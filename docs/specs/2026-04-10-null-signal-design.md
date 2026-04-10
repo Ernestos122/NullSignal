@@ -45,21 +45,25 @@ Health is a **die type** that degrades when an operative takes hits. Inspired by
 ### Health Track
 
 ```
-d10 → d8 → d6 → d4 → DOWN → OUT
+d10 → d8 → d6 (floor) → DOWN → OUT
 ```
 
 ### Taking Hits
 
 1. Operative takes a hit (from firefight, brawl, hazard, etc.)
 2. Roll current health die — **4+ = stay standing**, health die degrades one step
-3. Fail = operative goes **Down** (incapacitated, on the ground)
-4. A Down operative that takes another hit = **Out** (removed from play)
+3. If already at d6 (floor) and pass: stay at d6 — no further degradation, but every hit is a coin flip
+4. Fail at any step = operative goes **Down** (incapacitated, on the ground)
+5. A Down operative that takes another hit = **Out** (removed from play)
+
+**Combat is simultaneous.** Both sides resolve their attacks fully before applying health consequences. If an operative goes Down from incoming hits, their simultaneously-resolved attacks still count.
 
 ### Key Rules
 
 - **Stats never degrade.** An operative fights at full capability until they go Down. No tracking injured skills.
 - **Down operatives** cannot activate. They may attempt a **Recovery roll** during the End Phase (roll health die at current step, 4+ = get back up at that health level).
 - Starting health die depends on tier (see Section 5).
+- **Durability by tier:** Leaders absorb 2 degradation steps before the d6 floor. Specialists/Operatives absorb 1. Recruits start at the floor — every hit is 50/50.
 
 ---
 
@@ -94,6 +98,8 @@ All combat is resolved simultaneously — both sides roll at the same time. No f
 4. Resolve hits against both combatants (health checks)
 5. Melee weapons may grant bonus dice or special traits
 
+**Unarmed:** All operatives can fight in melee with **1 die** at their CMB type (fists, rifle butt, etc.). This is the default melee attack. Operatives with dedicated melee weapons (Blade, Power Weapon) use the weapon's Attack Dice value instead.
+
 Note: In brawls, REF is not used for defense — both fighters are committed. The mutual exchange IS the defense. REF governs ranged evasion and reactive situations.
 
 ### 3.3 Opposed Checks
@@ -113,8 +119,8 @@ Both players roll 1d6. Higher roll activates first. Ties: player with fewer rema
 
 **Phase 2 — Alternating Activations**
 Players take turns activating **one operative at a time**. Each activation:
-1. **Move** — up to 6" (standard for all operatives)
-2. **Perform one Action:**
+1. **Move** — up to 6" (standard for all operatives). Movement is optional.
+2. **Perform one Action** (optional — an operative may move without acting, or act without moving):
    - **Shoot** — Engage a target in line of sight (firefight)
    - **Fight** — Engage an adjacent enemy (brawl)
    - **Interact** — Hack a terminal, open a door, pick up an objective, disarm a trap (roll relevant stat per scenario)
@@ -153,7 +159,7 @@ No restrictions on tier composition — build whatever crew fits your minis and 
 
 | Crew Style | Composition | Models | Points |
 |------------|-------------|--------|--------|
-| Elite | Leader + 2 Specialists + 1 Operative | 4 | 10 |
+| Elite | Leader + 2 Specialists + 2 Operatives | 5 | 10 |
 | Balanced | Leader + 1 Specialist + 2 Operatives + 2 Recruits | 6 | 9 |
 | Standard | Leader + 1 Specialist + 3 Operatives + 1 Recruit | 6 | 10 |
 | Pack-friendly | Leader + 2 Operatives + 4 Recruits | 7 | 8 |
@@ -176,7 +182,7 @@ Each operative carries one weapon. Standard weapons are free; premium weapons co
 
 | Weapon | Attack Dice | Range Band | Hard Cap | Trait |
 |--------|------------|-----------|----------|-------|
-| Pistol | 2 | 8" | 16" | Sidearm (can be taken as secondary) |
+| Pistol | 2 | 8" | 16" | Compact (easy to conceal, common backup) |
 | SMG | 3 | 12" | — | Rapid (+1 die within 6") |
 | Rifle | 3 | 20" | — | Reliable (no special trait) |
 | Shotgun | 3 | 8" | 16" | Spread (+1 die within 6", hard cap) |
@@ -194,7 +200,8 @@ Each operative carries one weapon. Standard weapons are free; premium weapons co
 
 ### 6.3 Weapon Notes
 
-- Every operative has a free standard weapon. Premium weapons replace the standard loadout.
+- Every operative picks one free standard weapon OR pays gear slots for a premium weapon.
+- All operatives can fight unarmed in melee (1 die at CMB type) regardless of equipped weapon.
 - Leaders get 2 gear slots, Specialists get 1. These can be spent on premium weapons or gear items.
 - Gear slots not spent on weapons can be spent on equipment (medkits, scanners, hacking decks — see Abilities/Gear).
 - Range band = no-penalty distance. Beyond it, shift CMB die down one step. Hard cap = absolute maximum range.
@@ -214,12 +221,11 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 - Abilities are **not tiered by level** — any available ability can be taken by Leaders or Specialists
 - Abilities should complement weapons and stats, not replace them
 
-### Ability List (Draft — ~18 abilities)
+### Ability List (Draft — 17 abilities)
 
 | Ability | Effect |
 |---------|--------|
 | **Hardened** | +1 step to GRT die for recovery and morale checks |
-| **Overwatch** | May react-shoot when an enemy moves within line of sight (uses AWR to determine if triggered) |
 | **CQB Expert** | Bonus die in brawls |
 | **Marksman** | Bonus die when shooting within range band |
 | **Medic** | Use Gear action: roll TEC to attempt recovery on a Down ally in contact |
@@ -230,7 +236,7 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 | **Resilient** | First failed health check each game is treated as a pass (health still degrades) |
 | **Tactician** | Once per round, swap activation order with one friendly operative |
 | **Rapid Assault** | After a successful Fight action, may move 3" (no additional action) |
-| **Suppressive Fire** | Shoot action: instead of damage, target must pass GRT check or lose next action |
+| **Pinning Fire** | Shoot action: instead of dealing damage, force target to pass a GRT check or lose their next action (distinct from LMG's Suppressive trait which reduces movement) |
 | **Breacher** | Ignores cover penalty when shooting |
 | **Field Repair** | Use Gear action: roll TEC to restore one health step to a friendly operative in contact |
 | **Ghost** | When this operative is hidden, enemies must pass AWR check at -1 to spot them |
@@ -269,7 +275,7 @@ On each AI operative's activation:
 |----|--------|
 | 1–2 | Move toward nearest visible enemy, Fight if in contact |
 | 3–4 | Move toward nearest enemy, Shoot if in line of sight |
-| 5–6 | Rush nearest enemy (full move + charge into melee) |
+| 5–6 | Move toward nearest enemy + Fight if in contact (full move into melee) |
 
 **Defensive**
 
