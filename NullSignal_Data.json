@@ -150,8 +150,8 @@
       "traitEffect": "All models within 2\" of the target point take hits."
     },
     {
-      "id": "power_weapon",
-      "name": "Power Weapon",
+      "id": "tactical_knife",
+      "name": "Tactical Knife",
       "premium": true,
       "gearSlotCost": 1,
       "attackDice": 3,
@@ -159,7 +159,7 @@
       "hardCap": "Melee",
       "meleeOnly": true,
       "trait": "Piercing",
-      "traitEffect": "Target's health die shifts an extra step on a failed health check."
+      "traitEffect": "A heavy combat blade that finds gaps in armor. Target's health die shifts an extra step on failed check."
     }
   ],
 
