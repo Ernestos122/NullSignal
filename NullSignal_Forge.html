@@ -367,6 +367,27 @@ function Header({ view, warband, onBack, onExport, onImport }) {
                 </div>
             </div>
 
+            <nav className="flex items-center gap-2 text-xs">
+                <a href="NullSignal_Rules.html" style={{
+                    color: 'var(--text-dim)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', padding: '5px 10px',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.target.style.color = 'var(--accent-cyan)'; e.target.style.borderColor = 'var(--accent-cyan)'; }}
+                onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+                >RULES</a>
+                <a href="NullSignal_SoloEngine.html" style={{
+                    color: 'var(--text-dim)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', padding: '5px 10px',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.target.style.color = 'var(--accent-green)'; e.target.style.borderColor = 'var(--accent-green)'; }}
+                onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+                >SOLO ENGINE</a>
+            </nav>
+
             {view === 'editor' && warband && (
                 <div className="flex items-center gap-4 flex-wrap">
                     <div className="text-sm heading-font" style={{
