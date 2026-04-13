@@ -1,0 +1,1110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NULL SIGNAL — Rules</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-black: #0a0a0f;
+            --bg-dark: #12121a;
+            --bg-panel: #1a1a2e;
+            --bg-card: #16213e;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff006e;
+            --accent-amber: #ffbe0b;
+            --accent-green: #00f5a0;
+            --accent-red: #ff3366;
+            --text-primary: #e0e0e0;
+            --text-dim: #8888aa;
+            --text-bright: #ffffff;
+            --border: #2a2a4a;
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-black);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, h4, .heading-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.08) 2px,
+                rgba(0, 0, 0, 0.08) 4px
+            );
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+        /* Glow utility */
+        .glow-cyan { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.05); }
+        .glow-magenta { box-shadow: 0 0 10px rgba(255, 0, 110, 0.3), inset 0 0 10px rgba(255, 0, 110, 0.05); }
+        .glow-amber { box-shadow: 0 0 10px rgba(255, 190, 11, 0.3), inset 0 0 10px rgba(255, 190, 11, 0.05); }
+        .glow-green { box-shadow: 0 0 10px rgba(0, 245, 160, 0.3), inset 0 0 10px rgba(0, 245, 160, 0.05); }
+
+        /* Animations */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.97; }
+            92% { opacity: 1; }
+            93% { opacity: 0.9; }
+            94% { opacity: 1; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
+        }
+
+        html { scroll-behavior: smooth; }
+
+        @media (max-width: 768px) {
+            select, button, input { min-height: 44px; }
+        }
+
+        @media print {
+            body::after { display: none !important; }
+            .no-print { display: none !important; }
+            .print-full { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            body { background: #fff !important; color: #111 !important; }
+            h1, h2, h3, h4 { color: #111 !important; }
+            table { border-color: #999 !important; }
+            th { background: #ddd !important; color: #111 !important; }
+            td { color: #111 !important; border-color: #999 !important; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Disable AMD loader before CDN scripts -->
+    <script>window.define = null;</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel" data-type="module">
+// ============================================================
+// GAME DATA
+// ============================================================
+const GAME_DATA = {
+  "stats": ["CMB", "REF", "GRT", "TEC", "AWR"],
+  "statLabels": {
+    "CMB": "Combat",
+    "REF": "Reflexes",
+    "GRT": "Grit",
+    "TEC": "Tech",
+    "AWR": "Awareness"
+  },
+  "diceTypes": ["d6", "d8", "d10", "d12"],
+  "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
+  "tiers": [
+    { "id": "leader", "name": "Leader", "cost": 0, "health": "d10", "statSpread": { "d8Count": 3, "d6Count": 2 }, "gearSlots": 2, "abilitySlots": 2 },
+    { "id": "specialist", "name": "Specialist", "cost": 3, "health": "d8", "statSpread": { "d8Count": 2, "d6Count": 3 }, "gearSlots": 1, "abilitySlots": 1 },
+    { "id": "operative", "name": "Operative", "cost": 2, "health": "d8", "statSpread": { "d8Count": 1, "d6Count": 4 }, "gearSlots": 0, "abilitySlots": 0 },
+    { "id": "recruit", "name": "Recruit", "cost": 1, "health": "d6", "statSpread": { "d8Count": 0, "d6Count": 5 }, "gearSlots": 0, "abilitySlots": 0 }
+  ],
+  "weapons": [
+    { "id": "pistol", "name": "Pistol", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Compact", "traitEffect": "Easy to conceal, common backup weapon." },
+    { "id": "smg", "name": "SMG", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "12\"", "hardCap": null, "meleeOnly": false, "trait": "Rapid", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "rifle", "name": "Rifle", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Reliable", "traitEffect": "No special trait \u2014 consistent and dependable." },
+    { "id": "shotgun", "name": "Shotgun", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Spread", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "blade", "name": "Blade", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Melee-only", "traitEffect": "Can only be used in base contact." },
+    { "id": "sniper_rifle", "name": "Sniper Rifle", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "30\"", "hardCap": null, "meleeOnly": false, "trait": "Precise", "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty." },
+    { "id": "lmg", "name": "LMG", "premium": true, "gearSlotCost": 1, "attackDice": 4, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Suppressive", "traitEffect": "Target suffers -2\" movement on their next activation." },
+    { "id": "launcher", "name": "Launcher", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Blast", "traitEffect": "All models within 2\" of the target point take hits." },
+    { "id": "power_weapon", "name": "Power Weapon", "premium": true, "gearSlotCost": 1, "attackDice": 3, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Piercing", "traitEffect": "Target's health die shifts an extra step on a failed health check." }
+  ],
+  "abilities": [
+    { "id": "hardened", "name": "Hardened", "effect": "+1 step to GRT die for recovery and morale checks." },
+    { "id": "cqb_expert", "name": "CQB Expert", "effect": "Gains a bonus attack die in brawls." },
+    { "id": "marksman", "name": "Marksman", "effect": "Gains a bonus attack die when shooting a target within range band." },
+    { "id": "medic", "name": "Medic", "effect": "Use Gear action: roll TEC \u2014 on success, attempt recovery on a Down ally in base contact." },
+    { "id": "hacker", "name": "Hacker", "effect": "Gains a bonus die on TEC checks made for scenario interactions." },
+    { "id": "networked", "name": "Networked", "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check." },
+    { "id": "stealthy", "name": "Stealthy", "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative." },
+    { "id": "spotter", "name": "Spotter", "effect": "Once per round, designate a target: all friendly shooters gain +1 attack die vs. that target this round." },
+    { "id": "resilient", "name": "Resilient", "effect": "The first failed health check each game is treated as a pass (health die still degrades one step)." },
+    { "id": "tactician", "name": "Tactician", "effect": "Once per round, swap activation order with one friendly operative." },
+    { "id": "rapid_assault", "name": "Rapid Assault", "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)." },
+    { "id": "pinning_fire", "name": "Pinning Fire", "effect": "Shoot action: instead of dealing damage, force the target to pass a GRT check or lose their next action." },
+    { "id": "breacher", "name": "Breacher", "effect": "Ignores the cover penalty when shooting." },
+    { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC \u2014 on success, restore one health step to a friendly operative in base contact." },
+    { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative." },
+    { "id": "heavy_weapons", "name": "Heavy Weapons", "effect": "May carry one premium weapon without spending a gear slot." },
+    { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
+  ],
+  "behaviorTags": [
+    {
+      "id": "aggressive", "name": "Aggressive",
+      "personality": "Closes distance aggressively, prefers melee over shooting. Gets into combat as fast as possible.",
+      "table": [
+        { "roll": "1-2", "action": "Move toward nearest visible enemy. Fight if in base contact." },
+        { "roll": "3-4", "action": "Move toward nearest enemy. Shoot if in line of sight." },
+        { "roll": "5-6", "action": "Full move toward nearest enemy. Fight if in contact; otherwise Shoot." }
+      ]
+    },
+    {
+      "id": "defensive", "name": "Defensive",
+      "personality": "Holds position, shoots from cover. Prioritizes staying behind cover and engaging enemies at range.",
+      "table": [
+        { "roll": "1-2", "action": "If in cover: Shoot nearest visible enemy. If not in cover: move to nearest available cover." },
+        { "roll": "3-4", "action": "Hold position. Shoot nearest visible enemy." },
+        { "roll": "5-6", "action": "Move to better cover within 6\". Shoot nearest visible enemy if possible." }
+      ]
+    },
+    {
+      "id": "cautious", "name": "Cautious",
+      "personality": "Avoids risk and repositions frequently. Maintains maximum range and uses cover to survive.",
+      "table": [
+        { "roll": "1-2", "action": "Move away from nearest enemy to maintain range. Shoot if able." },
+        { "roll": "3-4", "action": "Move toward nearest objective. Interact if in contact." },
+        { "roll": "5-6", "action": "Move to cover with best sight lines. Shoot nearest visible enemy." }
+      ]
+    },
+    {
+      "id": "flanker", "name": "Flanker",
+      "personality": "Seeks angles and avoids the frontline. Moves to the sides or rear of enemies to attack from unexpected angles.",
+      "table": [
+        { "roll": "1-2", "action": "Move toward the flank or rear of the nearest enemy. Shoot if in line of sight." },
+        { "roll": "3-4", "action": "If behind cover with line of sight to enemy rear: Shoot. Otherwise reposition to a better angle." },
+        { "roll": "5-6", "action": "Move to the closest enemy not currently engaged by a friendly. Shoot or Fight as appropriate." }
+      ]
+    }
+  ],
+  "scenarios": [
+    { "id": "blackout", "name": "Blackout", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'\u00d73'" },
+    { "id": "extraction", "name": "Extraction", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'\u00d73'" },
+    { "id": "scorched_data", "name": "Scorched Data", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'\u00d73'" },
+    { "id": "dead_drop", "name": "Dead Drop", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'\u00d73'" },
+    { "id": "signal_jam", "name": "Signal Jam", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'\u00d73'" },
+    { "id": "sweep_and_clear", "name": "Sweep & Clear", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'\u00d73'" }
+  ]
+};
+
+// ============================================================
+// SECTIONS CONFIG
+// ============================================================
+const SECTIONS = [
+    { id: 'overview', title: '1. Overview' },
+    { id: 'core-stats', title: '2. Core Stats' },
+    { id: 'health-system', title: '3. Health System' },
+    { id: 'combat', title: '4. Combat' },
+    { id: 'turn-structure', title: '5. Turn Structure' },
+    { id: 'warband-building', title: '6. Warband Building' },
+    { id: 'weapons', title: '7. Weapons' },
+    { id: 'abilities', title: '8. Abilities' },
+    { id: 'solo-ai', title: '9. Solo / Co-op AI' },
+    { id: 'scenarios', title: '10. Scenarios' },
+    { id: 'quick-reference', title: '11. Quick Reference' },
+];
+
+// ============================================================
+// REUSABLE COMPONENTS
+// ============================================================
+const RuleBox = ({ children, color = 'cyan' }) => {
+    const borderColor = color === 'cyan' ? 'var(--accent-cyan)' : color === 'magenta' ? 'var(--accent-magenta)' : color === 'amber' ? 'var(--accent-amber)' : color === 'green' ? 'var(--accent-green)' : 'var(--accent-cyan)';
+    const glowClass = `glow-${color}`;
+    return (
+        <div className={glowClass} style={{ border: `1px solid ${borderColor}`, borderRadius: 6, padding: '12px 16px', margin: '12px 0', background: 'var(--bg-card)' }}>
+            {children}
+        </div>
+    );
+};
+
+const ExampleBox = ({ title, children }) => (
+    <div style={{ border: '1px solid var(--accent-amber)', borderLeft: '3px solid var(--accent-amber)', borderRadius: 4, padding: '10px 14px', margin: '12px 0', background: 'rgba(255,190,11,0.05)' }}>
+        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--accent-amber)', marginBottom: 6 }}>{title || 'Example'}</div>
+        <div style={{ color: 'var(--text-primary)', fontSize: 13 }}>{children}</div>
+    </div>
+);
+
+const DataTable = ({ headers, rows, compact = false }) => (
+    <div style={{ overflowX: 'auto', margin: '12px 0' }}>
+        <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: compact ? 12 : 13 }}>
+            <thead>
+                <tr>
+                    {headers.map((h, i) => (
+                        <th key={i} style={{ textAlign: 'left', padding: compact ? '6px 8px' : '8px 12px', background: 'var(--bg-panel)', color: 'var(--accent-cyan)', borderBottom: '2px solid var(--accent-cyan)', fontFamily: 'Orbitron, sans-serif', fontSize: compact ? 10 : 11, textTransform: 'uppercase', letterSpacing: 1, whiteSpace: 'nowrap' }}>{h}</th>
+                    ))}
+                </tr>
+            </thead>
+            <tbody>
+                {rows.map((row, ri) => (
+                    <tr key={ri} style={{ background: ri % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                        {row.map((cell, ci) => (
+                            <td key={ci} style={{ padding: compact ? '5px 8px' : '7px 12px', borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' }}>{cell}</td>
+                        ))}
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    </div>
+);
+
+const SectionHeading = ({ id, title }) => (
+    <h2 id={id} style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 22, color: 'var(--accent-cyan)', marginTop: 48, marginBottom: 16, paddingBottom: 8, borderBottom: '1px solid var(--border)', scrollMarginTop: 80 }}>{title}</h2>
+);
+
+const SubHeading = ({ children }) => (
+    <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 15, color: 'var(--accent-magenta)', marginTop: 24, marginBottom: 10 }}>{children}</h3>
+);
+
+const Dim = ({ children }) => <span style={{ color: 'var(--text-dim)' }}>{children}</span>;
+const Bright = ({ children }) => <span style={{ color: 'var(--text-bright)', fontWeight: 'bold' }}>{children}</span>;
+const CyanText = ({ children }) => <span style={{ color: 'var(--accent-cyan)' }}>{children}</span>;
+const Para = ({ children }) => <p style={{ marginBottom: 10, lineHeight: 1.7 }}>{children}</p>;
+
+// ============================================================
+// SECTION COMPONENTS
+// ============================================================
+const OverviewSection = () => (
+    <div>
+        <SectionHeading id="overview" title="1. Overview" />
+        <Para>
+            <Bright>NULL SIGNAL</Bright> is a fast-paced cyberpunk skirmish game for 2 players (or 1 in solo/co-op mode).
+            Each player controls a small warband of operatives \u2014 mercenaries, hackers, street soldiers, and specialists \u2014
+            fighting for control of objectives in a near-future urban warzone.
+        </Para>
+        <RuleBox color="cyan">
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 16px', fontSize: 13 }}>
+                <Bright>Scale:</Bright><span>Skirmish \u2014 4\u20138 operatives per side</span>
+                <Bright>Modes:</Bright><span>PvP (2-player), Solo, Co-op</span>
+                <Bright>Miniatures:</Bright><span>Miniature-agnostic \u2014 use any 28mm figures</span>
+                <Bright>Table:</Bright><span>3' \u00d7 3' recommended</span>
+                <Bright>Rounds:</Bright><span>5\u20136 rounds per game</span>
+                <Bright>Cost:</Bright><span>Free \u2014 all rules and tools are open</span>
+            </div>
+        </RuleBox>
+        <Para>
+            <Dim>
+                The game emphasizes simultaneous firefights, quick decision-making, and narrative-driven scenarios.
+                Dice pools determine outcomes: weapons set how many dice you roll, stats set which die type you use.
+                Every roll of 4+ is a success.
+            </Dim>
+        </Para>
+        <ExampleBox title="Design Philosophy">
+            Null Signal is designed to be learned in one game, played in under an hour, and endlessly replayable with
+            the warband builder and scenario system. No codex bloat. No pay-to-win. Just sharp tactical play.
+        </ExampleBox>
+    </div>
+);
+
+const CoreStatsSection = () => {
+    const statDescriptions = {
+        CMB: 'Offensive combat ability. Determines die type for shooting and melee attacks.',
+        REF: 'Defensive reflexes. Determines die type for dodge/defense rolls in firefights.',
+        GRT: 'Toughness and willpower. Used for recovery checks and morale.',
+        TEC: 'Technical skill. Used for hacking, gear actions, and scenario interactions.',
+        AWR: 'Situational awareness. Used for spotting, detection, and perception checks.',
+    };
+    return (
+        <div>
+            <SectionHeading id="core-stats" title="2. Core Stats" />
+            <Para>
+                Every operative has <Bright>5 stats</Bright>, each assigned a die type (d6, d8, d10, or d12).
+                Higher die types are better \u2014 more sides means higher chance of rolling 4+.
+            </Para>
+            <DataTable
+                headers={['Stat', 'Full Name', 'Description']}
+                rows={GAME_DATA.stats.map(s => [
+                    <CyanText>{s}</CyanText>,
+                    GAME_DATA.statLabels[s],
+                    statDescriptions[s],
+                ])}
+            />
+            <SubHeading>Resolution Mechanic</SubHeading>
+            <RuleBox color="cyan">
+                <div style={{ textAlign: 'center', fontSize: 18, fontFamily: 'Orbitron, sans-serif', color: 'var(--accent-cyan)' }}>
+                    4+ on any die = SUCCESS
+                </div>
+            </RuleBox>
+            <Para>
+                Roll a pool of dice. <Bright>Each die that shows 4 or higher is one success.</Bright> The
+                number of dice in the pool is determined by the weapon or action. The die type (d6, d8, d10, d12)
+                is determined by the relevant stat.
+            </Para>
+            <SubHeading>Die Probabilities</SubHeading>
+            <DataTable
+                headers={['Die', 'Chance of 4+', 'Successes per 3 dice (avg)']}
+                rows={[
+                    ['d6', '50%', '1.5'],
+                    ['d8', '62.5%', '1.88'],
+                    ['d10', '70%', '2.10'],
+                    ['d12', '75%', '2.25'],
+                ]}
+            />
+            <SubHeading>Dice Pool Rules</SubHeading>
+            <Para>
+                <Bright>Weapon determines pool size</Bright> (number of attack dice).{' '}
+                <Bright>Stat determines die type</Bright> (which die you roll for each). Default stat checks
+                that aren't tied to a weapon use <Bright>2 dice</Bright>.
+            </Para>
+            <ExampleBox>
+                An operative with CMB d8 fires a Rifle (3 attack dice). They roll 3d8, counting each die showing 4+ as a hit.
+            </ExampleBox>
+        </div>
+    );
+};
+
+const HealthSystemSection = () => (
+    <div>
+        <SectionHeading id="health-system" title="3. Health System" />
+        <Para>
+            Operatives don't have hit points. Instead, they have a <Bright>health die</Bright> that degrades
+            as they take damage, tracked on the health track.
+        </Para>
+        <SubHeading>Health Track</SubHeading>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '16px 0', flexWrap: 'wrap' }}>
+            {GAME_DATA.healthTrack.map((step, i) => {
+                const isDie = step.startsWith('d');
+                const bg = isDie ? 'var(--bg-card)' : step === 'DOWN' ? 'rgba(255,190,11,0.2)' : 'rgba(255,51,102,0.2)';
+                const border = isDie ? 'var(--accent-cyan)' : step === 'DOWN' ? 'var(--accent-amber)' : 'var(--accent-red)';
+                const color = isDie ? 'var(--accent-cyan)' : step === 'DOWN' ? 'var(--accent-amber)' : 'var(--accent-red)';
+                return (
+                    <React.Fragment key={i}>
+                        {i > 0 && <span style={{ color: 'var(--text-dim)', fontSize: 18 }}>\u2192</span>}
+                        <span style={{ display: 'inline-block', padding: '8px 16px', border: `2px solid ${border}`, borderRadius: 6, background: bg, color, fontFamily: 'Orbitron, sans-serif', fontSize: 16, fontWeight: 'bold' }}>{step}</span>
+                    </React.Fragment>
+                );
+            })}
+        </div>
+        <SubHeading>Taking Hits</SubHeading>
+        <RuleBox color="magenta">
+            <Para>When an operative takes a hit, roll their <Bright>current health die</Bright>.</Para>
+            <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li><Bright>4+ =</Bright> Stay up. Health die <CyanText>degrades one step</CyanText> (e.g., d10 \u2192 d8).</li>
+                <li><Bright>1\u20133 =</Bright> Fail. Operative goes <span style={{ color: 'var(--accent-amber)' }}>DOWN</span>.</li>
+                <li>A <span style={{ color: 'var(--accent-amber)' }}>DOWN</span> operative hit again goes <span style={{ color: 'var(--accent-red)' }}>OUT</span> (eliminated).</li>
+            </ul>
+        </RuleBox>
+        <SubHeading>d6 Floor Rule</SubHeading>
+        <Para>
+            Health dice cannot degrade below <Bright>d6</Bright>. An operative at d6 who passes a health check
+            remains at d6. They are at their most vulnerable but still fighting.
+        </Para>
+        <SubHeading>Starting Health by Tier</SubHeading>
+        <DataTable
+            headers={['Tier', 'Starting Health', 'Steps Before DOWN']}
+            rows={GAME_DATA.tiers.map(t => [
+                <Bright>{t.name}</Bright>,
+                <CyanText>{t.health}</CyanText>,
+                t.health === 'd10' ? '3 (d10 \u2192 d8 \u2192 d6 \u2192 DOWN)' : t.health === 'd8' ? '2 (d8 \u2192 d6 \u2192 DOWN)' : '1 (d6 \u2192 DOWN)',
+            ])}
+        />
+        <SubHeading>Recovery</SubHeading>
+        <Para>
+            During the <Bright>End Phase</Bright>, a DOWN operative may attempt recovery: roll their
+            current health die (the last die before going DOWN). On <Bright>4+ they recover</Bright> to
+            DOWN \u2192 d6. On failure, they remain DOWN.
+        </Para>
+        <SubHeading>Simultaneous Resolution</SubHeading>
+        <Para>
+            <Dim>Stats never degrade \u2014 only the health die changes. Firefights resolve simultaneously,
+            meaning both combatants roll before either applies results.</Dim>
+        </Para>
+    </div>
+);
+
+const CombatSection = () => (
+    <div>
+        <SectionHeading id="combat" title="4. Combat" />
+
+        <SubHeading>Firefights (Ranged Combat)</SubHeading>
+        <Para>Firefights are <Bright>simultaneous</Bright>. When an operative shoots, the target fires back at the same time.</Para>
+        <RuleBox color="cyan">
+            <ol style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li><Bright>Attacker</Bright> rolls CMB pool: weapon's attack dice at their CMB die type.</li>
+                <li><Bright>Defender</Bright> rolls 2 REF dice (as dodge/evade). Each defender success <CyanText>cancels one attacker hit</CyanText>.</li>
+                <li>Remaining uncancelled hits are applied to the target.</li>
+                <li>The target simultaneously fires back using the same process.</li>
+            </ol>
+        </RuleBox>
+        <ExampleBox title="Firefight Example">
+            Alpha (CMB d8, Rifle 3AD) shoots Beta (REF d6). Alpha rolls 3d8 and gets 2 successes.
+            Beta rolls 2d6 for REF and gets 1 success, cancelling 1 hit.
+            Beta takes 1 net hit and must roll a health check. Meanwhile, Beta fires back at Alpha.
+        </ExampleBox>
+
+        <SubHeading>Range Rules</SubHeading>
+        <DataTable
+            headers={['Zone', 'Effect']}
+            rows={[
+                [<Bright>Line of Sight (LOS)</Bright>, 'If you can see them, you can shoot. Required for all ranged attacks.'],
+                [<Bright>Within Range Band</Bright>, 'No penalty. Roll full attack dice at full CMB die type.'],
+                [<Bright>Beyond Range Band</Bright>, 'Shift CMB die type down 1 step (e.g., d8 \u2192 d6). Still roll full attack dice count.'],
+                [<Bright>Beyond Hard Cap</Bright>, 'Cannot shoot. Target is out of range entirely.'],
+            ]}
+        />
+
+        <SubHeading>Combat Modifiers</SubHeading>
+        <DataTable
+            headers={['Modifier', 'Effect']}
+            rows={[
+                [<Bright>Cover</Bright>, 'Target in cover: shift attacker\'s CMB die down 1 step.'],
+                [<Bright>Engaged in Melee</Bright>, 'Cannot shoot while in base contact with an enemy (must Fight instead).'],
+                [<Bright>Both Modifiers</Bright>, 'Penalties stack. Beyond range band + cover = shift down 2 steps.'],
+            ]}
+        />
+
+        <SubHeading>Brawls (Melee Combat)</SubHeading>
+        <RuleBox color="magenta">
+            <Para>Both combatants roll CMB simultaneously. <Bright>No REF defense in melee</Bright> \u2014 hits are not cancelled.</Para>
+            <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li><Bright>Unarmed:</Bright> 1 attack die (default for all operatives in melee).</li>
+                <li><Bright>Melee Weapon:</Bright> Use the weapon's attack dice instead.</li>
+                <li>All hits from both sides are applied simultaneously.</li>
+            </ul>
+        </RuleBox>
+
+        <SubHeading>Opposed Checks</SubHeading>
+        <Para>
+            Some situations call for an opposed check: both sides roll 2 dice of the relevant stat. The side
+            with more successes wins. Ties go to the active player (or are re-rolled if specified).
+        </Para>
+    </div>
+);
+
+const TurnStructureSection = () => (
+    <div>
+        <SectionHeading id="turn-structure" title="5. Turn Structure" />
+        <Para>A game of Null Signal is played over <Bright>5\u20136 fixed rounds</Bright> (set by the scenario).</Para>
+
+        <SubHeading>Round Sequence</SubHeading>
+        <RuleBox color="cyan">
+            <ol style={{ paddingLeft: 20, lineHeight: 2.2 }}>
+                <li><Bright>Initiative Phase</Bright> \u2014 Each player rolls 1d6. Higher roll chooses who activates first. <Dim>Re-roll ties.</Dim></li>
+                <li><Bright>Activation Phase</Bright> \u2014 Players alternate activating one operative each. The first player activates one, then the second, and so on until all operatives have activated.</li>
+                <li><Bright>End Phase</Bright> \u2014 Recovery checks for DOWN operatives. Score VP for controlled objectives. Advance round counter.</li>
+            </ol>
+        </RuleBox>
+
+        <SubHeading>Activation</SubHeading>
+        <Para>When an operative activates, they may:</Para>
+        <RuleBox color="green">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+                <div>
+                    <Bright>Move</Bright> <Dim>(up to 6")</Dim>
+                    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 4 }}>Optional. May move before or after action.</div>
+                </div>
+                <div>
+                    <Bright>+1 Action</Bright>
+                    <div style={{ fontSize: 12, color: 'var(--text-dim)', marginTop: 4 }}>Optional. Choose one from the action list.</div>
+                </div>
+            </div>
+        </RuleBox>
+        <Para><Dim>Both move and action are optional. An operative may move without acting, act without moving, or do neither.</Dim></Para>
+
+        <SubHeading>Actions</SubHeading>
+        <DataTable
+            headers={['Action', 'Description']}
+            rows={[
+                [<Bright>Shoot</Bright>, 'Make a ranged attack against a target in LOS.'],
+                [<Bright>Fight</Bright>, 'Make a melee attack against an enemy in base contact.'],
+                [<Bright>Interact</Bright>, 'Interact with a scenario objective (hack terminal, pick up intel, etc).'],
+                [<Bright>Use Gear</Bright>, 'Activate an ability that requires a Gear action (Medic, Field Repair, etc).'],
+            ]}
+        />
+    </div>
+);
+
+const WarbandBuildingSection = () => (
+    <div>
+        <SectionHeading id="warband-building" title="6. Warband Building" />
+        <Para>
+            Each warband is built to a <Bright>point budget</Bright>. The standard game uses <Bright>10 points</Bright>.
+            Your <Bright>Leader is free</Bright> \u2014 every warband gets exactly one.
+        </Para>
+
+        <SubHeading>Tier Table</SubHeading>
+        <DataTable
+            headers={['Tier', 'Cost', 'Health', 'd8 Stats', 'd6 Stats', 'Gear Slots', 'Ability Slots']}
+            rows={GAME_DATA.tiers.map(t => [
+                <Bright>{t.name}</Bright>,
+                t.cost === 0 ? <span style={{ color: 'var(--accent-green)' }}>FREE</span> : `${t.cost} pts`,
+                <CyanText>{t.health}</CyanText>,
+                t.statSpread.d8Count,
+                t.statSpread.d6Count,
+                t.gearSlots,
+                t.abilitySlots,
+            ])}
+        />
+        <Para>
+            <Bright>Stat assignment is free.</Bright> Each tier gives a number of d8 and d6 dice to assign across
+            the 5 stats. You choose which stats get the d8s and which get the d6s.
+        </Para>
+        <Para>
+            <Bright>Gear slots</Bright> are used to equip premium weapons. Standard weapons are free and don't use slots.
+        </Para>
+
+        <SubHeading>Example Crews</SubHeading>
+        <ExampleBox title="Balanced Crew (10 pts)">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>1x Leader (free)</div>
+                <div>1x Specialist (3 pts)</div>
+                <div>1x Operative (2 pts)</div>
+                <div>2x Recruit (2 pts)</div>
+            </div>
+            <div style={{ marginTop: 6, color: 'var(--text-dim)' }}>Total: 7 pts spent, 5 operatives. 3 pts unspent for upgrades or more recruits.</div>
+        </ExampleBox>
+        <ExampleBox title="Elite Crew (10 pts)">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>1x Leader (free)</div>
+                <div>2x Specialist (6 pts)</div>
+                <div>2x Operative (4 pts)</div>
+            </div>
+            <div style={{ marginTop: 6, color: 'var(--text-dim)' }}>Total: 10 pts spent, 5 operatives. High quality, no recruits.</div>
+        </ExampleBox>
+        <ExampleBox title="Swarm Crew (10 pts)">
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
+                <div>1x Leader (free)</div>
+                <div>1x Specialist (3 pts)</div>
+                <div>3x Recruit (3 pts)</div>
+                <div>2x Operative (4 pts)</div>
+            </div>
+            <div style={{ marginTop: 6, color: 'var(--text-dim)' }}>Total: 10 pts spent, 7 operatives. Numbers advantage.</div>
+        </ExampleBox>
+
+        <SubHeading>Scalable Game Sizes</SubHeading>
+        <DataTable
+            headers={['Size', 'Budget', 'Typical Operatives', 'Table Size', 'Rounds']}
+            rows={[
+                ['Skirmish', '6 pts', '3\u20134', "2'\u00d72'", '4\u20135'],
+                [<Bright>Standard</Bright>, <Bright>10 pts</Bright>, '5\u20136', "3'\u00d73'", '5\u20136'],
+                ['Large', '15 pts', '7\u20138', "4'\u00d74'", '6'],
+            ]}
+        />
+    </div>
+);
+
+const WeaponsSection = () => {
+    const standard = GAME_DATA.weapons.filter(w => !w.premium);
+    const premium = GAME_DATA.weapons.filter(w => w.premium);
+    return (
+        <div>
+            <SectionHeading id="weapons" title="7. Weapons" />
+            <Para>
+                Every operative carries one weapon. <Bright>Standard weapons</Bright> are free and available to all.{' '}
+                <Bright>Premium weapons</Bright> cost 1 gear slot and are only available to operatives with gear slots.
+            </Para>
+
+            <SubHeading>Standard Weapons</SubHeading>
+            <DataTable
+                headers={['Weapon', 'Attack Dice', 'Range Band', 'Hard Cap', 'Trait', 'Effect']}
+                rows={standard.map(w => [
+                    <Bright>{w.name}</Bright>,
+                    <CyanText>{w.attackDice}AD</CyanText>,
+                    w.rangeBand,
+                    w.hardCap || '\u2014',
+                    <span style={{ color: 'var(--accent-amber)' }}>{w.trait}</span>,
+                    <Dim>{w.traitEffect}</Dim>,
+                ])}
+            />
+
+            <SubHeading>Premium Weapons</SubHeading>
+            <DataTable
+                headers={['Weapon', 'Attack Dice', 'Range Band', 'Hard Cap', 'Slot Cost', 'Trait', 'Effect']}
+                rows={premium.map(w => [
+                    <Bright>{w.name}</Bright>,
+                    <CyanText>{w.attackDice}AD</CyanText>,
+                    w.rangeBand,
+                    w.hardCap || '\u2014',
+                    `${w.gearSlotCost} slot`,
+                    <span style={{ color: 'var(--accent-magenta)' }}>{w.trait}</span>,
+                    <Dim>{w.traitEffect}</Dim>,
+                ])}
+            />
+
+            <SubHeading>Weapon Notes</SubHeading>
+            <RuleBox color="amber">
+                <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
+                    <li><Bright>Range Band:</Bright> Within this range, no penalty. Full attack dice at full stat die type.</li>
+                    <li><Bright>Beyond Range Band:</Bright> Shift CMB die type down 1 step (e.g., d8 \u2192 d6). Pool size unchanged.</li>
+                    <li><Bright>Hard Cap:</Bright> Cannot shoot beyond this distance. Some weapons have no hard cap (unlimited range if LOS exists).</li>
+                    <li><Bright>Unarmed:</Bright> All operatives can fight in melee unarmed with 1 attack die as a default.</li>
+                </ul>
+            </RuleBox>
+        </div>
+    );
+};
+
+const AbilitiesSection = () => (
+    <div>
+        <SectionHeading id="abilities" title="8. Abilities" />
+        <Para>
+            Abilities are special skills assigned during warband building. Only <Bright>Leaders</Bright> and{' '}
+            <Bright>Specialists</Bright> have ability slots.
+        </Para>
+        <DataTable
+            headers={['Ability', 'Effect']}
+            rows={GAME_DATA.abilities.map(a => [
+                <Bright>{a.name}</Bright>,
+                a.effect,
+            ])}
+        />
+    </div>
+);
+
+const SoloAISection = () => (
+    <div>
+        <SectionHeading id="solo-ai" title="9. Solo / Co-op AI" />
+        <Para>
+            Null Signal includes a full solo and co-op AI system. Enemy operatives are assigned a{' '}
+            <Bright>behavior tag</Bright> that determines how they act each activation. Roll 1d6 on the
+            behavior's reaction table to determine the AI's action.
+        </Para>
+
+        <SubHeading>Behavior Tags</SubHeading>
+        <DataTable
+            headers={['Tag', 'Personality']}
+            rows={GAME_DATA.behaviorTags.map(b => [
+                <Bright>{b.name}</Bright>,
+                b.personality,
+            ])}
+        />
+
+        <SubHeading>AI Activation Rules</SubHeading>
+        <RuleBox color="green">
+            <ol style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li>Activate AI operatives in alternation with player operatives (same as PvP).</li>
+                <li>For each AI activation, roll 1d6 and consult the operative's behavior table.</li>
+                <li>The AI always targets the <Bright>nearest valid target</Bright> unless the table specifies otherwise.</li>
+                <li>If multiple targets are equally close, target the one with the lowest health die.</li>
+                <li>AI operatives always take their full move if the result says "Move."</li>
+            </ol>
+        </RuleBox>
+
+        <SubHeading>Reaction Tables</SubHeading>
+        {GAME_DATA.behaviorTags.map(b => (
+            <div key={b.id} style={{ marginTop: 16 }}>
+                <h4 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-amber)', marginBottom: 8 }}>{b.name} Reactions</h4>
+                <DataTable
+                    compact
+                    headers={['Roll (d6)', 'Action']}
+                    rows={b.table.map(r => [
+                        <CyanText>{r.roll}</CyanText>,
+                        r.action,
+                    ])}
+                />
+            </div>
+        ))}
+
+        <SubHeading>Target Priority</SubHeading>
+        <Para>
+            <Bright>1.</Bright> Nearest visible enemy. <Bright>2.</Bright> If tied, lowest current health die.{' '}
+            <Bright>3.</Bright> If still tied, random.
+        </Para>
+
+        <SubHeading>Solo / Co-op Setup</SubHeading>
+        <Para>
+            In solo mode, the player controls their warband and the AI controls the opposition. In co-op, 2 players
+            share a warband (split operatives) and the AI controls the enemy. Use the <Bright>Sweep & Clear</Bright> scenario
+            for a dedicated solo/co-op experience, or adapt any scenario by assigning behavior tags to enemy operatives.
+        </Para>
+        <ExampleBox title="Assigning Behavior Tags">
+            Give melee-focused enemies <Bright>Aggressive</Bright>. Snipers and support get <Bright>Defensive</Bright>.
+            Leaders get <Bright>Cautious</Bright> or <Bright>Flanker</Bright> depending on the scenario.
+        </ExampleBox>
+    </div>
+);
+
+const ScenariosSection = () => (
+    <div>
+        <SectionHeading id="scenarios" title="10. Scenarios" />
+        <Para>
+            Each game uses a scenario that defines the mission, objectives, round count, and special rules.
+        </Para>
+        <SubHeading>Scenario Structure</SubHeading>
+        <RuleBox color="cyan">
+            <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: 13 }}>
+                <Bright>Name:</Bright><span>The scenario's title.</span>
+                <Bright>Briefing:</Bright><span>Narrative setup and objectives.</span>
+                <Bright>Rounds:</Bright><span>How many rounds the game lasts.</span>
+                <Bright>Table Size:</Bright><span>Recommended play area.</span>
+                <Bright>Victory:</Bright><span>How VP are scored (see VP rules below).</span>
+            </div>
+        </RuleBox>
+
+        <SubHeading>Starter Scenarios</SubHeading>
+        {GAME_DATA.scenarios.map(s => (
+            <div key={s.id} style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '12px 16px', margin: '12px 0', background: 'var(--bg-card)' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
+                    <h4 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 15, color: 'var(--accent-cyan)' }}>{s.name}</h4>
+                    <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
+                        <span style={{ color: 'var(--accent-amber)' }}>{s.rounds} rounds</span>
+                        <span style={{ color: 'var(--text-dim)' }}>{s.tableSize}</span>
+                    </div>
+                </div>
+                <Para><Dim>{s.briefing}</Dim></Para>
+            </div>
+        ))}
+
+        <SubHeading>Victory Points</SubHeading>
+        <RuleBox color="magenta">
+            <DataTable
+                compact
+                headers={['Condition', 'VP']}
+                rows={[
+                    ['Eliminate an enemy operative', '1 VP'],
+                    ['Eliminate the enemy Leader', '2 VP'],
+                    ['Control an objective at end of a round', '1 VP'],
+                    ['Scenario-specific bonus', 'Varies'],
+                ]}
+            />
+            <Para style={{ marginTop: 8 }}><Dim>The player with the most VP at the end of the final round wins.</Dim></Para>
+        </RuleBox>
+    </div>
+);
+
+const QuickReferenceSection = () => {
+    const standard = GAME_DATA.weapons.filter(w => !w.premium);
+    const premium = GAME_DATA.weapons.filter(w => w.premium);
+    return (
+        <div>
+            <SectionHeading id="quick-reference" title="11. Quick Reference" />
+            <Para><Dim>Condensed tables for use during play. Print this section or keep it open on a second screen.</Dim></Para>
+
+            <SubHeading>Health Track</SubHeading>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 8, margin: '12px 0', flexWrap: 'wrap' }}>
+                {GAME_DATA.healthTrack.map((step, i) => {
+                    const isDie = step.startsWith('d');
+                    const color = isDie ? 'var(--accent-cyan)' : step === 'DOWN' ? 'var(--accent-amber)' : 'var(--accent-red)';
+                    return (
+                        <React.Fragment key={i}>
+                            {i > 0 && <span style={{ color: 'var(--text-dim)' }}>\u2192</span>}
+                            <span style={{ padding: '4px 10px', border: `1px solid ${color}`, borderRadius: 4, color, fontFamily: 'Orbitron, sans-serif', fontSize: 13, fontWeight: 'bold' }}>{step}</span>
+                        </React.Fragment>
+                    );
+                })}
+                <Dim style={{ marginLeft: 8 }}>| Hit: roll health die, 4+ = stay (degrade). Fail = DOWN. DOWN+hit = OUT.</Dim>
+            </div>
+
+            <SubHeading>Stat Summary</SubHeading>
+            <DataTable compact headers={['Stat', 'Use']} rows={[
+                ['CMB', 'Attack rolls (ranged + melee)'],
+                ['REF', 'Defense rolls (firefights only, 2 dice)'],
+                ['GRT', 'Recovery, morale'],
+                ['TEC', 'Gear actions, hacking, interactions'],
+                ['AWR', 'Spotting, detection, perception'],
+            ]} />
+
+            <SubHeading>Weapon Reference</SubHeading>
+            <DataTable compact headers={['Weapon', 'AD', 'Range', 'Cap', 'Trait']}
+                rows={[...standard, ...premium].map(w => [
+                    w.premium ? <span style={{ color: 'var(--accent-magenta)' }}>{w.name} *</span> : w.name,
+                    w.attackDice,
+                    w.rangeBand,
+                    w.hardCap || '\u2014',
+                    w.trait,
+                ])}
+            />
+            <Dim>* = Premium (1 gear slot)</Dim>
+
+            <SubHeading>Tier Reference</SubHeading>
+            <DataTable compact headers={['Tier', 'Cost', 'HP', 'd8s', 'Gear', 'Abilities']}
+                rows={GAME_DATA.tiers.map(t => [
+                    t.name,
+                    t.cost === 0 ? 'Free' : `${t.cost}pt`,
+                    t.health,
+                    t.statSpread.d8Count,
+                    t.gearSlots,
+                    t.abilitySlots,
+                ])}
+            />
+
+            <SubHeading>Ability Reference</SubHeading>
+            <DataTable compact headers={['Ability', 'Effect']}
+                rows={GAME_DATA.abilities.map(a => [a.name, a.effect])}
+            />
+
+            <SubHeading>Turn Sequence</SubHeading>
+            <RuleBox color="green">
+                <div style={{ fontSize: 13, lineHeight: 2 }}>
+                    <Bright>1.</Bright> Initiative: d6 rolloff \u2192{' '}
+                    <Bright>2.</Bright> Alternating activations (Move 6" + 1 Action) \u2192{' '}
+                    <Bright>3.</Bright> End phase (Recovery, VP, Round+1)
+                </div>
+            </RuleBox>
+
+            <SubHeading>Key Numbers</SubHeading>
+            <RuleBox color="cyan">
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
+                    <div><Bright>Success:</Bright> 4+ on any die</div>
+                    <div><Bright>Move:</Bright> 6"</div>
+                    <div><Bright>REF Defense:</Bright> 2 dice</div>
+                    <div><Bright>Unarmed Melee:</Bright> 1 die</div>
+                    <div><Bright>Default Stat Check:</Bright> 2 dice</div>
+                    <div><Bright>Standard Budget:</Bright> 10 pts</div>
+                </div>
+            </RuleBox>
+
+            <SubHeading>AI Quick Tables</SubHeading>
+            {GAME_DATA.behaviorTags.map(b => (
+                <div key={b.id} style={{ marginBottom: 8 }}>
+                    <DataTable compact headers={[`${b.name} (d6)`, 'Action']}
+                        rows={b.table.map(r => [r.roll, r.action])}
+                    />
+                </div>
+            ))}
+
+            <SubHeading>VP Summary</SubHeading>
+            <DataTable compact headers={['Event', 'VP']}
+                rows={[
+                    ['Eliminate operative', '1'],
+                    ['Eliminate Leader', '2'],
+                    ['Hold objective (per round)', '1'],
+                    ['Scenario bonus', 'Varies'],
+                ]}
+            />
+        </div>
+    );
+};
+
+// ============================================================
+// SIDEBAR / TOC
+// ============================================================
+const Sidebar = ({ activeSection, searchTerm, onSearchChange, onNavClick, isOpen, onClose }) => {
+    const filtered = SECTIONS.filter(s =>
+        s.title.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+    return (
+        <>
+            {/* Overlay for mobile */}
+            {isOpen && (
+                <div onClick={onClose} style={{
+                    position: 'fixed', top: 0, left: 0, right: 0, bottom: 0,
+                    background: 'rgba(0,0,0,0.7)', zIndex: 40,
+                }} className="lg:hidden" />
+            )}
+            <aside style={{
+                position: 'fixed', top: 0, left: 0, bottom: 0,
+                width: 256, background: 'var(--bg-dark)',
+                borderRight: '1px solid var(--border)',
+                zIndex: 50, overflowY: 'auto',
+                transform: isOpen ? 'translateX(0)' : 'translateX(-100%)',
+                transition: 'transform 0.2s ease',
+                paddingTop: 72,
+            }} className="no-print sidebar-panel">
+                <div style={{ padding: '12px 16px' }}>
+                    <input
+                        type="text"
+                        placeholder="Search sections..."
+                        value={searchTerm}
+                        onChange={e => onSearchChange(e.target.value)}
+                        style={{
+                            width: '100%', padding: '8px 12px',
+                            background: 'var(--bg-panel)', border: '1px solid var(--border)',
+                            borderRadius: 4, color: 'var(--text-primary)',
+                            fontFamily: 'Share Tech Mono, monospace', fontSize: 13,
+                            outline: 'none',
+                        }}
+                        onFocus={e => e.target.style.borderColor = 'var(--accent-cyan)'}
+                        onBlur={e => e.target.style.borderColor = 'var(--border)'}
+                    />
+                </div>
+                <nav style={{ padding: '0 8px 24px' }}>
+                    {filtered.map(s => {
+                        const isActive = activeSection === s.id;
+                        return (
+                            <a
+                                key={s.id}
+                                href={`#${s.id}`}
+                                onClick={(e) => { e.preventDefault(); onNavClick(s.id); }}
+                                style={{
+                                    display: 'block', padding: '8px 12px', marginBottom: 2,
+                                    borderRadius: 4, fontSize: 12, textDecoration: 'none',
+                                    color: isActive ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                                    background: isActive ? 'rgba(0,212,255,0.08)' : 'transparent',
+                                    borderLeft: isActive ? '2px solid var(--accent-cyan)' : '2px solid transparent',
+                                    transition: 'all 0.15s ease',
+                                    fontFamily: 'Share Tech Mono, monospace',
+                                }}
+                                onMouseEnter={e => { if (!isActive) e.target.style.color = 'var(--text-primary)'; }}
+                                onMouseLeave={e => { if (!isActive) e.target.style.color = 'var(--text-dim)'; }}
+                            >
+                                {s.title}
+                            </a>
+                        );
+                    })}
+                </nav>
+            </aside>
+        </>
+    );
+};
+
+// ============================================================
+// HEADER
+// ============================================================
+const Header = ({ onMenuToggle, sidebarOpen }) => (
+    <header className="no-print" style={{
+        position: 'fixed', top: 0, left: 0, right: 0, height: 64,
+        background: 'var(--bg-dark)', borderBottom: '1px solid var(--border)',
+        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+        padding: '0 20px', zIndex: 100,
+    }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <button
+                onClick={onMenuToggle}
+                style={{
+                    background: 'none', border: 'none', color: 'var(--text-primary)',
+                    fontSize: 22, cursor: 'pointer', padding: '4px 8px',
+                    display: 'flex', alignItems: 'center',
+                }}
+                title={sidebarOpen ? 'Close menu' : 'Open menu'}
+            >
+                {sidebarOpen ? '\u2715' : '\u2630'}
+            </button>
+            <div>
+                <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 20, fontWeight: 900, color: 'var(--accent-cyan)', letterSpacing: 2 }}>NULL SIGNAL</span>
+                <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 14, fontWeight: 400, color: 'var(--accent-magenta)', marginLeft: 10, letterSpacing: 3 }}>RULES</span>
+            </div>
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 12 }}>
+            <a href="NullSignal_Forge.html" style={{
+                color: 'var(--text-dim)', textDecoration: 'none', fontSize: 11,
+                fontFamily: 'Share Tech Mono, monospace', padding: '6px 12px',
+                border: '1px solid var(--border)', borderRadius: 4,
+                transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.target.style.color = 'var(--accent-cyan)'; e.target.style.borderColor = 'var(--accent-cyan)'; }}
+            onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+            >FORGE</a>
+            <a href="NullSignal_SoloEngine.html" style={{
+                color: 'var(--text-dim)', textDecoration: 'none', fontSize: 11,
+                fontFamily: 'Share Tech Mono, monospace', padding: '6px 12px',
+                border: '1px solid var(--border)', borderRadius: 4,
+                transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.target.style.color = 'var(--accent-green)'; e.target.style.borderColor = 'var(--accent-green)'; }}
+            onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+            >SOLO ENGINE</a>
+            <button onClick={() => window.print()} style={{
+                background: 'none', border: '1px solid var(--border)',
+                color: 'var(--text-dim)', padding: '6px 12px', borderRadius: 4,
+                cursor: 'pointer', fontSize: 11, fontFamily: 'Share Tech Mono, monospace',
+                transition: 'all 0.15s',
+            }}
+            onMouseEnter={e => { e.target.style.color = 'var(--accent-amber)'; e.target.style.borderColor = 'var(--accent-amber)'; }}
+            onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+            >PRINT</button>
+        </div>
+    </header>
+);
+
+// ============================================================
+// MAIN APP
+// ============================================================
+const App = () => {
+    const [sidebarOpen, setSidebarOpen] = React.useState(window.innerWidth >= 1024);
+    const [searchTerm, setSearchTerm] = React.useState('');
+    const [activeSection, setActiveSection] = React.useState('overview');
+
+    // Handle resize
+    React.useEffect(() => {
+        const onResize = () => {
+            if (window.innerWidth >= 1024) setSidebarOpen(true);
+        };
+        window.addEventListener('resize', onResize);
+        return () => window.removeEventListener('resize', onResize);
+    }, []);
+
+    // Intersection Observer for active section tracking
+    React.useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                const visible = entries
+                    .filter(e => e.isIntersecting)
+                    .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top);
+                if (visible.length > 0) {
+                    setActiveSection(visible[0].target.id);
+                }
+            },
+            { rootMargin: '-80px 0px -60% 0px', threshold: 0 }
+        );
+        SECTIONS.forEach(s => {
+            const el = document.getElementById(s.id);
+            if (el) observer.observe(el);
+        });
+        return () => observer.disconnect();
+    }, []);
+
+    const handleNavClick = (id) => {
+        const el = document.getElementById(id);
+        if (el) {
+            el.scrollIntoView({ behavior: 'smooth' });
+            setActiveSection(id);
+        }
+        if (window.innerWidth < 1024) setSidebarOpen(false);
+    };
+
+    const sidebarWidth = sidebarOpen && window.innerWidth >= 1024 ? 256 : 0;
+
+    return (
+        <div>
+            <Header onMenuToggle={() => setSidebarOpen(p => !p)} sidebarOpen={sidebarOpen} />
+            <Sidebar
+                activeSection={activeSection}
+                searchTerm={searchTerm}
+                onSearchChange={setSearchTerm}
+                onNavClick={handleNavClick}
+                isOpen={sidebarOpen}
+                onClose={() => setSidebarOpen(false)}
+            />
+            <main className="print-full" style={{
+                marginLeft: sidebarWidth,
+                paddingTop: 80, paddingBottom: 80,
+                paddingLeft: 32, paddingRight: 32,
+                maxWidth: sidebarWidth + 900,
+                transition: 'margin-left 0.2s ease',
+            }}>
+                <OverviewSection />
+                <CoreStatsSection />
+                <HealthSystemSection />
+                <CombatSection />
+                <TurnStructureSection />
+                <WarbandBuildingSection />
+                <WeaponsSection />
+                <AbilitiesSection />
+                <SoloAISection />
+                <ScenariosSection />
+                <QuickReferenceSection />
+                <div style={{ marginTop: 64, padding: '24px 0', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
+                    <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>NULL SIGNAL \u2014 Free cyberpunk skirmish game \u2014 All rules, tools, and army builder at your fingertips.</span>
+                </div>
+            </main>
+        </div>
+    );
+};
+
+// ============================================================
+// RENDER
+// ============================================================
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+    </script>
+</body>
+</html>
