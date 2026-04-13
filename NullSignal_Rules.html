@@ -197,12 +197,27 @@ const GAME_DATA = {
     }
   ],
     "scenarios": [
-    { "id": "blackout", "name": "Blackout", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.", "specialRules": ["Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).", "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."], "vpConditions": ["Control a Data Relay at end of round = 1 VP per relay", "Control all 3 relays simultaneously at end of any round = bonus 2 VP", "Eliminate enemy operative = 1 VP", "Eliminate enemy Leader = 2 VP"], "deploymentType": "opposite_edges" },
-    { "id": "extraction", "name": "Extraction", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).", "objectives": "Place 1 VIP marker in the exact center of the table.", "specialRules": ["The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).", "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).", "The VIP exits the table at the player's deployment edge for victory points."], "vpConditions": ["Extract VIP off player's deployment edge = 5 VP", "VIP goes Down = -2 VP (still recoverable)", "VIP goes Out = -3 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "asymmetric" },
-    { "id": "scorched_data", "name": "Scorched Data", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'×3'", "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.", "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.", "specialRules": ["Hack Terminal: Interact action using TEC. Roll 2 TEC dice — 1+ success = hacked.", "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.", "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."], "vpConditions": ["Hack a terminal = 2 VP (one-time)", "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "diagonal_corners" },
-    { "id": "dead_drop", "name": "Dead Drop", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 4 Intel Package markers in the center band of the table — each at least 6\" from any table edge and at least 6\" from each other.", "specialRules": ["Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.", "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.", "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.", "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).", "Deliver: Move the carrying operative into your deployment zone to score."], "vpConditions": ["Deliver Standard Intel = 2 VP", "Deliver Priority Intel = 3 VP", "Deliver Decoy = 0 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
-    { "id": "signal_jam", "name": "Signal Jam", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Transmitter marker in the exact center of the table.", "specialRules": ["Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.", "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.", "Losing control resets your broadcast counter to 0.", "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."], "vpConditions": ["Control transmitter for 3 consecutive rounds = Immediate Victory", "Control transmitter at end of round = 1 VP", "Eliminate enemy operative = 1 VP", "If no one achieves broadcast victory, highest VP at end of round 6 wins"], "deploymentType": "opposite_edges" },
-    { "id": "sweep_and_clear", "name": "Sweep & Clear", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions — at least 6\" from the player's deployment edge).", "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.", "specialRules": ["A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.", "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).", "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."], "vpConditions": ["Clear a zone = 2 VP per zone", "All 4 zones cleared = bonus 3 VP (total victory)", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "sweep" }
+    { "id": "blackout", "name": "Blackout", "category": "pvp", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.", "specialRules": ["Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).", "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."], "vpConditions": ["Control a Data Relay at end of round = 1 VP per relay", "Control all 3 relays simultaneously at end of any round = bonus 2 VP", "Eliminate enemy operative = 1 VP", "Eliminate enemy Leader = 2 VP"], "deploymentType": "opposite_edges" },
+    { "id": "scorched_data", "name": "Scorched Data", "category": "pvp", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'\u00d73'", "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.", "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.", "specialRules": ["Hack Terminal: Interact action using TEC. Roll 2 TEC dice \u2014 1+ success = hacked.", "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.", "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."], "vpConditions": ["Hack a terminal = 2 VP (one-time)", "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "diagonal_corners" },
+    { "id": "dead_drop", "name": "Dead Drop", "category": "pvp", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 4 Intel Package markers in the center band of the table \u2014 each at least 6\" from any table edge and at least 6\" from each other.", "specialRules": ["Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.", "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.", "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.", "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).", "Deliver: Move the carrying operative into your deployment zone to score."], "vpConditions": ["Deliver Standard Intel = 2 VP", "Deliver Priority Intel = 3 VP", "Deliver Decoy = 0 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "signal_jam", "name": "Signal Jam", "category": "pvp", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Transmitter marker in the exact center of the table.", "specialRules": ["Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.", "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.", "Losing control resets your broadcast counter to 0.", "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."], "vpConditions": ["Control transmitter for 3 consecutive rounds = Immediate Victory", "Control transmitter at end of round = 1 VP", "Eliminate enemy operative = 1 VP", "If no one achieves broadcast victory, highest VP at end of round 6 wins"], "deploymentType": "opposite_edges" },
+    { "id": "turf_war", "name": "Turf War", "category": "pvp", "briefing": "The district is up for grabs. Five zones, one winner. Control territory and push the enemy out.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Divide the table into 5 zones: 4 quarters plus a central zone (6\" radius from center). Place a zone marker in the center of each.", "specialRules": ["Zones are controlled by having more operatives inside the zone than the enemy at end of round.", "The central zone is worth double VP.", "An operative can only count for one zone (if overlapping, controlling player chooses)."], "vpConditions": ["Control outer zone at end of round = 1 VP", "Control central zone at end of round = 2 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "headhunter", "name": "Headhunter", "category": "pvp", "briefing": "Intel says they have high-value targets. Find them, eliminate them, and send a message.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 2 objective markers on the center line, each 8\" from center (left and right). These are intel caches.", "specialRules": ["Priority Targets: Eliminating the enemy Leader = 3 VP (instead of the usual 2). Eliminating a Specialist = 2 VP (instead of 1).", "Intel Cache: Interact action at a cache marker. Roll AWR \u2014 on success, you learn the positions of all hidden/stealthy enemies (negates Stealthy and Ghost for the rest of the round).", "First Blood: The first player to eliminate an enemy operative gains +1 bonus VP."], "vpConditions": ["Eliminate enemy Leader = 3 VP", "Eliminate enemy Specialist = 2 VP", "Eliminate other enemy = 1 VP", "First Blood = 1 bonus VP", "Control intel cache at end of game = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "crash_site", "name": "Crash Site", "category": "pvp", "briefing": "A cargo drone just went down in the middle of the district. Both teams want what\u2019s inside. Grab the cargo and get it home.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Crash Site marker in the exact center. Place 3 Cargo tokens on the crash site.", "specialRules": ["Recover Cargo: Interact action at the crash site to pick up 1 cargo token. One per activation.", "Carrying: An operative carrying cargo has -2\" movement. Can only carry 1 token.", "Drop: Cargo drops if carrier goes Down.", "Deliver: Move carrying operative into your deployment zone to score. Cargo is removed from play once delivered.", "The crash site is dangerous terrain \u2014 any operative ending activation within 2\" of it rolls 1d6: on a 1, take 1 hit (fuel leak)."], "vpConditions": ["Deliver cargo to your deployment zone = 2 VP per token", "Eliminate enemy operative = 1 VP", "All 3 cargo delivered by one side = bonus 2 VP"], "deploymentType": "opposite_edges" },
+    { "id": "extraction", "name": "Extraction", "category": "pve", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).", "objectives": "Place 1 VIP marker in the exact center of the table.", "specialRules": ["The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).", "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).", "The VIP exits the table at the player's deployment edge for victory points."], "vpConditions": ["Extract VIP off player's deployment edge = 5 VP", "VIP goes Down = -2 VP (still recoverable)", "VIP goes Out = -3 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "asymmetric" },
+    { "id": "sweep_and_clear", "name": "Sweep & Clear", "category": "pve", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions \u2014 at least 6\" from the player's deployment edge).", "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.", "specialRules": ["A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.", "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).", "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."], "vpConditions": ["Clear a zone = 2 VP per zone", "All 4 zones cleared = bonus 3 VP (total victory)", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "sweep" },
+    { "id": "holdout", "name": "Holdout", "category": "pve", "briefing": "They know where you are and they\u2019re coming. Dig in, hold your ground, and survive until extraction arrives.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of the table center. AI operatives deploy along all four table edges (within 3\" of edge).", "objectives": "Place 1 Holdout Point marker in the exact center. The player must maintain control at the end of round 6.", "specialRules": ["Wave System: The AI warband starts with a basic force. At the end of rounds 2, 4, and 6, reinforcements arrive \u2014 roll d6 per reinforcement wave: 1-2 = 2 Recruits (Aggressive), 3-4 = 1 Operative + 1 Recruit (Aggressive), 5-6 = 1 Specialist + 1 Recruit (mixed).", "Reinforcement entry: Roll d6 for each new operative: 1=North, 2=East, 3=South, 4=West, 5-6=closest edge to the Holdout Point.", "Surrounded: AI operatives always count as having line of sight for target priority (they know where you are)."], "vpConditions": ["Survive to end of round 6 with at least 1 operative standing = 5 VP", "Control Holdout Point at end of round 6 = 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "center_holdout" },
+    { "id": "data_heist", "name": "Data Heist", "category": "pve", "briefing": "A corporate server farm sits in the heart of enemy territory. Get in, hack the data, and get out before they lock you down.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. AI operatives deploy in the opposite half, concentrated around 2 Server Terminal markers.", "objectives": "Place 2 Server Terminal markers in the opposite half of the table, each at least 8\" from the player's deployment edge and 6\" apart.", "specialRules": ["Hack Server: Interact action at a terminal. Roll TEC \u2014 2+ successes = hacked. 1 success = partial (need another Interact action to finish). 0 = security alert triggered.", "Security Alert: If triggered (0 successes on hack, or an AI operative spots a player within 6\" of a terminal), all AI operatives gain +1 die to CMB for the rest of the game (heightened security).", "Exfiltration: After hacking both servers, player operatives must exit via their deployment edge to secure the data.", "Stealth Phase: AI operatives do not activate until a player operative is spotted (within line of sight and 12\" of an AI operative, or a failed hack triggers alert). Until then, AI operatives remain stationary."], "vpConditions": ["Hack server terminal = 2 VP each", "Both servers hacked = bonus 2 VP", "Exfil at least 1 operative after both hacks = 3 VP", "No security alert triggered = bonus 2 VP", "Player operative goes Out = -1 VP"], "deploymentType": "asymmetric" },
+    { "id": "ambush", "name": "Ambush", "category": "pve", "briefing": "Your patrol walked right into a trap. Hostiles on all sides. Fight your way to the extraction point before they close the net.", "rounds": 5, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 4\" of the table center (patrol starting position). AI operatives deploy along all four table edges, within 4\" of edges.", "objectives": "Place 1 Extraction Point marker on a randomly determined table edge (roll d6: 1-2 North, 3-4 East, 5 South, 6 West).", "specialRules": ["Ambush: AI has initiative automatically on round 1 (no roll).", "Closing Net: From round 3 onward, at the end of each round, all AI operatives that didn\u2019t activate this round may move 3\" toward the nearest player operative (the net tightens).", "Extraction: A player operative in contact with the Extraction Point may exit the table as their action. Exited operatives are safe.", "Urgency: If no player operative has exited by end of round 4, the extraction point moves 6\" toward center (extraction window shrinking)."], "vpConditions": ["Extract operative (exit at extraction point) = 2 VP each", "Extract Leader = 3 VP", "Extract more than half your warband = bonus 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out before extraction = -1 VP"], "deploymentType": "center_ambush" },
+    { "id": "bug_hunt", "name": "Bug Hunt", "category": "pve", "briefing": "Something\u2019s in the building complex. Room by room, floor by floor \u2014 find them before they find you.", "rounds": 6, "tableSize": "2'\u00d72'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are placed face-down (hidden) by the player across the rest of the table \u2014 at least one per zone.", "objectives": "Divide the table into 6 zones (3x2 grid). AI operatives are hidden in each zone.", "specialRules": ["Hidden Enemies: AI operatives start face-down (hidden). A player operative entering a zone with hidden enemies must roll AWR \u2014 on 1+ success, reveal all hidden enemies in that zone. On 0 successes, the hidden enemies get a free activation (ambush) before being revealed.", "Ambush Activation: Revealed enemies via failed AWR check immediately activate (one each) before normal play resumes.", "Sweep: A zone is considered cleared when all enemies in it are Out.", "Close Quarters: All ranges reduced \u2014 weapon range bands halved (round up). The table is tight."], "vpConditions": ["Clear a zone = 2 VP", "All zones cleared = bonus 4 VP", "Reveal enemies without triggering ambush = 1 VP per zone", "Player operative goes Out = -1 VP"], "deploymentType": "sweep_6zone" }
+  ],
+  "aiProfiles": [
+    { "id": "street_wolves", "name": "Street Wolves", "description": "A large street gang that overwhelms with numbers. Cheap bodies, aggressive tactics, led by a veteran enforcer.", "style": "Horde / Aggressive", "budget": 10, "operatives": [{ "name": "Pack Alpha", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": ["commander", "hardened"], "behavior": "defensive" },{ "name": "Enforcer", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },{ "name": "Enforcer", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "flanker" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "aggressive" }] },
+    { "id": "obsidian_corp", "name": "Obsidian Corp Security", "description": "Professional corporate security team. Disciplined, well-equipped, holds ground and picks targets methodically.", "style": "Balanced / Defensive", "budget": 10, "operatives": [{ "name": "Shift Commander", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": ["marksman", "tactician"], "behavior": "defensive" },{ "name": "Overwatch", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d8" }, "weapon": "sniper_rifle", "abilities": ["spotter"], "behavior": "cautious" },{ "name": "Point Man", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Trooper", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },{ "name": "Patrol", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },{ "name": "Patrol", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "cautious" },{ "name": "Patrol", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "behavior": "defensive" }] },
+    { "id": "ghost_protocol", "name": "Ghost Protocol", "description": "Elite black ops team. Few in number but highly skilled. Strikes from unexpected angles and disappears.", "style": "Elite / Stealth", "budget": 10, "operatives": [{ "name": "Phantom Lead", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d6", "TEC": "d6", "AWR": "d8" }, "weapon": "rifle", "abilities": ["stealthy", "breacher"], "behavior": "flanker" },{ "name": "Wraith", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["ghost"], "behavior": "flanker" },{ "name": "Shade", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["hacker"], "behavior": "cautious" },{ "name": "Striker", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },{ "name": "Striker", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "flanker" }] },
+    { "id": "iron_jackals", "name": "Iron Jackals", "description": "Brutal close-combat gang that rushes the enemy and overwhelms them in melee. Led by a terrifying pit fighter.", "style": "Melee / Rush", "budget": 10, "operatives": [{ "name": "Pit Boss", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "tactical_knife", "abilities": ["cqb_expert", "rapid_assault"], "behavior": "aggressive" },{ "name": "Gunner", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "lmg", "abilities": ["heavy_weapons"], "behavior": "defensive" },{ "name": "Charger", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "behavior": "flanker" },{ "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" }] },
+    { "id": "neon_shadows", "name": "Neon Shadows", "description": "Tech-savvy infiltration team. Prefers to hack, sneak, and outmaneuver rather than engage in straight firefights.", "style": "Tech / Infiltration", "budget": 10, "operatives": [{ "name": "Netrunner Prime", "tier": "leader", "stats": { "CMB": "d6", "REF": "d8", "GRT": "d6", "TEC": "d8", "AWR": "d8" }, "weapon": "pistol", "abilities": ["hacker", "ghost"], "behavior": "cautious" },{ "name": "Signal", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["networked"], "behavior": "flanker" },{ "name": "Cipher", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["stealthy"], "behavior": "flanker" },{ "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "cautious" },{ "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" }] },
+    { "id": "razorback_militia", "name": "Razorback Militia", "description": "Dug-in territorial militia. Fortifies positions and punishes anyone who comes too close. Patient and disciplined.", "style": "Defensive / Hold", "budget": 10, "operatives": [{ "name": "Warden", "tier": "leader", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d8" }, "weapon": "rifle", "abilities": ["commander", "marksman"], "behavior": "defensive" },{ "name": "Heavy", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "lmg", "abilities": ["heavy_weapons"], "behavior": "defensive" },{ "name": "Sentry", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },{ "name": "Sentry", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },{ "name": "Lookout", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "cautious" },{ "name": "Lookout", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "cautious" },{ "name": "Lookout", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" }] }
   ]
 };
 
@@ -219,8 +234,9 @@ const SECTIONS = [
     { id: 'weapons', title: '7. Weapons' },
     { id: 'abilities', title: '8. Abilities' },
     { id: 'solo-ai', title: '9. Solo / Co-op AI' },
-    { id: 'scenarios', title: '10. Scenarios' },
-    { id: 'quick-reference', title: '11. Quick Reference' },
+    { id: 'ai-profiles', title: '10. Premade AI Profiles' },
+    { id: 'scenarios', title: '11. Scenarios' },
+    { id: 'quick-reference', title: '12. Quick Reference' },
 ];
 
 // ============================================================
@@ -836,6 +852,134 @@ const DeploymentDiagram = ({ scenarioId }) => {
                 <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
             </svg>
         ),
+        turf_war: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <line x1="150" y1="10" x2="150" y2="290" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <line x1="10" y1="150" x2="290" y2="150" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <rect x="15" y="15" width="130" height="130" fill="rgba(255,190,11,0.05)" stroke="rgba(255,190,11,0.3)" strokeWidth="1" strokeDasharray="3,3"/>
+                <rect x="155" y="15" width="130" height="130" fill="rgba(255,190,11,0.05)" stroke="rgba(255,190,11,0.3)" strokeWidth="1" strokeDasharray="3,3"/>
+                <rect x="15" y="155" width="130" height="130" fill="rgba(255,190,11,0.05)" stroke="rgba(255,190,11,0.3)" strokeWidth="1" strokeDasharray="3,3"/>
+                <rect x="155" y="155" width="130" height="130" fill="rgba(255,190,11,0.05)" stroke="rgba(255,190,11,0.3)" strokeWidth="1" strokeDasharray="3,3"/>
+                <circle cx="150" cy="150" r="40" fill="rgba(255,190,11,0.15)" stroke="var(--accent-amber)" strokeWidth="2"/>
+                <circle cx="150" cy="150" r="6" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="150" y="170" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Center (2x VP)</text>
+                <text x="80" y="80" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Zone</text>
+                <text x="220" y="80" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Zone</text>
+                <text x="80" y="220" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Zone</text>
+                <text x="220" y="220" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Zone</text>
+                <text x="150" y="32" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player A</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player B</text>
+            </svg>
+        ),
+        headhunter: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <line x1="10" y1="150" x2="290" y2="150" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <polygon points="90,142 98,134 106,142 106,150 98,158 90,150" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <polygon points="194,142 202,134 210,142 210,150 202,158 194,150" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="98" y="173" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Intel Cache</text>
+                <text x="202" y="173" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Intel Cache</text>
+                <text x="150" y="32" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player A</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player B</text>
+                <text x="150" y="52" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+            </svg>
+        ),
+        crash_site: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <circle cx="150" cy="150" r="30" fill="none" stroke="var(--accent-red)" strokeWidth="1" strokeDasharray="4,4" opacity="0.6"/>
+                <text x="150" y="192" textAnchor="middle" fill="var(--accent-red)" fontSize="8" fontFamily="Share Tech Mono">Danger Zone (2")</text>
+                <polygon points="150,130 162,145 157,145 157,160 143,160 143,145 138,145" fill="rgba(255,190,11,0.9)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="150" y="175" textAnchor="middle" fill="var(--accent-amber)" fontSize="9" fontFamily="Share Tech Mono">Crash Site</text>
+                <text x="150" y="32" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player A</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player B</text>
+                <text x="150" y="52" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+            </svg>
+        ),
+        holdout: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="25" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="10" y="265" width="280" height="25" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="10" y="35" width="25" height="230" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="265" y="35" width="25" height="230" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <circle cx="150" cy="150" r="50" fill="rgba(0,212,255,0.1)" stroke="rgba(0,212,255,0.5)" strokeWidth="1.5"/>
+                <circle cx="150" cy="150" r="8" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="150" y="170" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Holdout Point</text>
+                <text x="150" y="120" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player</text>
+                <text x="150" y="133" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="22" textAnchor="middle" fill="var(--accent-magenta)" fontSize="8" fontFamily="Share Tech Mono">AI Edge</text>
+                <text x="150" y="280" textAnchor="middle" fill="var(--accent-magenta)" fontSize="8" fontFamily="Share Tech Mono">AI Edge</text>
+                <text x="22" y="155" textAnchor="middle" fill="var(--accent-magenta)" fontSize="8" fontFamily="Share Tech Mono" transform="rotate(-90,22,155)">AI Edge</text>
+                <text x="278" y="155" textAnchor="middle" fill="var(--accent-magenta)" fontSize="8" fontFamily="Share Tech Mono" transform="rotate(90,278,155)">AI Edge</text>
+            </svg>
+        ),
+        data_heist: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="10" width="280" height="140" fill="rgba(255,0,110,0.05)" stroke="rgba(255,0,110,0.2)" strokeWidth="1" strokeDasharray="4,4"/>
+                <rect x="90" y="65" width="20" height="20" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <rect x="190" y="90" width="20" height="20" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="100" y="100" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Server</text>
+                <text x="200" y="125" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Server</text>
+                <circle cx="75" cy="50" r="3" fill="var(--accent-red)"/><circle cx="115" cy="55" r="3" fill="var(--accent-red)"/>
+                <circle cx="185" cy="75" r="3" fill="var(--accent-red)"/><circle cx="215" cy="80" r="3" fill="var(--accent-red)"/>
+                <circle cx="130" cy="40" r="3" fill="var(--accent-red)"/><circle cx="170" cy="100" r="3" fill="var(--accent-red)"/>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="30" textAnchor="middle" fill="var(--accent-magenta)" fontSize="9" fontFamily="Orbitron" fontWeight="bold">AI Territory</text>
+            </svg>
+        ),
+        ambush: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="30" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="10" y="260" width="280" height="30" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="10" y="40" width="30" height="220" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="260" y="40" width="30" height="220" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <circle cx="150" cy="150" r="35" fill="rgba(0,212,255,0.1)" stroke="rgba(0,212,255,0.5)" strokeWidth="1.5"/>
+                <text x="150" y="145" textAnchor="middle" fill="var(--accent-cyan)" fontSize="9" fontFamily="Orbitron" fontWeight="bold">Player</text>
+                <text x="150" y="158" textAnchor="middle" fill="var(--text-dim)" fontSize="7" fontFamily="Share Tech Mono">4" deploy zone</text>
+                <polygon points="276,145 284,140 284,150" fill="rgba(0,245,160,0.8)" stroke="var(--accent-green)" strokeWidth="1.5"/>
+                <text x="272" y="165" textAnchor="middle" fill="var(--accent-green)" fontSize="7" fontFamily="Share Tech Mono">Extract</text>
+                <text x="150" y="25" textAnchor="middle" fill="var(--accent-magenta)" fontSize="8" fontFamily="Share Tech Mono">AI Edge (4")</text>
+                <text x="150" y="278" textAnchor="middle" fill="var(--accent-magenta)" fontSize="8" fontFamily="Share Tech Mono">AI Edge (4")</text>
+            </svg>
+        ),
+        bug_hunt: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <line x1="103" y1="10" x2="103" y2="230" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <line x1="197" y1="10" x2="197" y2="230" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <line x1="10" y1="120" x2="290" y2="120" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <text x="56" y="70" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Z1</text>
+                <text x="150" y="70" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Z2</text>
+                <text x="244" y="70" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Z3</text>
+                <text x="56" y="180" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Z4</text>
+                <text x="150" y="180" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Z5</text>
+                <text x="244" y="180" textAnchor="middle" fill="var(--text-dim)" fontSize="9" fontFamily="Share Tech Mono">Z6</text>
+                <text x="56" y="55" textAnchor="middle" fill="var(--accent-red)" fontSize="16" fontFamily="Share Tech Mono">?</text>
+                <text x="150" y="55" textAnchor="middle" fill="var(--accent-red)" fontSize="16" fontFamily="Share Tech Mono">?</text>
+                <text x="244" y="55" textAnchor="middle" fill="var(--accent-red)" fontSize="16" fontFamily="Share Tech Mono">?</text>
+                <text x="56" y="165" textAnchor="middle" fill="var(--accent-red)" fontSize="16" fontFamily="Share Tech Mono">?</text>
+                <text x="150" y="165" textAnchor="middle" fill="var(--accent-red)" fontSize="16" fontFamily="Share Tech Mono">?</text>
+                <text x="244" y="165" textAnchor="middle" fill="var(--accent-red)" fontSize="16" fontFamily="Share Tech Mono">?</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="16" textAnchor="middle" fill="var(--text-dim)" fontSize="7" fontFamily="Share Tech Mono">2' x 2' table</text>
+            </svg>
+        ),
     };
     return diagrams[scenarioId] || null;
 };
@@ -894,12 +1038,85 @@ const ScenarioCard = ({ s }) => (
     </div>
 );
 
-const ScenariosSection = () => (
+const WEAPON_MAP = {};
+GAME_DATA.weapons.forEach(w => WEAPON_MAP[w.id] = w);
+const ABILITY_MAP = {};
+GAME_DATA.abilities.forEach(a => ABILITY_MAP[a.id] = a);
+
+const AIProfileCard = ({ profile }) => {
+    const tierColors = { leader: 'var(--accent-amber)', specialist: 'var(--accent-cyan)', operative: 'var(--accent-green)', recruit: 'var(--text-dim)' };
+    const behaviorColors = { aggressive: '#ff3366', defensive: '#00d4ff', cautious: '#ffbe0b', flanker: '#ff006e' };
+    return (
+        <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 0, margin: '20px 0', background: 'var(--bg-card)', overflow: 'hidden' }}>
+            <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: 'var(--bg-panel)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+                <h4 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 17, color: 'var(--accent-cyan)', margin: 0 }}>{profile.name}</h4>
+                <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
+                    <span style={{ color: 'var(--accent-magenta)' }}>{profile.style}</span>
+                    <span style={{ color: 'var(--text-dim)' }}>{profile.operatives.length} models</span>
+                </div>
+            </div>
+            <div style={{ padding: '16px 18px' }}>
+                <Para><Dim>{profile.description}</Dim></Para>
+                <div style={{ overflowX: 'auto', margin: '12px 0' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: 11 }}>
+                        <thead>
+                            <tr>
+                                {['Name', 'Tier', 'Weapon', 'Abilities', 'Behavior'].map((h, i) => (
+                                    <th key={i} style={{ textAlign: 'left', padding: '5px 8px', background: 'var(--bg-panel)', color: 'var(--accent-cyan)', borderBottom: '2px solid var(--accent-cyan)', fontFamily: 'Orbitron, sans-serif', fontSize: 9, textTransform: 'uppercase', letterSpacing: 1, whiteSpace: 'nowrap' }}>{h}</th>
+                                ))}
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {profile.operatives.map((op, i) => (
+                                <tr key={i} style={{ background: i % 2 === 0 ? 'transparent' : 'rgba(255,255,255,0.02)' }}>
+                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', color: 'var(--text-bright)', fontWeight: 'bold' }}>{op.name}</td>
+                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>
+                                        <span style={{ color: tierColors[op.tier] || 'var(--text-dim)', fontSize: 10, fontWeight: 'bold' }}>{op.tier}</span>
+                                    </td>
+                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' }}>{WEAPON_MAP[op.weapon]?.name || op.weapon}</td>
+                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', color: 'var(--accent-amber)' }}>{op.abilities.length > 0 ? op.abilities.map(a => ABILITY_MAP[a]?.name || a).join(', ') : '\u2014'}</td>
+                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>
+                                        <span style={{ color: behaviorColors[op.behavior] || 'var(--text-dim)', fontSize: 10, fontWeight: 'bold' }}>{op.behavior}</span>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const AIProfilesSection = () => (
     <div>
-        <SectionHeading id="scenarios" title="10. Scenarios" />
+        <SectionHeading id="ai-profiles" title="10. Premade AI Profiles" />
+        <Para>
+            These are ready-to-play enemy warbands for solo, co-op, or quick PvP games. Each profile is built
+            to the standard <Bright>10-point budget</Bright> with a distinct playstyle and tactical identity.
+            Pick one, deploy it against your warband, and use the behavior tags to drive the AI.
+        </Para>
+        <RuleBox color="green">
+            <Para>
+                <Bright>How to use:</Bright> Choose a profile that matches the challenge you want. Deploy them according
+                to the scenario rules. Each operative already has a behavior tag assigned {'\u2014'} use it to drive their
+                AI activations with the behavior tables from Section 9.
+            </Para>
+        </RuleBox>
+        {(GAME_DATA.aiProfiles || []).map(p => <AIProfileCard key={p.id} profile={p} />)}
+    </div>
+);
+
+const ScenariosSection = () => {
+    const pvpScenarios = GAME_DATA.scenarios.filter(s => s.category === 'pvp');
+    const pveScenarios = GAME_DATA.scenarios.filter(s => s.category === 'pve');
+    return (
+    <div>
+        <SectionHeading id="scenarios" title="11. Scenarios" />
         <Para>
             Each game uses a scenario that defines the mission, objectives, deployment, round count, and special rules.
             Each scenario has its own VP conditions in addition to the universal scoring rules below.
+            Scenarios are divided into <Bright>PvP</Bright> (2-player competitive) and <Bright>PvE</Bright> (solo / co-op against the AI).
         </Para>
         <SubHeading>Scenario Structure</SubHeading>
         <RuleBox color="cyan">
@@ -929,17 +1146,23 @@ const ScenariosSection = () => (
             <Para style={{ marginTop: 8 }}><Dim>Each scenario also defines its own VP conditions. The player with the most VP at the end of the final round wins (unless a scenario specifies an alternate victory condition).</Dim></Para>
         </RuleBox>
 
-        <SubHeading>Scenarios</SubHeading>
-        {GAME_DATA.scenarios.map(s => <ScenarioCard key={s.id} s={s} />)}
+        <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 17, color: 'var(--accent-cyan)', marginTop: 32, marginBottom: 16, paddingBottom: 8, borderBottom: '2px solid var(--accent-cyan)' }}>PvP Scenarios</h3>
+        <Para><Dim>Competitive 2-player scenarios. Both sides deploy and fight for objectives.</Dim></Para>
+        {pvpScenarios.map(s => <ScenarioCard key={s.id} s={s} />)}
+
+        <h3 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 17, color: 'var(--accent-green)', marginTop: 32, marginBottom: 16, paddingBottom: 8, borderBottom: '2px solid var(--accent-green)' }}>PvE Scenarios (Solo / Co-op)</h3>
+        <Para><Dim>Play against the AI engine. Use behavior tags and premade AI profiles to drive the enemy warband.</Dim></Para>
+        {pveScenarios.map(s => <ScenarioCard key={s.id} s={s} />)}
     </div>
-);
+    );
+};
 
 const QuickReferenceSection = () => {
     const standard = GAME_DATA.weapons.filter(w => !w.premium);
     const premium = GAME_DATA.weapons.filter(w => w.premium);
     return (
         <div>
-            <SectionHeading id="quick-reference" title="11. Quick Reference" />
+            <SectionHeading id="quick-reference" title="12. Quick Reference" />
             <Para><Dim>Condensed tables for use during play. Print this section or keep it open on a second screen.</Dim></Para>
 
             <SubHeading>Health Track</SubHeading>
@@ -1244,6 +1467,7 @@ const App = () => {
                 <WeaponsSection />
                 <AbilitiesSection />
                 <SoloAISection />
+                <AIProfilesSection />
                 <ScenariosSection />
                 <QuickReferenceSection />
                 <div style={{ marginTop: 64, padding: '24px 0', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
