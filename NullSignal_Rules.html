@@ -333,7 +333,7 @@ const OverviewSection = () => (
 const CoreStatsSection = () => {
     const statDescriptions = {
         CMB: 'Offensive combat ability. Determines die type for shooting and melee attacks.',
-        REF: 'Defensive reflexes. Determines die type for dodge/defense rolls in firefights.',
+        REF: 'Defensive reaction under fire. Determines die type when choosing Take Cover (cancel hits) instead of Returning Fire. Also governs disengaging from melee.',
         GRT: 'Toughness and willpower. Used for recovery checks and morale.',
         TEC: 'Technical skill. Used for hacking, gear actions, and scenario interactions.',
         AWR: 'Situational awareness. Used for spotting, detection, and perception checks.',
@@ -440,8 +440,8 @@ const HealthSystemSection = () => (
         </Para>
         <SubHeading>Simultaneous Resolution</SubHeading>
         <Para>
-            <Dim>Stats never degrade — only the health die changes. Firefights resolve simultaneously,
-            meaning both combatants roll before either applies results.</Dim>
+            <Dim>Stats never degrade — only the health die changes. When both sides deal hits (Return Fire in firefights,
+            or brawls), resolve simultaneously — both combatants roll before either applies results.</Dim>
         </Para>
     </div>
 );
@@ -451,20 +451,42 @@ const CombatSection = () => (
         <SectionHeading id="combat" title="4. Combat" />
 
         <SubHeading>Firefights (Ranged Combat)</SubHeading>
-        <Para>Firefights are <Bright>simultaneous</Bright>. When an operative shoots, the target fires back at the same time.</Para>
+        <Para>When an operative shoots, the defender must make a <Bright>tactical choice</Bright>: trade fire or dive for cover.</Para>
         <RuleBox color="cyan">
             <ol style={{ paddingLeft: 20, lineHeight: 2 }}>
-                <li><Bright>Attacker</Bright> rolls CMB pool: weapon's attack dice at their CMB die type.</li>
-                <li><Bright>Defender</Bright> rolls 2 REF dice (as dodge/evade). Each defender success <CyanText>cancels one attacker hit</CyanText>.</li>
-                <li>Remaining uncancelled hits are applied to the target.</li>
-                <li>The target simultaneously fires back using the same process.</li>
+                <li><Bright>Attacker</Bright> declares Shoot and rolls CMB pool (weapon's attack dice at their CMB die type). Each 4+ = a hit.</li>
+                <li><Bright>Defender chooses one response:</Bright></li>
+            </ol>
+            <div style={{ paddingLeft: 40, marginTop: 4, marginBottom: 8 }}>
+                <div style={{ marginBottom: 8 }}>
+                    <Bright>A) Return Fire (CMB):</Bright> Roll their weapon's attack dice at their CMB die type.
+                    Both sides' successes (4+) count as hits. Resolve hits against <CyanText>BOTH operatives simultaneously</CyanText>.
+                </div>
+                <div>
+                    <Bright>B) Take Cover (REF):</Bright> Roll 2 dice at their REF die type.
+                    Each success (4+) <CyanText>cancels one incoming hit</CyanText>. The defender does NOT fire back.
+                </div>
+            </div>
+            <ol start={3} style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li>Remaining uncancelled hits trigger health checks on the target.</li>
+                <li>If the defender chose Return Fire, the attacker also takes health checks for uncancelled hits.</li>
             </ol>
         </RuleBox>
-        <ExampleBox title="Firefight Example">
-            Alpha (CMB d8, Rifle 3AD) shoots Beta (REF d6). Alpha rolls 3d8 and gets 2 successes.
-            Beta rolls 2d6 for REF and gets 1 success, cancelling 1 hit.
-            Beta takes 1 net hit and must roll a health check. Meanwhile, Beta fires back at Alpha.
+        <ExampleBox title="Return Fire Example">
+            Alpha (CMB d8, Rifle 3AD) shoots Beta (CMB d6, SMG 3AD). Alpha rolls 3d8 → 2 hits.
+            Beta chooses Return Fire and rolls 3d6 → 1 hit.
+            Both sides' hits apply simultaneously: Beta takes 2 health checks, Alpha takes 1 health check.
         </ExampleBox>
+        <ExampleBox title="Take Cover Example">
+            Alpha (CMB d8, Rifle 3AD) shoots Gamma (REF d8). Alpha rolls 3d8 → 2 hits.
+            Gamma chooses Take Cover and rolls 2d8 → 1 success, cancelling 1 hit.
+            Gamma takes 1 health check. Alpha takes no damage (Gamma didn't fire back).
+        </ExampleBox>
+        <RuleBox color="amber">
+            <Bright>The choice matters:</Bright> A well-armed operative may prefer to Return Fire and trade blows.
+            A fragile operative (low CMB or low health) may prefer Take Cover to survive. This creates a
+            meaningful tactical decision on every firefight.
+        </RuleBox>
 
         <SubHeading>Range Rules</SubHeading>
         <DataTable
@@ -489,7 +511,7 @@ const CombatSection = () => (
 
         <SubHeading>Brawls (Melee Combat)</SubHeading>
         <RuleBox color="magenta">
-            <Para>Both combatants roll CMB simultaneously. <Bright>No REF defense in melee</Bright> — hits are not cancelled.</Para>
+            <Para>Both combatants roll CMB simultaneously. <Bright>No Take Cover option in melee</Bright> — both fighters are committed.</Para>
             <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
                 <li><Bright>Unarmed:</Bright> 1 attack die (default for all operatives in melee).</li>
                 <li><Bright>Melee Weapon:</Bright> Use the weapon's attack dice instead.</li>
@@ -728,6 +750,17 @@ const SoloAISection = () => (
                 />
             </div>
         ))}
+
+        <SubHeading>AI Defender Choice (Firefights)</SubHeading>
+        <Para>
+            When an AI operative is targeted by a firefight, their behavior tag determines the response:
+        </Para>
+        <RuleBox color="amber">
+            <ul style={{ paddingLeft: 20, lineHeight: 2.2 }}>
+                <li><Bright>Aggressive</Bright> or <Bright>Flanker</Bright>: Always <CyanText>Return Fire</CyanText></li>
+                <li><Bright>Defensive</Bright> or <Bright>Cautious</Bright>: <CyanText>Take Cover</CyanText> if current health die is d6 (floor); otherwise <CyanText>Return Fire</CyanText></li>
+            </ul>
+        </RuleBox>
 
         <SubHeading>Target Priority</SubHeading>
         <Para>
@@ -1183,7 +1216,7 @@ const QuickReferenceSection = () => {
             <SubHeading>Stat Summary</SubHeading>
             <DataTable compact headers={['Stat', 'Use']} rows={[
                 ['CMB', 'Attack rolls (ranged + melee)'],
-                ['REF', 'Defense rolls (firefights only, 2 dice)'],
+                ['REF', 'Take Cover response (2 dice) or disengage from melee'],
                 ['GRT', 'Recovery, morale'],
                 ['TEC', 'Gear actions, hacking, interactions'],
                 ['AWR', 'Spotting, detection, perception'],
@@ -1232,7 +1265,7 @@ const QuickReferenceSection = () => {
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
                     <div><Bright>Success:</Bright> 4+ on any die</div>
                     <div><Bright>Move:</Bright> 6"</div>
-                    <div><Bright>REF Defense:</Bright> 2 dice</div>
+                    <div><Bright>Take Cover:</Bright> 2 REF dice</div>
                     <div><Bright>Unarmed Melee:</Bright> 1 die</div>
                     <div><Bright>Default Stat Check:</Bright> 2 dice</div>
                     <div><Bright>Standard Budget:</Bright> 10 pts</div>

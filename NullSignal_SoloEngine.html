@@ -775,6 +775,7 @@ function PlayView({ initialState, onNewGame }) {
     const [showEndPhase, setShowEndPhase] = useState(false);
     const [endPhaseChecks, setEndPhaseChecks] = useState({ recovery: false, vp: false, conditions: false, advance: false });
     const [targetPriorityOpen, setTargetPriorityOpen] = useState(false);
+    const [defenderChoiceOpen, setDefenderChoiceOpen] = useState(false);
     const [recoveryRolling, setRecoveryRolling] = useState(null);
     const [recoveryResult, setRecoveryResult] = useState(null);
 
@@ -1155,6 +1156,39 @@ function PlayView({ initialState, onNewGame }) {
                                             {i + 1}.
                                         </span>
                                         <span style={{ color: 'var(--text-primary)' }}>{rule}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* AI Defender Choice (Firefights) */}
+                    <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                        <button onClick={() => setDefenderChoiceOpen(prev => !prev)}
+                            className="w-full flex items-center justify-between p-3 text-left transition-all hover:bg-white/5"
+                            style={{ color: 'var(--text-primary)' }}>
+                            <span className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-amber)' }}>
+                                AI DEFENDER CHOICE
+                            </span>
+                            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                {defenderChoiceOpen ? '[ - ]' : '[ + ]'}
+                            </span>
+                        </button>
+                        {defenderChoiceOpen && (
+                            <div className="px-4 pb-4 space-y-2 fade-in-up">
+                                <p className="text-xs mb-2" style={{ color: 'var(--text-dim)' }}>
+                                    When an AI operative is targeted by a firefight:
+                                </p>
+                                {[
+                                    { tags: 'Aggressive / Flanker', action: 'Always Return Fire (roll CMB)' },
+                                    { tags: 'Defensive / Cautious', action: 'Take Cover (roll REF) if health is d6; otherwise Return Fire' },
+                                ].map((rule, i) => (
+                                    <div key={i} className="flex items-start gap-3 text-sm p-2 rounded"
+                                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                        <span className="heading-font font-bold shrink-0" style={{ color: 'var(--accent-cyan)' }}>
+                                            {rule.tags}:
+                                        </span>
+                                        <span style={{ color: 'var(--text-primary)' }}>{rule.action}</span>
                                     </div>
                                 ))}
                             </div>

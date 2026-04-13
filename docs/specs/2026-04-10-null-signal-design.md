@@ -18,7 +18,7 @@ Five attributes, each represented by a **die type** (d6 / d8 / d10 / d12). Highe
 | Stat | Abbr | Governs |
 |------|------|---------|
 | Combat | CMB | All attacks — melee and ranged. Weapon determines range/effects, CMB determines dice. |
-| Reflexes | REF | Ranged defense (evasion under fire), reactive checks, overwatch triggers. Defenders roll REF to cancel incoming ranged hits. |
+| Reflexes | REF | Defensive reaction when under fire. Defender chooses to Take Cover (roll REF to cancel hits) instead of Returning Fire. Also governs disengaging from melee. |
 | Grit | GRT | Physical/mental toughness. Resisting suppression, morale, enduring hazards. |
 | Tech | TEC | Hacking terminals, disarming traps, using specialist gear, operating devices. |
 | Awareness | AWR | Spotting hidden enemies, overwatch reactions, detecting ambushes. |
@@ -56,7 +56,7 @@ d10 → d8 → d6 (floor) → DOWN → OUT
 4. Fail at any step = operative goes **Down** (incapacitated, on the ground)
 5. A Down operative that takes another hit = **Out** (removed from play)
 
-**Combat is simultaneous.** Both sides resolve their attacks fully before applying health consequences. If an operative goes Down from incoming hits, their simultaneously-resolved attacks still count.
+**When both sides deal hits (Return Fire in firefights, or brawls), combat is simultaneous.** Both sides resolve their attacks fully before applying health consequences. If an operative goes Down from incoming hits, their simultaneously-resolved attacks still count.
 
 ### Key Rules
 
@@ -69,16 +69,19 @@ d10 → d8 → d6 (floor) → DOWN → OUT
 
 ## 3. Combat — Simultaneous Resolution
 
-All combat is resolved simultaneously — both sides roll at the same time. No free attacks.
+Brawls are always simultaneous. Firefights give the defender a choice: Return Fire (mutual exchange) or Take Cover (defensive). No free attacks.
 
 ### 3.1 Firefights (Ranged Combat)
 
 1. Active operative declares Shoot action and chooses a target in **line of sight**
 2. **Attacker rolls CMB pool** (number of dice = weapon's Attack value, die type = CMB stat)
-3. **Defender rolls REF pool** (number of dice = 2, die type = REF stat) — representing evasion, diving for cover, return fire
-4. Each attacker success (4+) = one hit. Each defender success (4+) = one hit **cancelled**.
-5. Remaining hits trigger health checks on the target
-6. **Simultaneously**, the target fires back if they have line of sight — resolve their attack using the same process (they roll CMB, original attacker rolls REF)
+3. **Defender chooses one response:**
+   - **Return Fire (CMB):** Roll their weapon's attack dice at their CMB die type. Both sides' successes (4+) count as hits. Resolve hits against BOTH operatives simultaneously.
+   - **Take Cover (REF):** Roll 2 dice at their REF die type. Each success (4+) cancels one incoming hit. The defender does NOT fire back.
+4. Remaining uncancelled hits trigger health checks on the target
+5. If the defender chose Return Fire, the attacker's uncancelled hits also trigger health checks
+
+**The choice matters:** A well-armed operative may prefer to Return Fire and trade blows. A fragile operative (low CMB or low health) may prefer Take Cover to survive. This creates a meaningful tactical decision on every firefight.
 
 **Range Rules:**
 - **Line of sight = can shoot.** If you can see them, you can shoot them.
@@ -100,7 +103,7 @@ All combat is resolved simultaneously — both sides roll at the same time. No f
 
 **Unarmed:** All operatives can fight in melee with **1 die** at their CMB type (fists, rifle butt, etc.). This is the default melee attack. Operatives with dedicated melee weapons (Blade, Power Weapon) use the weapon's Attack Dice value instead.
 
-Note: In brawls, REF is not used for defense — both fighters are committed. The mutual exchange IS the defense. REF governs ranged evasion and reactive situations.
+Note: In brawls, there is no Take Cover option — both fighters are committed. The mutual exchange IS the defense. REF governs the Take Cover response in firefights and disengaging from melee.
 
 ### 3.3 Opposed Checks
 
@@ -301,14 +304,21 @@ On each AI operative's activation:
 | 3–4 | If behind cover with line of sight to enemy rear: Shoot. Otherwise: reposition |
 | 5–6 | Move to closest enemy not currently engaged by a friendly, Shoot or Fight |
 
-### 8.4 AI Target Priority
+### 8.4 AI Defender Choice (Firefights)
+
+When an AI operative is targeted by a firefight, the behavior tag determines whether it Returns Fire or Takes Cover:
+
+- **Aggressive** or **Flanker:** Always Return Fire
+- **Defensive** or **Cautious:** Take Cover if current health die is d6 (floor); otherwise Return Fire
+
+### 8.5 AI Target Priority
 
 When multiple targets are valid, AI selects by:
 1. Nearest visible enemy
 2. If tied: lowest health enemy
 3. If tied: enemy holding an objective
 
-### 8.5 Solo/Co-op Setup
+### 8.6 Solo/Co-op Setup
 
 - **Solo:** Player controls one warband, AI controls the opposing warband(s)
 - **Co-op:** Multiple players each control a warband (or split one warband), AI controls the enemy
@@ -412,6 +422,6 @@ All apps follow the established pattern from the Pulp Alley Forge and Voidbreak 
 3. **Metal pack friendly.** A set of 4–6 minis should form a viable crew out of the box.
 4. **No cards.** Tables, dice, and reference sheets only.
 5. **Flat power curve.** A Recruit can contribute meaningfully. A Leader is better, not invincible.
-6. **Simultaneous combat.** Every engagement is a mutual risk. No safe attacks.
+6. **Meaningful combat choices.** Firefights force a decision: trade fire or take cover. Brawls are always mutual. No safe attacks.
 7. **Solo-first design.** The AI system isn't an afterthought — it's a core feature.
 8. **Free forever.** Rules, apps, and tools are free. No paywalled content.
