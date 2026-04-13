@@ -1,0 +1,377 @@
+{
+  "stats": ["CMB", "REF", "GRT", "TEC", "AWR"],
+
+  "statLabels": {
+    "CMB": "Combat",
+    "REF": "Reflexes",
+    "GRT": "Grit",
+    "TEC": "Tech",
+    "AWR": "Awareness"
+  },
+
+  "diceTypes": ["d6", "d8", "d10", "d12"],
+
+  "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
+
+  "tiers": [
+    {
+      "id": "leader",
+      "name": "Leader",
+      "cost": 0,
+      "health": "d10",
+      "statSpread": { "d8Count": 3, "d6Count": 2 },
+      "gearSlots": 2,
+      "abilitySlots": 2
+    },
+    {
+      "id": "specialist",
+      "name": "Specialist",
+      "cost": 3,
+      "health": "d8",
+      "statSpread": { "d8Count": 2, "d6Count": 3 },
+      "gearSlots": 1,
+      "abilitySlots": 1
+    },
+    {
+      "id": "operative",
+      "name": "Operative",
+      "cost": 2,
+      "health": "d8",
+      "statSpread": { "d8Count": 1, "d6Count": 4 },
+      "gearSlots": 0,
+      "abilitySlots": 0
+    },
+    {
+      "id": "recruit",
+      "name": "Recruit",
+      "cost": 1,
+      "health": "d6",
+      "statSpread": { "d8Count": 0, "d6Count": 5 },
+      "gearSlots": 0,
+      "abilitySlots": 0
+    }
+  ],
+
+  "weapons": [
+    {
+      "id": "pistol",
+      "name": "Pistol",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 2,
+      "rangeBand": "8\"",
+      "hardCap": "16\"",
+      "meleeOnly": false,
+      "trait": "Compact",
+      "traitEffect": "Easy to conceal, common backup weapon."
+    },
+    {
+      "id": "smg",
+      "name": "SMG",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 3,
+      "rangeBand": "12\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Rapid",
+      "traitEffect": "+1 attack die within 6\"."
+    },
+    {
+      "id": "rifle",
+      "name": "Rifle",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 3,
+      "rangeBand": "20\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Reliable",
+      "traitEffect": "No special trait — consistent and dependable."
+    },
+    {
+      "id": "shotgun",
+      "name": "Shotgun",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 3,
+      "rangeBand": "8\"",
+      "hardCap": "16\"",
+      "meleeOnly": false,
+      "trait": "Spread",
+      "traitEffect": "+1 attack die within 6\"."
+    },
+    {
+      "id": "blade",
+      "name": "Blade",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 2,
+      "rangeBand": "Melee",
+      "hardCap": "Melee",
+      "meleeOnly": true,
+      "trait": "Melee-only",
+      "traitEffect": "Can only be used in base contact."
+    },
+    {
+      "id": "sniper_rifle",
+      "name": "Sniper Rifle",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 2,
+      "rangeBand": "30\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Precise",
+      "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty."
+    },
+    {
+      "id": "lmg",
+      "name": "LMG",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 4,
+      "rangeBand": "20\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Suppressive",
+      "traitEffect": "Target suffers -2\" movement on their next activation."
+    },
+    {
+      "id": "launcher",
+      "name": "Launcher",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 2,
+      "rangeBand": "20\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Blast",
+      "traitEffect": "All models within 2\" of the target point take hits."
+    },
+    {
+      "id": "power_weapon",
+      "name": "Power Weapon",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 3,
+      "rangeBand": "Melee",
+      "hardCap": "Melee",
+      "meleeOnly": true,
+      "trait": "Piercing",
+      "traitEffect": "Target's health die shifts an extra step on a failed health check."
+    }
+  ],
+
+  "abilities": [
+    {
+      "id": "hardened",
+      "name": "Hardened",
+      "effect": "+1 step to GRT die for recovery and morale checks."
+    },
+    {
+      "id": "cqb_expert",
+      "name": "CQB Expert",
+      "effect": "Gains a bonus attack die in brawls."
+    },
+    {
+      "id": "marksman",
+      "name": "Marksman",
+      "effect": "Gains a bonus attack die when shooting a target within range band."
+    },
+    {
+      "id": "medic",
+      "name": "Medic",
+      "effect": "Use Gear action: roll TEC — on success, attempt recovery on a Down ally in base contact."
+    },
+    {
+      "id": "hacker",
+      "name": "Hacker",
+      "effect": "Gains a bonus die on TEC checks made for scenario interactions."
+    },
+    {
+      "id": "networked",
+      "name": "Networked",
+      "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check."
+    },
+    {
+      "id": "stealthy",
+      "name": "Stealthy",
+      "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative."
+    },
+    {
+      "id": "spotter",
+      "name": "Spotter",
+      "effect": "Once per round, designate a target: all friendly shooters gain +1 attack die vs. that target this round."
+    },
+    {
+      "id": "resilient",
+      "name": "Resilient",
+      "effect": "The first failed health check each game is treated as a pass (health die still degrades one step)."
+    },
+    {
+      "id": "tactician",
+      "name": "Tactician",
+      "effect": "Once per round, swap activation order with one friendly operative."
+    },
+    {
+      "id": "rapid_assault",
+      "name": "Rapid Assault",
+      "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)."
+    },
+    {
+      "id": "pinning_fire",
+      "name": "Pinning Fire",
+      "effect": "Shoot action: instead of dealing damage, force the target to pass a GRT check or lose their next action."
+    },
+    {
+      "id": "breacher",
+      "name": "Breacher",
+      "effect": "Ignores the cover penalty when shooting."
+    },
+    {
+      "id": "field_repair",
+      "name": "Field Repair",
+      "effect": "Use Gear action: roll TEC — on success, restore one health step to a friendly operative in base contact."
+    },
+    {
+      "id": "ghost",
+      "name": "Ghost",
+      "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative."
+    },
+    {
+      "id": "heavy_weapons",
+      "name": "Heavy Weapons",
+      "effect": "May carry one premium weapon without spending a gear slot."
+    },
+    {
+      "id": "commander",
+      "name": "Commander",
+      "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks."
+    }
+  ],
+
+  "behaviorTags": [
+    {
+      "id": "aggressive",
+      "name": "Aggressive",
+      "personality": "Closes distance aggressively, prefers melee over shooting. Gets into combat as fast as possible.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "Move toward nearest visible enemy. Fight if in base contact."
+        },
+        {
+          "roll": "3-4",
+          "action": "Move toward nearest enemy. Shoot if in line of sight."
+        },
+        {
+          "roll": "5-6",
+          "action": "Full move toward nearest enemy. Fight if in contact; otherwise Shoot."
+        }
+      ]
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "personality": "Holds position, shoots from cover. Prioritizes staying behind cover and engaging enemies at range.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "If in cover: Shoot nearest visible enemy. If not in cover: move to nearest available cover."
+        },
+        {
+          "roll": "3-4",
+          "action": "Hold position. Shoot nearest visible enemy."
+        },
+        {
+          "roll": "5-6",
+          "action": "Move to better cover within 6\". Shoot nearest visible enemy if possible."
+        }
+      ]
+    },
+    {
+      "id": "cautious",
+      "name": "Cautious",
+      "personality": "Avoids risk and repositions frequently. Maintains maximum range and uses cover to survive.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "Move away from nearest enemy to maintain range. Shoot if able."
+        },
+        {
+          "roll": "3-4",
+          "action": "Move toward nearest objective. Interact if in contact."
+        },
+        {
+          "roll": "5-6",
+          "action": "Move to cover with best sight lines. Shoot nearest visible enemy."
+        }
+      ]
+    },
+    {
+      "id": "flanker",
+      "name": "Flanker",
+      "personality": "Seeks angles and avoids the frontline. Moves to the sides or rear of enemies to attack from unexpected angles.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "Move toward the flank or rear of the nearest enemy. Shoot if in line of sight."
+        },
+        {
+          "roll": "3-4",
+          "action": "If behind cover with line of sight to enemy rear: Shoot. Otherwise reposition to a better angle."
+        },
+        {
+          "roll": "5-6",
+          "action": "Move to the closest enemy not currently engaged by a friendly. Shoot or Fight as appropriate."
+        }
+      ]
+    }
+  ],
+
+  "scenarios": [
+    {
+      "id": "blackout",
+      "name": "Blackout",
+      "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.",
+      "rounds": 6,
+      "tableSize": "3'×3'"
+    },
+    {
+      "id": "extraction",
+      "name": "Extraction",
+      "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.",
+      "rounds": 6,
+      "tableSize": "3'×3'"
+    },
+    {
+      "id": "scorched_data",
+      "name": "Scorched Data",
+      "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.",
+      "rounds": 5,
+      "tableSize": "3'×3'"
+    },
+    {
+      "id": "dead_drop",
+      "name": "Dead Drop",
+      "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.",
+      "rounds": 6,
+      "tableSize": "3'×3'"
+    },
+    {
+      "id": "signal_jam",
+      "name": "Signal Jam",
+      "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.",
+      "rounds": 6,
+      "tableSize": "3'×3'"
+    },
+    {
+      "id": "sweep_and_clear",
+      "name": "Sweep & Clear",
+      "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.",
+      "rounds": 6,
+      "tableSize": "3'×3'"
+    }
+  ]
+}
