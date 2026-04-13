@@ -131,7 +131,7 @@ const GAME_DATA = {
   "weapons": [
     { "id": "pistol", "name": "Pistol", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Compact", "traitEffect": "Easy to conceal, common backup weapon." },
     { "id": "smg", "name": "SMG", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "12\"", "hardCap": null, "meleeOnly": false, "trait": "Rapid", "traitEffect": "+1 attack die within 6\"." },
-    { "id": "rifle", "name": "Rifle", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Reliable", "traitEffect": "No special trait \u2014 consistent and dependable." },
+    { "id": "rifle", "name": "Rifle", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Reliable", "traitEffect": "No special trait — consistent and dependable." },
     { "id": "shotgun", "name": "Shotgun", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Spread", "traitEffect": "+1 attack die within 6\"." },
     { "id": "blade", "name": "Blade", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Melee-only", "traitEffect": "Can only be used in base contact." },
     { "id": "sniper_rifle", "name": "Sniper Rifle", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "30\"", "hardCap": null, "meleeOnly": false, "trait": "Precise", "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty." },
@@ -143,7 +143,7 @@ const GAME_DATA = {
     { "id": "hardened", "name": "Hardened", "effect": "+1 step to GRT die for recovery and morale checks." },
     { "id": "cqb_expert", "name": "CQB Expert", "effect": "Gains a bonus attack die in brawls." },
     { "id": "marksman", "name": "Marksman", "effect": "Gains a bonus attack die when shooting a target within range band." },
-    { "id": "medic", "name": "Medic", "effect": "Use Gear action: roll TEC \u2014 on success, attempt recovery on a Down ally in base contact." },
+    { "id": "medic", "name": "Medic", "effect": "Use Gear action: roll TEC — on success, attempt recovery on a Down ally in base contact." },
     { "id": "hacker", "name": "Hacker", "effect": "Gains a bonus die on TEC checks made for scenario interactions." },
     { "id": "networked", "name": "Networked", "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check." },
     { "id": "stealthy", "name": "Stealthy", "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative." },
@@ -153,7 +153,7 @@ const GAME_DATA = {
     { "id": "rapid_assault", "name": "Rapid Assault", "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)." },
     { "id": "pinning_fire", "name": "Pinning Fire", "effect": "Shoot action: instead of dealing damage, force the target to pass a GRT check or lose their next action." },
     { "id": "breacher", "name": "Breacher", "effect": "Ignores the cover penalty when shooting." },
-    { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC \u2014 on success, restore one health step to a friendly operative in base contact." },
+    { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC — on success, restore one health step to a friendly operative in base contact." },
     { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative." },
     { "id": "heavy_weapons", "name": "Heavy Weapons", "effect": "May carry one premium weapon without spending a gear slot." },
     { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
@@ -197,19 +197,19 @@ const GAME_DATA = {
     }
   ],
     "scenarios": [
-    { "id": "blackout", "name": "Blackout", "category": "pvp", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.", "specialRules": ["Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).", "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."], "vpConditions": ["Control a Data Relay at end of round = 1 VP per relay", "Control all 3 relays simultaneously at end of any round = bonus 2 VP", "Eliminate enemy operative = 1 VP", "Eliminate enemy Leader = 2 VP"], "deploymentType": "opposite_edges" },
-    { "id": "scorched_data", "name": "Scorched Data", "category": "pvp", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'\u00d73'", "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.", "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.", "specialRules": ["Hack Terminal: Interact action using TEC. Roll 2 TEC dice \u2014 1+ success = hacked.", "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.", "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."], "vpConditions": ["Hack a terminal = 2 VP (one-time)", "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "diagonal_corners" },
-    { "id": "dead_drop", "name": "Dead Drop", "category": "pvp", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 4 Intel Package markers in the center band of the table \u2014 each at least 6\" from any table edge and at least 6\" from each other.", "specialRules": ["Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.", "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.", "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.", "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).", "Deliver: Move the carrying operative into your deployment zone to score."], "vpConditions": ["Deliver Standard Intel = 2 VP", "Deliver Priority Intel = 3 VP", "Deliver Decoy = 0 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
-    { "id": "signal_jam", "name": "Signal Jam", "category": "pvp", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Transmitter marker in the exact center of the table.", "specialRules": ["Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.", "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.", "Losing control resets your broadcast counter to 0.", "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."], "vpConditions": ["Control transmitter for 3 consecutive rounds = Immediate Victory", "Control transmitter at end of round = 1 VP", "Eliminate enemy operative = 1 VP", "If no one achieves broadcast victory, highest VP at end of round 6 wins"], "deploymentType": "opposite_edges" },
-    { "id": "turf_war", "name": "Turf War", "category": "pvp", "briefing": "The district is up for grabs. Five zones, one winner. Control territory and push the enemy out.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Divide the table into 5 zones: 4 quarters plus a central zone (6\" radius from center). Place a zone marker in the center of each.", "specialRules": ["Zones are controlled by having more operatives inside the zone than the enemy at end of round.", "The central zone is worth double VP.", "An operative can only count for one zone (if overlapping, controlling player chooses)."], "vpConditions": ["Control outer zone at end of round = 1 VP", "Control central zone at end of round = 2 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
-    { "id": "headhunter", "name": "Headhunter", "category": "pvp", "briefing": "Intel says they have high-value targets. Find them, eliminate them, and send a message.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 2 objective markers on the center line, each 8\" from center (left and right). These are intel caches.", "specialRules": ["Priority Targets: Eliminating the enemy Leader = 3 VP (instead of the usual 2). Eliminating a Specialist = 2 VP (instead of 1).", "Intel Cache: Interact action at a cache marker. Roll AWR \u2014 on success, you learn the positions of all hidden/stealthy enemies (negates Stealthy and Ghost for the rest of the round).", "First Blood: The first player to eliminate an enemy operative gains +1 bonus VP."], "vpConditions": ["Eliminate enemy Leader = 3 VP", "Eliminate enemy Specialist = 2 VP", "Eliminate other enemy = 1 VP", "First Blood = 1 bonus VP", "Control intel cache at end of game = 1 VP"], "deploymentType": "opposite_edges" },
-    { "id": "crash_site", "name": "Crash Site", "category": "pvp", "briefing": "A cargo drone just went down in the middle of the district. Both teams want what\u2019s inside. Grab the cargo and get it home.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Crash Site marker in the exact center. Place 3 Cargo tokens on the crash site.", "specialRules": ["Recover Cargo: Interact action at the crash site to pick up 1 cargo token. One per activation.", "Carrying: An operative carrying cargo has -2\" movement. Can only carry 1 token.", "Drop: Cargo drops if carrier goes Down.", "Deliver: Move carrying operative into your deployment zone to score. Cargo is removed from play once delivered.", "The crash site is dangerous terrain \u2014 any operative ending activation within 2\" of it rolls 1d6: on a 1, take 1 hit (fuel leak)."], "vpConditions": ["Deliver cargo to your deployment zone = 2 VP per token", "Eliminate enemy operative = 1 VP", "All 3 cargo delivered by one side = bonus 2 VP"], "deploymentType": "opposite_edges" },
-    { "id": "extraction", "name": "Extraction", "category": "pve", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).", "objectives": "Place 1 VIP marker in the exact center of the table.", "specialRules": ["The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).", "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).", "The VIP exits the table at the player's deployment edge for victory points."], "vpConditions": ["Extract VIP off player's deployment edge = 5 VP", "VIP goes Down = -2 VP (still recoverable)", "VIP goes Out = -3 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "asymmetric" },
-    { "id": "sweep_and_clear", "name": "Sweep & Clear", "category": "pve", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions \u2014 at least 6\" from the player's deployment edge).", "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.", "specialRules": ["A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.", "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).", "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."], "vpConditions": ["Clear a zone = 2 VP per zone", "All 4 zones cleared = bonus 3 VP (total victory)", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "sweep" },
-    { "id": "holdout", "name": "Holdout", "category": "pve", "briefing": "They know where you are and they\u2019re coming. Dig in, hold your ground, and survive until extraction arrives.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of the table center. AI operatives deploy along all four table edges (within 3\" of edge).", "objectives": "Place 1 Holdout Point marker in the exact center. The player must maintain control at the end of round 6.", "specialRules": ["Wave System: The AI warband starts with a basic force. At the end of rounds 2, 4, and 6, reinforcements arrive \u2014 roll d6 per reinforcement wave: 1-2 = 2 Recruits (Aggressive), 3-4 = 1 Operative + 1 Recruit (Aggressive), 5-6 = 1 Specialist + 1 Recruit (mixed).", "Reinforcement entry: Roll d6 for each new operative: 1=North, 2=East, 3=South, 4=West, 5-6=closest edge to the Holdout Point.", "Surrounded: AI operatives always count as having line of sight for target priority (they know where you are)."], "vpConditions": ["Survive to end of round 6 with at least 1 operative standing = 5 VP", "Control Holdout Point at end of round 6 = 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "center_holdout" },
-    { "id": "data_heist", "name": "Data Heist", "category": "pve", "briefing": "A corporate server farm sits in the heart of enemy territory. Get in, hack the data, and get out before they lock you down.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. AI operatives deploy in the opposite half, concentrated around 2 Server Terminal markers.", "objectives": "Place 2 Server Terminal markers in the opposite half of the table, each at least 8\" from the player's deployment edge and 6\" apart.", "specialRules": ["Hack Server: Interact action at a terminal. Roll TEC \u2014 2+ successes = hacked. 1 success = partial (need another Interact action to finish). 0 = security alert triggered.", "Security Alert: If triggered (0 successes on hack, or an AI operative spots a player within 6\" of a terminal), all AI operatives gain +1 die to CMB for the rest of the game (heightened security).", "Exfiltration: After hacking both servers, player operatives must exit via their deployment edge to secure the data.", "Stealth Phase: AI operatives do not activate until a player operative is spotted (within line of sight and 12\" of an AI operative, or a failed hack triggers alert). Until then, AI operatives remain stationary."], "vpConditions": ["Hack server terminal = 2 VP each", "Both servers hacked = bonus 2 VP", "Exfil at least 1 operative after both hacks = 3 VP", "No security alert triggered = bonus 2 VP", "Player operative goes Out = -1 VP"], "deploymentType": "asymmetric" },
-    { "id": "ambush", "name": "Ambush", "category": "pve", "briefing": "Your patrol walked right into a trap. Hostiles on all sides. Fight your way to the extraction point before they close the net.", "rounds": 5, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 4\" of the table center (patrol starting position). AI operatives deploy along all four table edges, within 4\" of edges.", "objectives": "Place 1 Extraction Point marker on a randomly determined table edge (roll d6: 1-2 North, 3-4 East, 5 South, 6 West).", "specialRules": ["Ambush: AI has initiative automatically on round 1 (no roll).", "Closing Net: From round 3 onward, at the end of each round, all AI operatives that didn\u2019t activate this round may move 3\" toward the nearest player operative (the net tightens).", "Extraction: A player operative in contact with the Extraction Point may exit the table as their action. Exited operatives are safe.", "Urgency: If no player operative has exited by end of round 4, the extraction point moves 6\" toward center (extraction window shrinking)."], "vpConditions": ["Extract operative (exit at extraction point) = 2 VP each", "Extract Leader = 3 VP", "Extract more than half your warband = bonus 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out before extraction = -1 VP"], "deploymentType": "center_ambush" },
-    { "id": "bug_hunt", "name": "Bug Hunt", "category": "pve", "briefing": "Something\u2019s in the building complex. Room by room, floor by floor \u2014 find them before they find you.", "rounds": 6, "tableSize": "2'\u00d72'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are placed face-down (hidden) by the player across the rest of the table \u2014 at least one per zone.", "objectives": "Divide the table into 6 zones (3x2 grid). AI operatives are hidden in each zone.", "specialRules": ["Hidden Enemies: AI operatives start face-down (hidden). A player operative entering a zone with hidden enemies must roll AWR \u2014 on 1+ success, reveal all hidden enemies in that zone. On 0 successes, the hidden enemies get a free activation (ambush) before being revealed.", "Ambush Activation: Revealed enemies via failed AWR check immediately activate (one each) before normal play resumes.", "Sweep: A zone is considered cleared when all enemies in it are Out.", "Close Quarters: All ranges reduced \u2014 weapon range bands halved (round up). The table is tight."], "vpConditions": ["Clear a zone = 2 VP", "All zones cleared = bonus 4 VP", "Reveal enemies without triggering ambush = 1 VP per zone", "Player operative goes Out = -1 VP"], "deploymentType": "sweep_6zone" }
+    { "id": "blackout", "name": "Blackout", "category": "pvp", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.", "specialRules": ["Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).", "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."], "vpConditions": ["Control a Data Relay at end of round = 1 VP per relay", "Control all 3 relays simultaneously at end of any round = bonus 2 VP", "Eliminate enemy operative = 1 VP", "Eliminate enemy Leader = 2 VP"], "deploymentType": "opposite_edges" },
+    { "id": "scorched_data", "name": "Scorched Data", "category": "pvp", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'×3'", "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.", "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.", "specialRules": ["Hack Terminal: Interact action using TEC. Roll 2 TEC dice — 1+ success = hacked.", "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.", "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."], "vpConditions": ["Hack a terminal = 2 VP (one-time)", "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "diagonal_corners" },
+    { "id": "dead_drop", "name": "Dead Drop", "category": "pvp", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 4 Intel Package markers in the center band of the table — each at least 6\" from any table edge and at least 6\" from each other.", "specialRules": ["Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.", "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.", "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.", "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).", "Deliver: Move the carrying operative into your deployment zone to score."], "vpConditions": ["Deliver Standard Intel = 2 VP", "Deliver Priority Intel = 3 VP", "Deliver Decoy = 0 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "signal_jam", "name": "Signal Jam", "category": "pvp", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Transmitter marker in the exact center of the table.", "specialRules": ["Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.", "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.", "Losing control resets your broadcast counter to 0.", "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."], "vpConditions": ["Control transmitter for 3 consecutive rounds = Immediate Victory", "Control transmitter at end of round = 1 VP", "Eliminate enemy operative = 1 VP", "If no one achieves broadcast victory, highest VP at end of round 6 wins"], "deploymentType": "opposite_edges" },
+    { "id": "turf_war", "name": "Turf War", "category": "pvp", "briefing": "The district is up for grabs. Five zones, one winner. Control territory and push the enemy out.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Divide the table into 5 zones: 4 quarters plus a central zone (6\" radius from center). Place a zone marker in the center of each.", "specialRules": ["Zones are controlled by having more operatives inside the zone than the enemy at end of round.", "The central zone is worth double VP.", "An operative can only count for one zone (if overlapping, controlling player chooses)."], "vpConditions": ["Control outer zone at end of round = 1 VP", "Control central zone at end of round = 2 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "headhunter", "name": "Headhunter", "category": "pvp", "briefing": "Intel says they have high-value targets. Find them, eliminate them, and send a message.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 2 objective markers on the center line, each 8\" from center (left and right). These are intel caches.", "specialRules": ["Priority Targets: Eliminating the enemy Leader = 3 VP (instead of the usual 2). Eliminating a Specialist = 2 VP (instead of 1).", "Intel Cache: Interact action at a cache marker. Roll AWR — on success, you learn the positions of all hidden/stealthy enemies (negates Stealthy and Ghost for the rest of the round).", "First Blood: The first player to eliminate an enemy operative gains +1 bonus VP."], "vpConditions": ["Eliminate enemy Leader = 3 VP", "Eliminate enemy Specialist = 2 VP", "Eliminate other enemy = 1 VP", "First Blood = 1 bonus VP", "Control intel cache at end of game = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "crash_site", "name": "Crash Site", "category": "pvp", "briefing": "A cargo drone just went down in the middle of the district. Both teams want what\u2019s inside. Grab the cargo and get it home.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Crash Site marker in the exact center. Place 3 Cargo tokens on the crash site.", "specialRules": ["Recover Cargo: Interact action at the crash site to pick up 1 cargo token. One per activation.", "Carrying: An operative carrying cargo has -2\" movement. Can only carry 1 token.", "Drop: Cargo drops if carrier goes Down.", "Deliver: Move carrying operative into your deployment zone to score. Cargo is removed from play once delivered.", "The crash site is dangerous terrain — any operative ending activation within 2\" of it rolls 1d6: on a 1, take 1 hit (fuel leak)."], "vpConditions": ["Deliver cargo to your deployment zone = 2 VP per token", "Eliminate enemy operative = 1 VP", "All 3 cargo delivered by one side = bonus 2 VP"], "deploymentType": "opposite_edges" },
+    { "id": "extraction", "name": "Extraction", "category": "pve", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).", "objectives": "Place 1 VIP marker in the exact center of the table.", "specialRules": ["The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).", "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).", "The VIP exits the table at the player's deployment edge for victory points."], "vpConditions": ["Extract VIP off player's deployment edge = 5 VP", "VIP goes Down = -2 VP (still recoverable)", "VIP goes Out = -3 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "asymmetric" },
+    { "id": "sweep_and_clear", "name": "Sweep & Clear", "category": "pve", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions — at least 6\" from the player's deployment edge).", "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.", "specialRules": ["A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.", "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).", "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."], "vpConditions": ["Clear a zone = 2 VP per zone", "All 4 zones cleared = bonus 3 VP (total victory)", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "sweep" },
+    { "id": "holdout", "name": "Holdout", "category": "pve", "briefing": "They know where you are and they\u2019re coming. Dig in, hold your ground, and survive until extraction arrives.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of the table center. AI operatives deploy along all four table edges (within 3\" of edge).", "objectives": "Place 1 Holdout Point marker in the exact center. The player must maintain control at the end of round 6.", "specialRules": ["Wave System: The AI warband starts with a basic force. At the end of rounds 2, 4, and 6, reinforcements arrive — roll d6 per reinforcement wave: 1-2 = 2 Recruits (Aggressive), 3-4 = 1 Operative + 1 Recruit (Aggressive), 5-6 = 1 Specialist + 1 Recruit (mixed).", "Reinforcement entry: Roll d6 for each new operative: 1=North, 2=East, 3=South, 4=West, 5-6=closest edge to the Holdout Point.", "Surrounded: AI operatives always count as having line of sight for target priority (they know where you are)."], "vpConditions": ["Survive to end of round 6 with at least 1 operative standing = 5 VP", "Control Holdout Point at end of round 6 = 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "center_holdout" },
+    { "id": "data_heist", "name": "Data Heist", "category": "pve", "briefing": "A corporate server farm sits in the heart of enemy territory. Get in, hack the data, and get out before they lock you down.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. AI operatives deploy in the opposite half, concentrated around 2 Server Terminal markers.", "objectives": "Place 2 Server Terminal markers in the opposite half of the table, each at least 8\" from the player's deployment edge and 6\" apart.", "specialRules": ["Hack Server: Interact action at a terminal. Roll TEC — 2+ successes = hacked. 1 success = partial (need another Interact action to finish). 0 = security alert triggered.", "Security Alert: If triggered (0 successes on hack, or an AI operative spots a player within 6\" of a terminal), all AI operatives gain +1 die to CMB for the rest of the game (heightened security).", "Exfiltration: After hacking both servers, player operatives must exit via their deployment edge to secure the data.", "Stealth Phase: AI operatives do not activate until a player operative is spotted (within line of sight and 12\" of an AI operative, or a failed hack triggers alert). Until then, AI operatives remain stationary."], "vpConditions": ["Hack server terminal = 2 VP each", "Both servers hacked = bonus 2 VP", "Exfil at least 1 operative after both hacks = 3 VP", "No security alert triggered = bonus 2 VP", "Player operative goes Out = -1 VP"], "deploymentType": "asymmetric" },
+    { "id": "ambush", "name": "Ambush", "category": "pve", "briefing": "Your patrol walked right into a trap. Hostiles on all sides. Fight your way to the extraction point before they close the net.", "rounds": 5, "tableSize": "3'×3'", "deployment": "Player deploys within 4\" of the table center (patrol starting position). AI operatives deploy along all four table edges, within 4\" of edges.", "objectives": "Place 1 Extraction Point marker on a randomly determined table edge (roll d6: 1-2 North, 3-4 East, 5 South, 6 West).", "specialRules": ["Ambush: AI has initiative automatically on round 1 (no roll).", "Closing Net: From round 3 onward, at the end of each round, all AI operatives that didn\u2019t activate this round may move 3\" toward the nearest player operative (the net tightens).", "Extraction: A player operative in contact with the Extraction Point may exit the table as their action. Exited operatives are safe.", "Urgency: If no player operative has exited by end of round 4, the extraction point moves 6\" toward center (extraction window shrinking)."], "vpConditions": ["Extract operative (exit at extraction point) = 2 VP each", "Extract Leader = 3 VP", "Extract more than half your warband = bonus 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out before extraction = -1 VP"], "deploymentType": "center_ambush" },
+    { "id": "bug_hunt", "name": "Bug Hunt", "category": "pve", "briefing": "Something\u2019s in the building complex. Room by room, floor by floor — find them before they find you.", "rounds": 6, "tableSize": "2'×2'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are placed face-down (hidden) by the player across the rest of the table — at least one per zone.", "objectives": "Divide the table into 6 zones (3x2 grid). AI operatives are hidden in each zone.", "specialRules": ["Hidden Enemies: AI operatives start face-down (hidden). A player operative entering a zone with hidden enemies must roll AWR — on 1+ success, reveal all hidden enemies in that zone. On 0 successes, the hidden enemies get a free activation (ambush) before being revealed.", "Ambush Activation: Revealed enemies via failed AWR check immediately activate (one each) before normal play resumes.", "Sweep: A zone is considered cleared when all enemies in it are Out.", "Close Quarters: All ranges reduced — weapon range bands halved (round up). The table is tight."], "vpConditions": ["Clear a zone = 2 VP", "All zones cleared = bonus 4 VP", "Reveal enemies without triggering ambush = 1 VP per zone", "Player operative goes Out = -1 VP"], "deploymentType": "sweep_6zone" }
   ],
   "aiProfiles": [
     { "id": "street_wolves", "name": "Street Wolves", "description": "A large street gang that overwhelms with numbers. Cheap bodies, aggressive tactics, led by a veteran enforcer.", "style": "Horde / Aggressive", "budget": 10, "operatives": [{ "name": "Pack Alpha", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": ["commander", "hardened"], "behavior": "defensive" },{ "name": "Enforcer", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },{ "name": "Enforcer", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "flanker" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "aggressive" }] },
@@ -303,17 +303,17 @@ const OverviewSection = () => (
         <SectionHeading id="overview" title="1. Overview" />
         <Para>
             <Bright>NULL SIGNAL</Bright> is a fast-paced cyberpunk skirmish game for 2 players (or 1 in solo/co-op mode).
-            Each player controls a small warband of operatives \u2014 mercenaries, hackers, street soldiers, and specialists \u2014
+            Each player controls a small warband of operatives — mercenaries, hackers, street soldiers, and specialists —
             fighting for control of objectives in a near-future urban warzone.
         </Para>
         <RuleBox color="cyan">
             <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '6px 16px', fontSize: 13 }}>
-                <Bright>Scale:</Bright><span>Skirmish \u2014 4\u20138 operatives per side</span>
+                <Bright>Scale:</Bright><span>Skirmish — 4–8 operatives per side</span>
                 <Bright>Modes:</Bright><span>PvP (2-player), Solo, Co-op</span>
-                <Bright>Miniatures:</Bright><span>Miniature-agnostic \u2014 use any 28mm figures</span>
-                <Bright>Table:</Bright><span>3' \u00d7 3' recommended</span>
-                <Bright>Rounds:</Bright><span>5\u20136 rounds per game</span>
-                <Bright>Cost:</Bright><span>Free \u2014 all rules and tools are open</span>
+                <Bright>Miniatures:</Bright><span>Miniature-agnostic — use any 28mm figures</span>
+                <Bright>Table:</Bright><span>3' × 3' recommended</span>
+                <Bright>Rounds:</Bright><span>5–6 rounds per game</span>
+                <Bright>Cost:</Bright><span>Free — all rules and tools are open</span>
             </div>
         </RuleBox>
         <Para>
@@ -343,7 +343,7 @@ const CoreStatsSection = () => {
             <SectionHeading id="core-stats" title="2. Core Stats" />
             <Para>
                 Every operative has <Bright>5 stats</Bright>, each assigned a die type (d6, d8, d10, or d12).
-                Higher die types are better \u2014 more sides means higher chance of rolling 4+.
+                Higher die types are better — more sides means higher chance of rolling 4+.
             </Para>
             <DataTable
                 headers={['Stat', 'Full Name', 'Description']}
@@ -403,7 +403,7 @@ const HealthSystemSection = () => (
                 const color = isDie ? 'var(--accent-cyan)' : step === 'DOWN' ? 'var(--accent-amber)' : 'var(--accent-red)';
                 return (
                     <React.Fragment key={i}>
-                        {i > 0 && <span style={{ color: 'var(--text-dim)', fontSize: 18 }}>\u2192</span>}
+                        {i > 0 && <span style={{ color: 'var(--text-dim)', fontSize: 18 }}>→</span>}
                         <span style={{ display: 'inline-block', padding: '8px 16px', border: `2px solid ${border}`, borderRadius: 6, background: bg, color, fontFamily: 'Orbitron, sans-serif', fontSize: 16, fontWeight: 'bold' }}>{step}</span>
                     </React.Fragment>
                 );
@@ -413,8 +413,8 @@ const HealthSystemSection = () => (
         <RuleBox color="magenta">
             <Para>When an operative takes a hit, roll their <Bright>current health die</Bright>.</Para>
             <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
-                <li><Bright>4+ =</Bright> Stay up. Health die <CyanText>degrades one step</CyanText> (e.g., d10 \u2192 d8).</li>
-                <li><Bright>1\u20133 =</Bright> Fail. Operative goes <span style={{ color: 'var(--accent-amber)' }}>DOWN</span>.</li>
+                <li><Bright>4+ =</Bright> Stay up. Health die <CyanText>degrades one step</CyanText> (e.g., d10 → d8).</li>
+                <li><Bright>1–3 =</Bright> Fail. Operative goes <span style={{ color: 'var(--accent-amber)' }}>DOWN</span>.</li>
                 <li>A <span style={{ color: 'var(--accent-amber)' }}>DOWN</span> operative hit again goes <span style={{ color: 'var(--accent-red)' }}>OUT</span> (eliminated).</li>
             </ul>
         </RuleBox>
@@ -429,18 +429,18 @@ const HealthSystemSection = () => (
             rows={GAME_DATA.tiers.map(t => [
                 <Bright>{t.name}</Bright>,
                 <CyanText>{t.health}</CyanText>,
-                t.health === 'd10' ? '3 (d10 \u2192 d8 \u2192 d6 \u2192 DOWN)' : t.health === 'd8' ? '2 (d8 \u2192 d6 \u2192 DOWN)' : '1 (d6 \u2192 DOWN)',
+                t.health === 'd10' ? '3 (d10 → d8 → d6 → DOWN)' : t.health === 'd8' ? '2 (d8 → d6 → DOWN)' : '1 (d6 → DOWN)',
             ])}
         />
         <SubHeading>Recovery</SubHeading>
         <Para>
             During the <Bright>End Phase</Bright>, a DOWN operative may attempt recovery: roll their
             current health die (the last die before going DOWN). On <Bright>4+ they recover</Bright> to
-            DOWN \u2192 d6. On failure, they remain DOWN.
+            DOWN → d6. On failure, they remain DOWN.
         </Para>
         <SubHeading>Simultaneous Resolution</SubHeading>
         <Para>
-            <Dim>Stats never degrade \u2014 only the health die changes. Firefights resolve simultaneously,
+            <Dim>Stats never degrade — only the health die changes. Firefights resolve simultaneously,
             meaning both combatants roll before either applies results.</Dim>
         </Para>
     </div>
@@ -472,7 +472,7 @@ const CombatSection = () => (
             rows={[
                 [<Bright>Line of Sight (LOS)</Bright>, 'If you can see them, you can shoot. Required for all ranged attacks.'],
                 [<Bright>Within Range Band</Bright>, 'No penalty. Roll full attack dice at full CMB die type.'],
-                [<Bright>Beyond Range Band</Bright>, 'Shift CMB die type down 1 step (e.g., d8 \u2192 d6). Still roll full attack dice count.'],
+                [<Bright>Beyond Range Band</Bright>, 'Shift CMB die type down 1 step (e.g., d8 → d6). Still roll full attack dice count.'],
                 [<Bright>Beyond Hard Cap</Bright>, 'Cannot shoot. Target is out of range entirely.'],
             ]}
         />
@@ -489,7 +489,7 @@ const CombatSection = () => (
 
         <SubHeading>Brawls (Melee Combat)</SubHeading>
         <RuleBox color="magenta">
-            <Para>Both combatants roll CMB simultaneously. <Bright>No REF defense in melee</Bright> \u2014 hits are not cancelled.</Para>
+            <Para>Both combatants roll CMB simultaneously. <Bright>No REF defense in melee</Bright> — hits are not cancelled.</Para>
             <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
                 <li><Bright>Unarmed:</Bright> 1 attack die (default for all operatives in melee).</li>
                 <li><Bright>Melee Weapon:</Bright> Use the weapon's attack dice instead.</li>
@@ -508,14 +508,14 @@ const CombatSection = () => (
 const TurnStructureSection = () => (
     <div>
         <SectionHeading id="turn-structure" title="5. Turn Structure" />
-        <Para>A game of Null Signal is played over <Bright>5\u20136 fixed rounds</Bright> (set by the scenario).</Para>
+        <Para>A game of Null Signal is played over <Bright>5–6 fixed rounds</Bright> (set by the scenario).</Para>
 
         <SubHeading>Round Sequence</SubHeading>
         <RuleBox color="cyan">
             <ol style={{ paddingLeft: 20, lineHeight: 2.2 }}>
-                <li><Bright>Initiative Phase</Bright> \u2014 Each player rolls 1d6. Higher roll chooses who activates first. <Dim>Re-roll ties.</Dim></li>
-                <li><Bright>Activation Phase</Bright> \u2014 Players alternate activating one operative each. The first player activates one, then the second, and so on until all operatives have activated.</li>
-                <li><Bright>End Phase</Bright> \u2014 Recovery checks for DOWN operatives. Score VP for controlled objectives. Advance round counter.</li>
+                <li><Bright>Initiative Phase</Bright> — Each player rolls 1d6. Higher roll chooses who activates first. <Dim>Re-roll ties.</Dim></li>
+                <li><Bright>Activation Phase</Bright> — Players alternate activating one operative each. The first player activates one, then the second, and so on until all operatives have activated.</li>
+                <li><Bright>End Phase</Bright> — Recovery checks for DOWN operatives. Score VP for controlled objectives. Advance round counter.</li>
             </ol>
         </RuleBox>
 
@@ -553,7 +553,7 @@ const WarbandBuildingSection = () => (
         <SectionHeading id="warband-building" title="6. Warband Building" />
         <Para>
             Each warband is built to a <Bright>point budget</Bright>. The standard game uses <Bright>10 points</Bright>.
-            Your <Bright>Leader is free</Bright> \u2014 every warband gets exactly one.
+            Your <Bright>Leader is free</Bright> — every warband gets exactly one.
         </Para>
 
         <SubHeading>Tier Table</SubHeading>
@@ -609,9 +609,9 @@ const WarbandBuildingSection = () => (
         <DataTable
             headers={['Size', 'Budget', 'Typical Operatives', 'Table Size', 'Rounds']}
             rows={[
-                ['Skirmish', '6 pts', '3\u20134', "2'\u00d72'", '4\u20135'],
-                [<Bright>Standard</Bright>, <Bright>10 pts</Bright>, '5\u20136', "3'\u00d73'", '5\u20136'],
-                ['Large', '15 pts', '7\u20138', "4'\u00d74'", '6'],
+                ['Skirmish', '6 pts', '3–4', "2'×2'", '4–5'],
+                [<Bright>Standard</Bright>, <Bright>10 pts</Bright>, '5–6', "3'×3'", '5–6'],
+                ['Large', '15 pts', '7–8', "4'×4'", '6'],
             ]}
         />
     </div>
@@ -635,7 +635,7 @@ const WeaponsSection = () => {
                     <Bright>{w.name}</Bright>,
                     <CyanText>{w.attackDice}AD</CyanText>,
                     w.rangeBand,
-                    w.hardCap || '\u2014',
+                    w.hardCap || '—',
                     <span style={{ color: 'var(--accent-amber)' }}>{w.trait}</span>,
                     <Dim>{w.traitEffect}</Dim>,
                 ])}
@@ -648,7 +648,7 @@ const WeaponsSection = () => {
                     <Bright>{w.name}</Bright>,
                     <CyanText>{w.attackDice}AD</CyanText>,
                     w.rangeBand,
-                    w.hardCap || '\u2014',
+                    w.hardCap || '—',
                     `${w.gearSlotCost} slot`,
                     <span style={{ color: 'var(--accent-magenta)' }}>{w.trait}</span>,
                     <Dim>{w.traitEffect}</Dim>,
@@ -659,7 +659,7 @@ const WeaponsSection = () => {
             <RuleBox color="amber">
                 <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
                     <li><Bright>Range Band:</Bright> Within this range, no penalty. Full attack dice at full stat die type.</li>
-                    <li><Bright>Beyond Range Band:</Bright> Shift CMB die type down 1 step (e.g., d8 \u2192 d6). Pool size unchanged.</li>
+                    <li><Bright>Beyond Range Band:</Bright> Shift CMB die type down 1 step (e.g., d8 → d6). Pool size unchanged.</li>
                     <li><Bright>Hard Cap:</Bright> Cannot shoot beyond this distance. Some weapons have no hard cap (unlimited range if LOS exists).</li>
                     <li><Bright>Unarmed:</Bright> All operatives can fight in melee unarmed with 1 attack die as a default.</li>
                 </ul>
@@ -1074,7 +1074,7 @@ const AIProfileCard = ({ profile }) => {
                                         <span style={{ color: tierColors[op.tier] || 'var(--text-dim)', fontSize: 10, fontWeight: 'bold' }}>{op.tier}</span>
                                     </td>
                                     <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', color: 'var(--text-primary)' }}>{WEAPON_MAP[op.weapon]?.name || op.weapon}</td>
-                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', color: 'var(--accent-amber)' }}>{op.abilities.length > 0 ? op.abilities.map(a => ABILITY_MAP[a]?.name || a).join(', ') : '\u2014'}</td>
+                                    <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)', color: 'var(--accent-amber)' }}>{op.abilities.length > 0 ? op.abilities.map(a => ABILITY_MAP[a]?.name || a).join(', ') : '—'}</td>
                                     <td style={{ padding: '4px 8px', borderBottom: '1px solid var(--border)' }}>
                                         <span style={{ color: behaviorColors[op.behavior] || 'var(--text-dim)', fontSize: 10, fontWeight: 'bold' }}>{op.behavior}</span>
                                     </td>
@@ -1099,7 +1099,7 @@ const AIProfilesSection = () => (
         <RuleBox color="green">
             <Para>
                 <Bright>How to use:</Bright> Choose a profile that matches the challenge you want. Deploy them according
-                to the scenario rules. Each operative already has a behavior tag assigned {'\u2014'} use it to drive their
+                to the scenario rules. Each operative already has a behavior tag assigned {'—'} use it to drive their
                 AI activations with the behavior tables from Section 9.
             </Para>
         </RuleBox>
@@ -1172,7 +1172,7 @@ const QuickReferenceSection = () => {
                     const color = isDie ? 'var(--accent-cyan)' : step === 'DOWN' ? 'var(--accent-amber)' : 'var(--accent-red)';
                     return (
                         <React.Fragment key={i}>
-                            {i > 0 && <span style={{ color: 'var(--text-dim)' }}>\u2192</span>}
+                            {i > 0 && <span style={{ color: 'var(--text-dim)' }}>→</span>}
                             <span style={{ padding: '4px 10px', border: `1px solid ${color}`, borderRadius: 4, color, fontFamily: 'Orbitron, sans-serif', fontSize: 13, fontWeight: 'bold' }}>{step}</span>
                         </React.Fragment>
                     );
@@ -1195,7 +1195,7 @@ const QuickReferenceSection = () => {
                     w.premium ? <span style={{ color: 'var(--accent-magenta)' }}>{w.name} *</span> : w.name,
                     w.attackDice,
                     w.rangeBand,
-                    w.hardCap || '\u2014',
+                    w.hardCap || '—',
                     w.trait,
                 ])}
             />
@@ -1221,8 +1221,8 @@ const QuickReferenceSection = () => {
             <SubHeading>Turn Sequence</SubHeading>
             <RuleBox color="green">
                 <div style={{ fontSize: 13, lineHeight: 2 }}>
-                    <Bright>1.</Bright> Initiative: d6 rolloff \u2192{' '}
-                    <Bright>2.</Bright> Alternating activations (Move 6" + 1 Action) \u2192{' '}
+                    <Bright>1.</Bright> Initiative: d6 rolloff →{' '}
+                    <Bright>2.</Bright> Alternating activations (Move 6" + 1 Action) →{' '}
                     <Bright>3.</Bright> End phase (Recovery, VP, Round+1)
                 </div>
             </RuleBox>
@@ -1471,7 +1471,7 @@ const App = () => {
                 <ScenariosSection />
                 <QuickReferenceSection />
                 <div style={{ marginTop: 64, padding: '24px 0', borderTop: '1px solid var(--border)', textAlign: 'center' }}>
-                    <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>NULL SIGNAL \u2014 Free cyberpunk skirmish game \u2014 All rules, tools, and army builder at your fingertips.</span>
+                    <span style={{ color: 'var(--text-dim)', fontSize: 11 }}>NULL SIGNAL — Free cyberpunk skirmish game — All rules, tools, and army builder at your fingertips.</span>
                 </div>
             </main>
         </div>
