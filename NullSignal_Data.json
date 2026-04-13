@@ -251,6 +251,65 @@
     }
   ],
 
+  "gear": [
+    {
+      "id": "frag_grenade",
+      "name": "Frag Grenade",
+      "gearCost": 1,
+      "type": "one-use",
+      "effect": "Shoot action: place blast (2\" radius) within 8\". All models in radius take 1 hit. Discard after use."
+    },
+    {
+      "id": "smoke_grenade",
+      "name": "Smoke Grenade",
+      "gearCost": 1,
+      "type": "one-use",
+      "effect": "Action: place 3\" smoke cloud within 8\". Blocks line of sight through it until end of next round. Discard after use."
+    },
+    {
+      "id": "medkit",
+      "name": "Medkit",
+      "gearCost": 1,
+      "type": "reusable",
+      "effect": "Use Gear action: roll TEC on a Down ally in base contact. On 1+ success, ally may attempt an immediate recovery roll."
+    },
+    {
+      "id": "armor_vest",
+      "name": "Armor Vest",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "Once per game, treat a failed health check as passed (health die still degrades one step)."
+    },
+    {
+      "id": "tactical_scanner",
+      "name": "Tactical Scanner",
+      "gearCost": 1,
+      "type": "reusable",
+      "effect": "Use Gear action: roll AWR. On 1+ success, reveal all hidden/stealthy enemies within 12\"."
+    },
+    {
+      "id": "combat_stims",
+      "name": "Combat Stims",
+      "gearCost": 1,
+      "type": "one-use",
+      "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use."
+    },
+    {
+      "id": "signal_jammer",
+      "name": "Signal Jammer",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked)."
+    },
+    {
+      "id": "hacking_deck",
+      "name": "Hacking Deck",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions."
+    }
+  ],
+
   "behaviorTags": [
     {
       "id": "aggressive",
@@ -652,7 +711,7 @@
       "style": "Balanced / Defensive",
       "budget": 10,
       "operatives": [
-        { "name": "Shift Commander", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": ["marksman", "tactician"], "behavior": "defensive" },
+        { "name": "Shift Commander", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": ["marksman", "tactician"], "gear": ["armor_vest"], "behavior": "defensive" },
         { "name": "Overwatch", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d8" }, "weapon": "sniper_rifle", "abilities": ["spotter"], "behavior": "cautious" },
         { "name": "Point Man", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },
         { "name": "Trooper", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },
@@ -670,7 +729,7 @@
       "operatives": [
         { "name": "Phantom Lead", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d6", "TEC": "d6", "AWR": "d8" }, "weapon": "rifle", "abilities": ["stealthy", "breacher"], "behavior": "flanker" },
         { "name": "Wraith", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["ghost"], "behavior": "flanker" },
-        { "name": "Shade", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["hacker"], "behavior": "cautious" },
+        { "name": "Shade", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["hacker"], "gear": ["hacking_deck"], "behavior": "cautious" },
         { "name": "Striker", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },
         { "name": "Striker", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "flanker" }
       ]
@@ -682,7 +741,7 @@
       "style": "Melee / Rush",
       "budget": 10,
       "operatives": [
-        { "name": "Pit Boss", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "tactical_knife", "abilities": ["cqb_expert", "rapid_assault"], "behavior": "aggressive" },
+        { "name": "Pit Boss", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "tactical_knife", "abilities": ["cqb_expert", "rapid_assault"], "gear": ["combat_stims"], "behavior": "aggressive" },
         { "name": "Gunner", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "lmg", "abilities": ["heavy_weapons"], "behavior": "defensive" },
         { "name": "Charger", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },
         { "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },
@@ -699,8 +758,8 @@
       "style": "Tech / Infiltration",
       "budget": 10,
       "operatives": [
-        { "name": "Netrunner Prime", "tier": "leader", "stats": { "CMB": "d6", "REF": "d8", "GRT": "d6", "TEC": "d8", "AWR": "d8" }, "weapon": "pistol", "abilities": ["hacker", "ghost"], "behavior": "cautious" },
-        { "name": "Signal", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["networked"], "behavior": "flanker" },
+        { "name": "Netrunner Prime", "tier": "leader", "stats": { "CMB": "d6", "REF": "d8", "GRT": "d6", "TEC": "d8", "AWR": "d8" }, "weapon": "pistol", "abilities": ["hacker", "ghost"], "gear": ["hacking_deck"], "behavior": "cautious" },
+        { "name": "Signal", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["networked"], "gear": ["signal_jammer"], "behavior": "flanker" },
         { "name": "Cipher", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["stealthy"], "behavior": "flanker" },
         { "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "cautious" },
         { "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" }
@@ -713,7 +772,7 @@
       "style": "Defensive / Hold",
       "budget": 10,
       "operatives": [
-        { "name": "Warden", "tier": "leader", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d8" }, "weapon": "rifle", "abilities": ["commander", "marksman"], "behavior": "defensive" },
+        { "name": "Warden", "tier": "leader", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d8" }, "weapon": "rifle", "abilities": ["commander", "marksman"], "gear": ["armor_vest"], "behavior": "defensive" },
         { "name": "Heavy", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "lmg", "abilities": ["heavy_weapons"], "behavior": "defensive" },
         { "name": "Sentry", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },
         { "name": "Sentry", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },

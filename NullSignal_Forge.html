@@ -148,6 +148,16 @@ const GAME_DATA = {
     { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative." },
     { "id": "heavy_weapons", "name": "Heavy Weapons", "effect": "May carry one premium weapon without spending a gear slot." },
     { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
+  ],
+  "gear": [
+    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 1, "type": "one-use", "effect": "Shoot action: place blast (2\" radius) within 8\". All models in radius take 1 hit. Discard after use." },
+    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 1, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks line of sight through it until end of next round. Discard after use." },
+    { "id": "medkit", "name": "Medkit", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: roll TEC on a Down ally in base contact. On 1+ success, ally may attempt an immediate recovery roll." },
+    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "passive", "effect": "Once per game, treat a failed health check as passed (health die still degrades one step)." },
+    { "id": "tactical_scanner", "name": "Tactical Scanner", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: roll AWR. On 1+ success, reveal all hidden/stealthy enemies within 12\"." },
+    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use." },
+    { "id": "signal_jammer", "name": "Signal Jammer", "gearCost": 1, "type": "passive", "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked)." },
+    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions." }
   ]
 };
 
@@ -161,6 +171,7 @@ const WEAPONS = GAME_DATA.weapons;
 const STANDARD_WEAPONS = WEAPONS.filter(w => !w.premium);
 const PREMIUM_WEAPONS = WEAPONS.filter(w => w.premium);
 const ABILITIES = GAME_DATA.abilities;
+const GEAR_ITEMS = GAME_DATA.gear;
 
 const TIER_COLORS = {
     leader: 'var(--accent-amber)',
@@ -181,6 +192,7 @@ const createOperative = (tierId) => ({
     stats: Object.fromEntries(GAME_DATA.stats.map(s => [s, 'd6'])),
     weapon: 'rifle',
     abilities: [],
+    gear: [],
 });
 
 const createWarband = () => ({
@@ -201,10 +213,12 @@ const hasHeavyWeapons = (op) => op.abilities.includes('heavy_weapons');
 const getGearSlotsTotal = (op) => TIERS[op.tier].gearSlots;
 
 const getGearSlotsUsed = (op) => {
+    let used = 0;
     const weapon = WEAPONS.find(w => w.id === op.weapon);
-    if (!weapon || !weapon.premium) return 0;
-    if (hasHeavyWeapons(op)) return 0;
-    return weapon.gearSlotCost;
+    const hasHW = op.abilities.includes('heavy_weapons');
+    if (weapon && weapon.premium && !hasHW) used += weapon.gearSlotCost || 1;
+    used += (op.gear || []).length;
+    return used;
 };
 
 const getGearSlotsFree = (op) => getGearSlotsTotal(op) - getGearSlotsUsed(op);
@@ -277,6 +291,13 @@ const printRoster = (warband) => {
                  <br/><em>${weapon.trait}: ${weapon.traitEffect}</em>
                </div>`
             : '';
+        const gearItems = (op.gear || []).map(gId => GEAR_ITEMS.find(g => g.id === gId)).filter(Boolean);
+        const gearHtml = gearItems.length > 0
+            ? gearItems.map(g => {
+                const typeLabel = g.type === 'one-use' ? '[1x]' : g.type === 'reusable' ? '[R]' : '[P]';
+                return `<div style="margin-top:4px;font-size:10px;padding:2px 6px;background:#e8f4f8;border-radius:3px;"><strong>${g.name}</strong> <span style="color:#666;">${typeLabel}</span> ${g.effect}</div>`;
+            }).join('')
+            : '';
         const abilitiesHtml = abilities.length > 0
             ? abilities.map(a => `<div style="margin-top:4px;font-size:10px;"><strong>${a.name}:</strong> ${a.effect}</div>`).join('')
             : '';
@@ -295,6 +316,7 @@ const printRoster = (warband) => {
             </div>
             <div style="font-size:10px;margin-bottom:6px;">${statsHtml}</div>
             ${weaponHtml}
+            ${gearHtml ? '<div style="margin-top:4px;">' + gearHtml + '</div>' : ''}
             ${abilitiesHtml ? '<div style="margin-top:6px;border-top:1px solid #ddd;padding-top:4px;">' + abilitiesHtml + '</div>' : ''}
             <div style="margin-top:auto;border-top:1px solid #ddd;padding-top:6px;">
                 <div style="font-size:9px;color:#666;margin-bottom:3px;font-family:\'Orbitron\',sans-serif;text-transform:uppercase;letter-spacing:1px;">Health Track</div>
@@ -609,7 +631,13 @@ function WeaponSelect({ op, onUpdate }) {
     const hasHW = hasHeavyWeapons(op);
 
     const selectWeapon = (weaponId) => {
-        onUpdate({ ...op, weapon: weaponId });
+        const newWeapon = WEAPONS.find(w => w.id === weaponId);
+        const newWeaponCost = (newWeapon && newWeapon.premium && !hasHW) ? (newWeapon.gearSlotCost || 1) : 0;
+        const gearItems = op.gear || [];
+        const available = totalGear - newWeaponCost;
+        // Trim gear items if weapon switch would exceed slots
+        const trimmedGear = gearItems.slice(0, Math.max(0, available));
+        onUpdate({ ...op, weapon: weaponId, gear: trimmedGear });
     };
 
     const canSelectPremium = (w) => {
@@ -618,7 +646,9 @@ function WeaponSelect({ op, onUpdate }) {
         // If currently selected weapon is premium and not free, switching to another premium is ok (same slot)
         const currentIsPremium = currentWeapon && currentWeapon.premium && !hasHW;
         if (currentIsPremium) return true;
-        return totalGear - usedGear >= w.gearSlotCost;
+        // Available = total - gear items used (weapon slot not yet counted since current weapon is standard)
+        const gearItemsUsed = (op.gear || []).length;
+        return totalGear - gearItemsUsed >= w.gearSlotCost;
     };
 
     const renderWeaponRow = (w, isPremium) => {
@@ -690,6 +720,91 @@ function WeaponSelect({ op, onUpdate }) {
     );
 }
 
+// ---- GearSelect ----
+function GearSelect({ op, onUpdate }) {
+    const totalGear = getGearSlotsTotal(op);
+    const usedGear = getGearSlotsUsed(op);
+    const freeSlots = totalGear - usedGear;
+
+    if (totalGear === 0) return null;
+
+    const toggleGear = (gearId) => {
+        const currentGear = op.gear || [];
+        const has = currentGear.includes(gearId);
+        if (has) {
+            onUpdate({ ...op, gear: currentGear.filter(g => g !== gearId) });
+        } else {
+            if (freeSlots <= 0) return;
+            onUpdate({ ...op, gear: [...currentGear, gearId] });
+        }
+    };
+
+    const TYPE_COLORS = {
+        'one-use': { bg: 'rgba(255,51,102,0.15)', color: 'var(--accent-red)', label: 'ONE-USE' },
+        'reusable': { bg: 'rgba(0,245,160,0.15)', color: 'var(--accent-green)', label: 'REUSABLE' },
+        'passive': { bg: 'rgba(0,212,255,0.15)', color: 'var(--accent-cyan)', label: 'PASSIVE' },
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Gear
+                </h3>
+                <span className="text-xs" style={{ color: freeSlots === 0 ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
+                    {usedGear}/{totalGear} slots used
+                </span>
+            </div>
+            <div className="grid gap-1">
+                {GEAR_ITEMS.map(item => {
+                    const isSelected = (op.gear || []).includes(item.id);
+                    const disabled = !isSelected && freeSlots <= 0;
+                    const typeStyle = TYPE_COLORS[item.type] || TYPE_COLORS['passive'];
+                    return (
+                        <div key={item.id}
+                            onClick={() => !disabled && toggleGear(item.id)}
+                            className="flex items-start gap-2 p-2 rounded border transition-all"
+                            style={{
+                                background: isSelected ? 'rgba(0,212,255,0.08)' : 'var(--bg-dark)',
+                                borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
+                                boxShadow: isSelected ? '0 0 8px rgba(0,212,255,0.2)' : 'none',
+                                opacity: disabled ? 0.35 : 1,
+                                cursor: disabled ? 'not-allowed' : 'pointer',
+                            }}>
+                            <div className="w-4 h-4 mt-0.5 rounded-sm border flex items-center justify-center flex-shrink-0"
+                                style={{
+                                    borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
+                                    background: isSelected ? 'var(--accent-cyan)' : 'transparent',
+                                }}>
+                                {isSelected && <span style={{ color: 'var(--bg-black)', fontSize: '0.7rem', fontWeight: 'bold' }}>&#x2713;</span>}
+                            </div>
+                            <div className="flex-1">
+                                <div className="flex items-center gap-2">
+                                    <span className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                                        {item.name}
+                                    </span>
+                                    <span className="text-xs px-1.5 py-0.5 rounded" style={{
+                                        background: typeStyle.bg,
+                                        color: typeStyle.color,
+                                        fontSize: '0.55rem',
+                                        fontWeight: 'bold',
+                                        letterSpacing: '0.05em',
+                                    }}>
+                                        {typeStyle.label}
+                                    </span>
+                                </div>
+                                <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                    {item.effect}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
 // ---- AbilitySelect ----
 function AbilitySelect({ op, onUpdate }) {
     const tierData = TIERS[op.tier];
@@ -708,7 +823,10 @@ function AbilitySelect({ op, onUpdate }) {
                 const weapon = WEAPONS.find(w => w.id === op.weapon);
                 if (weapon && weapon.premium) {
                     const gearTotal = getGearSlotsTotal(op);
-                    if (gearTotal < weapon.gearSlotCost) {
+                    const weaponCost = weapon.gearSlotCost || 1;
+                    const gearItemCount = (op.gear || []).length;
+                    if (gearTotal < weaponCost + gearItemCount) {
+                        // Not enough slots — reset weapon to free, keep gear
                         onUpdate({ ...op, abilities: newAbilities, weapon: 'rifle' });
                         return;
                     }
@@ -817,6 +935,9 @@ function OperativeDetail({ op, onUpdate }) {
 
             {/* Weapon Select */}
             <WeaponSelect op={op} onUpdate={onUpdate} />
+
+            {/* Gear Select */}
+            <GearSelect op={op} onUpdate={onUpdate} />
 
             {/* Ability Select */}
             <AbilitySelect op={op} onUpdate={onUpdate} />
