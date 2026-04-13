@@ -159,14 +159,16 @@ const GAME_DATA = {
     { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
   ],
   "gear": [
-    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 1, "type": "one-use", "effect": "Shoot action: place blast (2\" radius) within 8\". All models in radius take 1 hit. Discard after use." },
-    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 1, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks line of sight through it until end of next round. Discard after use." },
-    { "id": "medkit", "name": "Medkit", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: roll TEC on a Down ally in base contact. On 1+ success, ally may attempt an immediate recovery roll." },
-    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "passive", "effect": "Once per game, treat a failed health check as passed (health die still degrades one step)." },
-    { "id": "tactical_scanner", "name": "Tactical Scanner", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: roll AWR. On 1+ success, reveal all hidden/stealthy enemies within 12\"." },
-    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use." },
-    { "id": "signal_jammer", "name": "Signal Jammer", "gearCost": 1, "type": "passive", "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked)." },
-    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions." }
+    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 0, "type": "one-use", "effect": "Shoot action: 2\" blast within 8\". All models in radius take 1 hit.", "pro": "Area damage, ignores cover", "con": "One-use, short range, can hit friendlies in blast" },
+    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 0, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks all line of sight through it until end of next round.", "pro": "Blocks LOS, enables safe repositioning", "con": "One-use, blocks YOUR line of sight too" },
+    { "id": "first_aid_kit", "name": "First Aid Kit", "gearCost": 0, "type": "reusable", "effect": "Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll.", "pro": "Can stabilize downed allies without Medic ability", "con": "Requires base contact and uses your action, TEC check can fail" },
+    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "one-use", "effect": "Once per game, treat a failed health check as passed. Health die still degrades one step.", "pro": "Survives one hit that would drop you", "con": "One-use, health still degrades, doesn't help at d6 floor much" },
+    { "id": "tactical_drone", "name": "Tactical Drone", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: reveal all hidden/stealthy enemies within 12\". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed.", "pro": "Guaranteed intel, counters stealth", "con": "Can be destroyed on use, uses your action" },
+    { "id": "comms_relay", "name": "Comms Relay", "gearCost": 1, "type": "passive", "effect": "Friendly ability auras (Commander, Networked, Spotter) extend to 12\" instead of 6\" while this operative is active.", "pro": "Doubles the effective range of support abilities", "con": "No direct combat benefit, useless if no aura abilities in warband" },
+    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6→d8) for this activation only. Discard after use.", "pro": "Clutch stat boost when you need it most", "con": "One-use, must declare at start of activation before rolling" },
+    { "id": "signal_jammer", "name": "Signal Jammer", "gearCost": 1, "type": "passive", "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked).", "pro": "Shuts down enemy support abilities in an area", "con": "No direct combat benefit, only matters vs enemies with auras" },
+    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions.", "pro": "Makes TEC checks much more reliable", "con": "Only useful in scenarios with TEC interactions" },
+    { "id": "suppressor", "name": "Suppressor", "gearCost": 1, "type": "passive", "effect": "Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target.", "pro": "Stay hidden while shooting, powerful with Stealthy/Ghost abilities", "con": "No combat bonus, useless without stealth abilities or scenarios" }
   ],
   "behaviorTags": [
     {
@@ -607,8 +609,8 @@ const WarbandBuildingSection = () => (
             the 5 stats. You choose which stats get the d8s and which get the d6s.
         </Para>
         <Para>
-            <Bright>Gear slots</Bright> can be spent on premium weapons or gear items. Each costs 1 gear slot.
-            Standard weapons are free and don't use slots.
+            <Bright>Gear slots</Bright> can be spent on premium weapons or premium gear items. Each costs 1 gear slot.
+            Standard weapons are free and don't use slots. Every operative may also carry one <CyanText>free gear item</CyanText> regardless of gear slots.
         </Para>
 
         <SubHeading>Example Crews</SubHeading>
@@ -702,32 +704,53 @@ const WeaponsSection = () => {
     );
 };
 
-const GearSection = () => (
+const GearSection = () => {
+    const freeGear = (GAME_DATA.gear || []).filter(g => g.gearCost === 0);
+    const premiumGear = (GAME_DATA.gear || []).filter(g => g.gearCost > 0);
+    return (
     <div>
         <SectionHeading id="gear" title="8. Gear" />
         <Para>
-            Gear items are equipment that gives Leaders and Specialists additional tactical options.
-            Each gear item costs <Bright>1 gear slot</Bright> — the same slots used by premium weapons.
-            Operatives and Recruits have no gear slots and cannot carry gear.
+            Gear is split into two categories: <Bright>free gear</Bright> available to every operative, and{' '}
+            <Bright>premium gear</Bright> that costs gear slots.
         </Para>
         <RuleBox color="cyan">
             <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li><Bright>Every operative</Bright> may carry <CyanText>one free gear item</CyanText> regardless of gear slots.</li>
+                <li><Bright>Premium gear</Bright> costs <CyanText>1 gear slot each</CyanText> — shared with premium weapons.</li>
                 <li><Bright>One-use:</Bright> Discard after use. Powerful single-activation effects.</li>
                 <li><Bright>Reusable:</Bright> Can be used once per activation, every activation.</li>
                 <li><Bright>Passive:</Bright> Always active. No action required.</li>
             </ul>
         </RuleBox>
+        <SubHeading>Free Gear</SubHeading>
+        <Para><Dim>Any operative can carry one of these. No gear slot required.</Dim></Para>
         <DataTable
-            headers={['Gear', 'Type', 'Cost', 'Effect']}
-            rows={(GAME_DATA.gear || []).map(g => [
+            headers={['Gear', 'Type', 'Effect', 'Pro', 'Con']}
+            rows={freeGear.map(g => [
+                <Bright>{g.name}</Bright>,
+                <span style={{ color: g.type === 'one-use' ? 'var(--accent-red)' : g.type === 'reusable' ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>{g.type}</span>,
+                <Dim>{g.effect}</Dim>,
+                <span style={{ color: 'var(--accent-green)', fontSize: 12 }}>{g.pro}</span>,
+                <span style={{ color: 'var(--accent-red)', fontSize: 12 }}>{g.con}</span>,
+            ])}
+        />
+        <SubHeading>Premium Gear</SubHeading>
+        <Para><Dim>Costs 1 gear slot each. Only available to operatives with gear slots (Leaders, Specialists, or those granted slots).</Dim></Para>
+        <DataTable
+            headers={['Gear', 'Type', 'Cost', 'Effect', 'Pro', 'Con']}
+            rows={premiumGear.map(g => [
                 <Bright>{g.name}</Bright>,
                 <span style={{ color: g.type === 'one-use' ? 'var(--accent-red)' : g.type === 'reusable' ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>{g.type}</span>,
                 `${g.gearCost} slot`,
                 <Dim>{g.effect}</Dim>,
+                <span style={{ color: 'var(--accent-green)', fontSize: 12 }}>{g.pro}</span>,
+                <span style={{ color: 'var(--accent-red)', fontSize: 12 }}>{g.con}</span>,
             ])}
         />
     </div>
-);
+    );
+};
 
 const AbilitiesSection = () => (
     <div>
@@ -1277,10 +1300,11 @@ const QuickReferenceSection = () => {
             <Dim>* = Premium (1 gear slot)</Dim>
 
             <SubHeading>Gear Reference</SubHeading>
-            <DataTable compact headers={['Gear', 'Type', 'Effect']}
+            <DataTable compact headers={['Gear', 'Type', 'Cost', 'Effect']}
                 rows={(GAME_DATA.gear || []).map(g => [
-                    g.name,
+                    g.gearCost === 0 ? <span style={{ color: 'var(--accent-green)' }}>{g.name}</span> : g.name,
                     g.type,
+                    g.gearCost === 0 ? 'Free' : '1 slot',
                     g.effect,
                 ])}
             />

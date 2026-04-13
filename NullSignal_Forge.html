@@ -150,14 +150,16 @@ const GAME_DATA = {
     { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
   ],
   "gear": [
-    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 1, "type": "one-use", "effect": "Shoot action: place blast (2\" radius) within 8\". All models in radius take 1 hit. Discard after use." },
-    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 1, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks line of sight through it until end of next round. Discard after use." },
-    { "id": "medkit", "name": "Medkit", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: roll TEC on a Down ally in base contact. On 1+ success, ally may attempt an immediate recovery roll." },
-    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "passive", "effect": "Once per game, treat a failed health check as passed (health die still degrades one step)." },
-    { "id": "tactical_scanner", "name": "Tactical Scanner", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: roll AWR. On 1+ success, reveal all hidden/stealthy enemies within 12\"." },
-    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use." },
-    { "id": "signal_jammer", "name": "Signal Jammer", "gearCost": 1, "type": "passive", "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked)." },
-    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions." }
+    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 0, "type": "one-use", "effect": "Shoot action: 2\" blast within 8\". All models in radius take 1 hit.", "pro": "Area damage, ignores cover", "con": "One-use, short range, can hit friendlies in blast" },
+    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 0, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks all line of sight through it until end of next round.", "pro": "Blocks LOS, enables safe repositioning", "con": "One-use, blocks YOUR line of sight too" },
+    { "id": "first_aid_kit", "name": "First Aid Kit", "gearCost": 0, "type": "reusable", "effect": "Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll.", "pro": "Can stabilize downed allies without Medic ability", "con": "Requires base contact and uses your action, TEC check can fail" },
+    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "one-use", "effect": "Once per game, treat a failed health check as passed. Health die still degrades one step.", "pro": "Survives one hit that would drop you", "con": "One-use, health still degrades, doesn't help at d6 floor much" },
+    { "id": "tactical_drone", "name": "Tactical Drone", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: reveal all hidden/stealthy enemies within 12\". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed.", "pro": "Guaranteed intel, counters stealth", "con": "Can be destroyed on use, uses your action" },
+    { "id": "comms_relay", "name": "Comms Relay", "gearCost": 1, "type": "passive", "effect": "Friendly ability auras (Commander, Networked, Spotter) extend to 12\" instead of 6\" while this operative is active.", "pro": "Doubles the effective range of support abilities", "con": "No direct combat benefit, useless if no aura abilities in warband" },
+    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6→d8) for this activation only. Discard after use.", "pro": "Clutch stat boost when you need it most", "con": "One-use, must declare at start of activation before rolling" },
+    { "id": "signal_jammer", "name": "Signal Jammer", "gearCost": 1, "type": "passive", "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked).", "pro": "Shuts down enemy support abilities in an area", "con": "No direct combat benefit, only matters vs enemies with auras" },
+    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions.", "pro": "Makes TEC checks much more reliable", "con": "Only useful in scenarios with TEC interactions" },
+    { "id": "suppressor", "name": "Suppressor", "gearCost": 1, "type": "passive", "effect": "Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target.", "pro": "Stay hidden while shooting, powerful with Stealthy/Ghost abilities", "con": "No combat bonus, useless without stealth abilities or scenarios" }
   ]
 };
 
@@ -172,6 +174,8 @@ const STANDARD_WEAPONS = WEAPONS.filter(w => !w.premium);
 const PREMIUM_WEAPONS = WEAPONS.filter(w => w.premium);
 const ABILITIES = GAME_DATA.abilities;
 const GEAR_ITEMS = GAME_DATA.gear;
+const FREE_GEAR = GEAR_ITEMS.filter(g => g.gearCost === 0);
+const PREMIUM_GEAR = GEAR_ITEMS.filter(g => g.gearCost > 0);
 
 const TIER_COLORS = {
     leader: 'var(--accent-amber)',
@@ -217,7 +221,11 @@ const getGearSlotsUsed = (op) => {
     const weapon = WEAPONS.find(w => w.id === op.weapon);
     const hasHW = op.abilities.includes('heavy_weapons');
     if (weapon && weapon.premium && !hasHW) used += weapon.gearSlotCost || 1;
-    used += (op.gear || []).length;
+    // Only count premium gear items (gearCost > 0) toward gear slots
+    used += (op.gear || []).filter(gId => {
+        const g = GEAR_ITEMS.find(gi => gi.id === gId);
+        return g && g.gearCost > 0;
+    }).length;
     return used;
 };
 
@@ -295,7 +303,8 @@ const printRoster = (warband) => {
         const gearHtml = gearItems.length > 0
             ? gearItems.map(g => {
                 const typeLabel = g.type === 'one-use' ? '[1x]' : g.type === 'reusable' ? '[R]' : '[P]';
-                return `<div style="margin-top:4px;font-size:10px;padding:2px 6px;background:#e8f4f8;border-radius:3px;"><strong>${g.name}</strong> <span style="color:#666;">${typeLabel}</span> ${g.effect}</div>`;
+                const costLabel = g.gearCost === 0 ? '<span style="color:#22c55e;">[FREE]</span>' : '<span style="color:#eab308;">[PREMIUM]</span>';
+                return `<div style="margin-top:4px;font-size:10px;padding:2px 6px;background:#e8f4f8;border-radius:3px;"><strong>${g.name}</strong> <span style="color:#666;">${typeLabel}</span> ${costLabel} ${g.effect}</div>`;
             }).join('')
             : '';
         const abilitiesHtml = abilities.length > 0
@@ -634,10 +643,12 @@ function WeaponSelect({ op, onUpdate }) {
         const newWeapon = WEAPONS.find(w => w.id === weaponId);
         const newWeaponCost = (newWeapon && newWeapon.premium && !hasHW) ? (newWeapon.gearSlotCost || 1) : 0;
         const gearItems = op.gear || [];
+        const freeGear = gearItems.filter(gId => { const g = GEAR_ITEMS.find(gi => gi.id === gId); return g && g.gearCost === 0; });
+        const premiumGear = gearItems.filter(gId => { const g = GEAR_ITEMS.find(gi => gi.id === gId); return g && g.gearCost > 0; });
         const available = totalGear - newWeaponCost;
-        // Trim gear items if weapon switch would exceed slots
-        const trimmedGear = gearItems.slice(0, Math.max(0, available));
-        onUpdate({ ...op, weapon: weaponId, gear: trimmedGear });
+        // Trim only premium gear items if weapon switch would exceed slots; free gear always stays
+        const trimmedPremium = premiumGear.slice(0, Math.max(0, available));
+        onUpdate({ ...op, weapon: weaponId, gear: [...freeGear, ...trimmedPremium] });
     };
 
     const canSelectPremium = (w) => {
@@ -646,9 +657,12 @@ function WeaponSelect({ op, onUpdate }) {
         // If currently selected weapon is premium and not free, switching to another premium is ok (same slot)
         const currentIsPremium = currentWeapon && currentWeapon.premium && !hasHW;
         if (currentIsPremium) return true;
-        // Available = total - gear items used (weapon slot not yet counted since current weapon is standard)
-        const gearItemsUsed = (op.gear || []).length;
-        return totalGear - gearItemsUsed >= w.gearSlotCost;
+        // Available = total - premium gear items used (weapon slot not yet counted since current weapon is standard)
+        const premiumGearUsed = (op.gear || []).filter(gId => {
+            const g = GEAR_ITEMS.find(gi => gi.id === gId);
+            return g && g.gearCost > 0;
+        }).length;
+        return totalGear - premiumGearUsed >= w.gearSlotCost;
     };
 
     const renderWeaponRow = (w, isPremium) => {
@@ -724,17 +738,35 @@ function WeaponSelect({ op, onUpdate }) {
 function GearSelect({ op, onUpdate }) {
     const totalGear = getGearSlotsTotal(op);
     const usedGear = getGearSlotsUsed(op);
-    const freeSlots = totalGear - usedGear;
+    const premiumSlotsFree = totalGear - usedGear;
+    const currentGear = op.gear || [];
 
-    if (totalGear === 0) return null;
+    // Find current free gear (gearCost === 0)
+    const currentFreeGear = currentGear.find(gId => {
+        const g = GEAR_ITEMS.find(gi => gi.id === gId);
+        return g && g.gearCost === 0;
+    });
 
-    const toggleGear = (gearId) => {
-        const currentGear = op.gear || [];
+    const selectFreeGear = (gearId) => {
+        // Radio-button style: remove any existing free gear, add the new one
+        const withoutFree = currentGear.filter(gId => {
+            const g = GEAR_ITEMS.find(gi => gi.id === gId);
+            return g && g.gearCost > 0;
+        });
+        if (currentFreeGear === gearId) {
+            // Deselect
+            onUpdate({ ...op, gear: withoutFree });
+        } else {
+            onUpdate({ ...op, gear: [...withoutFree, gearId] });
+        }
+    };
+
+    const togglePremiumGear = (gearId) => {
         const has = currentGear.includes(gearId);
         if (has) {
             onUpdate({ ...op, gear: currentGear.filter(g => g !== gearId) });
         } else {
-            if (freeSlots <= 0) return;
+            if (premiumSlotsFree <= 0) return;
             onUpdate({ ...op, gear: [...currentGear, gearId] });
         }
     };
@@ -745,62 +777,97 @@ function GearSelect({ op, onUpdate }) {
         'passive': { bg: 'rgba(0,212,255,0.15)', color: 'var(--accent-cyan)', label: 'PASSIVE' },
     };
 
+    const renderGearRow = (item, isSelected, disabled, onClick, isRadio) => {
+        const typeStyle = TYPE_COLORS[item.type] || TYPE_COLORS['passive'];
+        return (
+            <div key={item.id}
+                onClick={() => !disabled && onClick(item.id)}
+                className="flex items-start gap-2 p-2 rounded border transition-all"
+                style={{
+                    background: isSelected ? 'rgba(0,212,255,0.08)' : 'var(--bg-dark)',
+                    borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
+                    boxShadow: isSelected ? '0 0 8px rgba(0,212,255,0.2)' : 'none',
+                    opacity: disabled ? 0.35 : 1,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                }}>
+                <div className="mt-0.5 flex items-center justify-center flex-shrink-0"
+                    style={{
+                        width: 16, height: 16,
+                        borderRadius: isRadio ? '50%' : 3,
+                        border: `2px solid ${isSelected ? 'var(--accent-cyan)' : 'var(--border)'}`,
+                        background: isSelected ? 'var(--accent-cyan)' : 'transparent',
+                    }}>
+                    {isSelected && <span style={{ color: 'var(--bg-black)', fontSize: '0.7rem', fontWeight: 'bold' }}>{isRadio ? '\u25CF' : '\u2713'}</span>}
+                </div>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                            {item.name}
+                        </span>
+                        <span className="text-xs px-1.5 py-0.5 rounded" style={{
+                            background: typeStyle.bg,
+                            color: typeStyle.color,
+                            fontSize: '0.55rem',
+                            fontWeight: 'bold',
+                            letterSpacing: '0.05em',
+                        }}>
+                            {typeStyle.label}
+                        </span>
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                        {item.effect}
+                    </div>
+                    {(item.pro || item.con) && (
+                        <div className="text-xs mt-1" style={{ color: 'var(--text-dim)', opacity: 0.7, fontSize: '0.65rem' }}>
+                            {item.pro && <span style={{ color: 'var(--accent-green)' }}>+ {item.pro}</span>}
+                            {item.pro && item.con && <span> &middot; </span>}
+                            {item.con && <span style={{ color: 'var(--accent-red)' }}>- {item.con}</span>}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div>
             <div className="flex items-center justify-between mb-2">
                 <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
                     Gear
                 </h3>
-                <span className="text-xs" style={{ color: freeSlots === 0 ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
-                    {usedGear}/{totalGear} slots used
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                    Premium: {usedGear}/{totalGear} slots
                 </span>
             </div>
-            <div className="grid gap-1">
-                {GEAR_ITEMS.map(item => {
-                    const isSelected = (op.gear || []).includes(item.id);
-                    const disabled = !isSelected && freeSlots <= 0;
-                    const typeStyle = TYPE_COLORS[item.type] || TYPE_COLORS['passive'];
-                    return (
-                        <div key={item.id}
-                            onClick={() => !disabled && toggleGear(item.id)}
-                            className="flex items-start gap-2 p-2 rounded border transition-all"
-                            style={{
-                                background: isSelected ? 'rgba(0,212,255,0.08)' : 'var(--bg-dark)',
-                                borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
-                                boxShadow: isSelected ? '0 0 8px rgba(0,212,255,0.2)' : 'none',
-                                opacity: disabled ? 0.35 : 1,
-                                cursor: disabled ? 'not-allowed' : 'pointer',
-                            }}>
-                            <div className="w-4 h-4 mt-0.5 rounded-sm border flex items-center justify-center flex-shrink-0"
-                                style={{
-                                    borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
-                                    background: isSelected ? 'var(--accent-cyan)' : 'transparent',
-                                }}>
-                                {isSelected && <span style={{ color: 'var(--bg-black)', fontSize: '0.7rem', fontWeight: 'bold' }}>&#x2713;</span>}
-                            </div>
-                            <div className="flex-1">
-                                <div className="flex items-center gap-2">
-                                    <span className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
-                                        {item.name}
-                                    </span>
-                                    <span className="text-xs px-1.5 py-0.5 rounded" style={{
-                                        background: typeStyle.bg,
-                                        color: typeStyle.color,
-                                        fontSize: '0.55rem',
-                                        fontWeight: 'bold',
-                                        letterSpacing: '0.05em',
-                                    }}>
-                                        {typeStyle.label}
-                                    </span>
-                                </div>
-                                <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
-                                    {item.effect}
-                                </div>
-                            </div>
-                        </div>
-                    );
-                })}
+
+            {/* Free Gear Section */}
+            <div className="mb-3">
+                <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-green)', fontSize: '0.6rem' }}>
+                    Free Gear (pick one)
+                </div>
+                <div className="grid gap-1">
+                    {FREE_GEAR.map(item => {
+                        const isSelected = currentFreeGear === item.id;
+                        return renderGearRow(item, isSelected, false, selectFreeGear, true);
+                    })}
+                </div>
             </div>
+
+            {/* Premium Gear Section */}
+            {totalGear > 0 && (
+                <div>
+                    <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-amber)', fontSize: '0.6rem' }}>
+                        Premium Gear (1 slot each)
+                    </div>
+                    <div className="grid gap-1">
+                        {PREMIUM_GEAR.map(item => {
+                            const isSelected = currentGear.includes(item.id);
+                            const disabled = !isSelected && premiumSlotsFree <= 0;
+                            return renderGearRow(item, isSelected, disabled, togglePremiumGear, false);
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

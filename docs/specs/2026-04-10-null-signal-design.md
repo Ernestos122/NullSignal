@@ -158,7 +158,7 @@ No restrictions on tier composition — build whatever crew fits your minis and 
 
 **Stat assignment is free** — the player chooses which of the 5 stats (CMB, REF, GRT, TEC, AWR) receive the d8 slots. This lets the same tier produce very different operatives (a combat-focused Specialist vs. a tech-focused Specialist).
 
-**Gear slots** can be spent on premium weapons or gear items. Each costs 1 gear slot.
+**Gear slots** can be spent on premium weapons or premium gear items. Each costs 1 gear slot. Every operative may also carry one **free gear item** (Frag Grenade, Smoke Grenade, or First Aid Kit) regardless of gear slots.
 
 ### Example Crews (10 points)
 
@@ -208,7 +208,8 @@ Each operative carries one weapon. Standard weapons are free; premium weapons co
 - Every operative picks one free standard weapon OR pays gear slots for a premium weapon.
 - All operatives can fight unarmed in melee (1 die at CMB type) regardless of equipped weapon.
 - Leaders get 2 gear slots, Specialists get 1. These can be spent on premium weapons or gear items.
-- Gear slots not spent on weapons can be spent on equipment (medkits, scanners, hacking decks — see Section 6.5).
+- Gear slots not spent on weapons can be spent on premium gear (Armor Vest, Tactical Drone, Comms Relay, etc. — see Section 6.5).
+- Every operative may carry one free gear item (Frag Grenade, Smoke Grenade, or First Aid Kit) regardless of gear slots.
 - Range band = no-penalty distance. Beyond it, shift CMB die down one step. Hard cap = absolute maximum range.
 - In line of sight and within range band = roll CMB as normal.
 - In line of sight but beyond range band (no hard cap) = shift CMB down one step.
@@ -216,23 +217,32 @@ Each operative carries one weapon. Standard weapons are free; premium weapons co
 
 ### 6.5 Gear Items
 
-Gear items cost 1 gear slot each and give Leaders and Specialists additional tactical options. Gear slots are shared between premium weapons and gear items.
-
-| Gear | Type | Cost | Effect |
-|------|------|------|--------|
-| **Frag Grenade** | one-use | 1 slot | Shoot action: place blast (2" radius) within 8". All models in radius take 1 hit. Discard after use. |
-| **Smoke Grenade** | one-use | 1 slot | Action: place 3" smoke cloud within 8". Blocks line of sight through it until end of next round. Discard after use. |
-| **Medkit** | reusable | 1 slot | Use Gear action: roll TEC on a Down ally in base contact. On 1+ success, ally may attempt an immediate recovery roll. |
-| **Armor Vest** | passive | 1 slot | Once per game, treat a failed health check as passed (health die still degrades one step). |
-| **Tactical Scanner** | reusable | 1 slot | Use Gear action: roll AWR. On 1+ success, reveal all hidden/stealthy enemies within 12". |
-| **Combat Stims** | one-use | 1 slot | At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use. |
-| **Signal Jammer** | passive | 1 slot | Enemy operatives within 6" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked). |
-| **Hacking Deck** | passive | 1 slot | +1 die on all TEC checks. Required for some advanced scenario interactions. |
+Gear is split into **free gear** (available to every operative) and **premium gear** (costs gear slots). Every operative may carry one free gear item regardless of tier or gear slots. Premium gear costs 1 gear slot each, shared with premium weapons.
 
 **Gear types:**
 - **One-use:** Powerful single-activation effects. Discarded after use.
 - **Reusable:** Can be used once per activation, every activation.
 - **Passive:** Always active. No action required.
+
+#### Free Gear (any operative can carry ONE)
+
+| Gear | Type | Cost | Effect | Pro | Con |
+|------|------|------|--------|-----|-----|
+| **Frag Grenade** | one-use | Free | Shoot action: 2" blast within 8". All models in radius take 1 hit. | Area damage, ignores cover | One-use, short range, can hit friendlies in blast |
+| **Smoke Grenade** | one-use | Free | Action: place 3" smoke cloud within 8". Blocks all line of sight through it until end of next round. | Blocks LOS, enables safe repositioning | One-use, blocks YOUR line of sight too |
+| **First Aid Kit** | reusable | Free | Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll. | Can stabilize downed allies without Medic ability | Requires base contact and uses your action, TEC check can fail |
+
+#### Premium Gear (1 gear slot each)
+
+| Gear | Type | Cost | Effect | Pro | Con |
+|------|------|------|--------|-----|-----|
+| **Armor Vest** | one-use | 1 slot | Once per game, treat a failed health check as passed. Health die still degrades one step. | Survives one hit that would drop you | One-use, health still degrades, doesn't help at d6 floor much |
+| **Tactical Drone** | reusable | 1 slot | Use Gear action: reveal all hidden/stealthy enemies within 12". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed. | Guaranteed intel, counters stealth | Can be destroyed on use, uses your action |
+| **Comms Relay** | passive | 1 slot | Friendly ability auras (Commander, Networked, Spotter) extend to 12" instead of 6" while this operative is active. | Doubles the effective range of support abilities | No direct combat benefit, useless if no aura abilities in warband |
+| **Combat Stims** | one-use | 1 slot | At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use. | Clutch stat boost when you need it most | One-use, must declare at start of activation before rolling |
+| **Signal Jammer** | passive | 1 slot | Enemy operatives within 6" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked). | Shuts down enemy support abilities in an area | No direct combat benefit, only matters vs enemies with auras |
+| **Hacking Deck** | passive | 1 slot | +1 die on all TEC checks. Required for some advanced scenario interactions. | Makes TEC checks much more reliable | Only useful in scenarios with TEC interactions |
+| **Suppressor** | passive | 1 slot | Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target. | Stay hidden while shooting, powerful with Stealthy/Ghost abilities | No combat bonus, useless without stealth abilities or scenarios |
 
 ---
 
