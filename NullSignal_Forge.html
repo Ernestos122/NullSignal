@@ -82,6 +82,10 @@
             0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
             50% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
         }
+
+        @media (max-width: 768px) {
+            select, button, input { min-height: 44px; }
+        }
     </style>
 </head>
 <body>
@@ -247,6 +251,87 @@ const deleteWarbandFromStorage = (id) => {
 };
 
 // ============================================================
+// PRINT ROSTER
+// ============================================================
+const printRoster = (warband) => {
+    const opCount = warband.operatives.length;
+    const ptsUsed = getPointsUsed(warband);
+    const ptsBudget = warband.budget;
+
+    const healthTrack = ['d10', 'd8', 'd6', 'DOWN', 'OUT'];
+
+    const getHealthSlice = (startDie) => {
+        const idx = healthTrack.indexOf(startDie);
+        return healthTrack.slice(idx);
+    };
+
+    const operativeCards = warband.operatives.map(op => {
+        const tier = TIERS[op.tier];
+        const weapon = WEAPONS.find(w => w.id === op.weapon);
+        const abilities = op.abilities.map(aId => ABILITIES.find(a => a.id === aId)).filter(Boolean);
+        const hpSlice = getHealthSlice(tier.health);
+        const statsHtml = STATS.map(s => `<span style="margin-right:8px;"><strong>${s}:</strong> ${op.stats[s]}</span>`).join('');
+        const weaponHtml = weapon
+            ? `<div style="margin-top:6px;padding:4px 6px;background:#f0f0f0;border-radius:3px;font-size:10px;">
+                 <strong>${weapon.name}</strong> &mdash; ${weapon.attackDice}AD, ${weapon.rangeBand}
+                 <br/><em>${weapon.trait}: ${weapon.traitEffect}</em>
+               </div>`
+            : '';
+        const abilitiesHtml = abilities.length > 0
+            ? abilities.map(a => `<div style="margin-top:4px;font-size:10px;"><strong>${a.name}:</strong> ${a.effect}</div>`).join('')
+            : '';
+        const hpHtml = hpSlice.map(step => {
+            const isDie = step.startsWith('d');
+            const bg = isDie ? '#e0e0e0' : (step === 'DOWN' ? '#ffcc00' : '#ff4444');
+            const color = step === 'OUT' ? '#fff' : '#111';
+            return `<span style="display:inline-block;padding:2px 6px;margin-right:3px;border-radius:3px;font-size:10px;font-weight:bold;background:${bg};color:${color};">${step}</span>`;
+        }).join('<span style="font-size:10px;color:#999;margin-right:3px;">&rarr;</span>');
+
+        return `
+        <div style="width:63mm;height:88mm;border:1px solid #333;border-radius:4px;padding:8px;font-size:11px;overflow:hidden;display:flex;flex-direction:column;page-break-inside:avoid;box-sizing:border-box;">
+            <div style="background:#1a1a2e;color:#fff;margin:-8px -8px 6px -8px;padding:6px 8px;border-radius:4px 4px 0 0;">
+                <div style="font-family:'Orbitron',sans-serif;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:#aaa;">${tier.name}</div>
+                <div style="font-family:'Orbitron',sans-serif;font-size:12px;font-weight:bold;color:#fff;margin-top:2px;">${op.name || 'Unnamed'}</div>
+            </div>
+            <div style="font-size:10px;margin-bottom:6px;">${statsHtml}</div>
+            ${weaponHtml}
+            ${abilitiesHtml ? '<div style="margin-top:6px;border-top:1px solid #ddd;padding-top:4px;">' + abilitiesHtml + '</div>' : ''}
+            <div style="margin-top:auto;border-top:1px solid #ddd;padding-top:6px;">
+                <div style="font-size:9px;color:#666;margin-bottom:3px;font-family:\'Orbitron\',sans-serif;text-transform:uppercase;letter-spacing:1px;">Health Track</div>
+                <div>${hpHtml}</div>
+            </div>
+        </div>`;
+    }).join('\n');
+
+    const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"/>
+<title>${warband.name || 'Warband'} - Roster</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Share Tech Mono',monospace; background:#fff; color:#111; padding:20px; }
+    h1, h2 { font-family:'Orbitron',sans-serif; }
+    @media print { body { padding:10px; } }
+</style>
+</head><body>
+<div style="text-align:center;margin-bottom:20px;">
+    <h1 style="font-size:22px;letter-spacing:4px;margin-bottom:4px;">${warband.name || 'Unnamed Warband'}</h1>
+    <h2 style="font-size:13px;font-weight:400;color:#666;">${opCount} operative${opCount !== 1 ? 's' : ''} &middot; ${ptsUsed}/${ptsBudget} pts</h2>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+${operativeCards}
+</div>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) { alert('Please allow popups to print.'); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.print(); win.onafterprint = () => win.close(); };
+};
+
+// ============================================================
 // REACT COMPONENTS
 // ============================================================
 const { useState, useEffect, useCallback, useRef } = React;
@@ -298,7 +383,7 @@ function Header({ view, warband, onBack, onExport, onImport }) {
                             onMouseLeave={(e) => e.target.style.background = 'transparent'}>
                             EXPORT JSON
                         </button>
-                        <button onClick={() => window.print()}
+                        <button onClick={() => printRoster(warband)}
                             className="px-3 py-1 text-xs rounded border transition-colors"
                             style={{ borderColor: 'var(--text-dim)', color: 'var(--text-dim)', background: 'transparent' }}
                             onMouseEnter={(e) => e.target.style.background = 'rgba(136,136,170,0.15)'}
@@ -725,6 +810,9 @@ function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
     const overBudget = ptsUsed > warband.budget;
     const leaderExists = hasLeader(warband);
     const selectedOp = warband.operatives.find(op => op.id === selectedOpId) || null;
+    const [mobileDetailView, setMobileDetailView] = useState(false);
+
+    const isMobile = () => window.innerWidth < 768;
 
     const updateWarband = (newWb) => {
         setWarband(newWb);
@@ -735,6 +823,7 @@ function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
         const newWb = { ...warband, operatives: [...warband.operatives, newOp] };
         updateWarband(newWb);
         setSelectedOpId(newOp.id);
+        if (isMobile()) setMobileDetailView(true);
     };
 
     const deleteOperative = (opId) => {
@@ -760,10 +849,19 @@ function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
         { label: 'Large', value: 15 },
     ];
 
+    const handleSelectOp = (opId) => {
+        setSelectedOpId(opId);
+        if (isMobile()) setMobileDetailView(true);
+    };
+
+    const handleMobileBack = () => {
+        setMobileDetailView(false);
+    };
+
     return (
         <div className="flex flex-col md:flex-row h-full" style={{ minHeight: 'calc(100vh - 64px)' }}>
-            {/* Left Sidebar */}
-            <div className="w-full md:w-80 flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r"
+            {/* Left Sidebar — hidden on mobile when viewing detail */}
+            <div className={`w-full md:w-80 flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r ${mobileDetailView ? 'hidden md:block' : ''}`}
                 style={{ background: 'var(--bg-dark)', borderColor: 'var(--border)' }}>
                 <div className="p-4 space-y-4">
                     {/* Warband Name */}
@@ -875,7 +973,7 @@ function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
                                     key={op.id}
                                     op={op}
                                     isSelected={selectedOpId === op.id}
-                                    onSelect={() => setSelectedOpId(op.id)}
+                                    onSelect={() => handleSelectOp(op.id)}
                                     onDelete={() => deleteOperative(op.id)}
                                 />
                             ))}
@@ -884,8 +982,14 @@ function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
                 </div>
             </div>
 
-            {/* Right Detail Panel */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-6" style={{ background: 'var(--bg-black)' }}>
+            {/* Right Detail Panel — hidden on mobile when viewing roster list */}
+            <div className={`flex-1 overflow-y-auto p-4 md:p-6 ${!mobileDetailView ? 'hidden md:block' : ''}`} style={{ background: 'var(--bg-black)' }}>
+                {/* Mobile back button */}
+                <button onClick={handleMobileBack}
+                    className="md:hidden flex items-center gap-2 mb-4 px-3 py-2 rounded border text-sm transition-colors"
+                    style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'transparent' }}>
+                    &#x2190; Back to Roster
+                </button>
                 {selectedOp ? (
                     <OperativeDetail op={selectedOp} onUpdate={updateOperative} />
                 ) : (
