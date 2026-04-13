@@ -196,13 +196,13 @@ const GAME_DATA = {
       ]
     }
   ],
-  "scenarios": [
-    { "id": "blackout", "name": "Blackout", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'\u00d73'" },
-    { "id": "extraction", "name": "Extraction", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'\u00d73'" },
-    { "id": "scorched_data", "name": "Scorched Data", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'\u00d73'" },
-    { "id": "dead_drop", "name": "Dead Drop", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'\u00d73'" },
-    { "id": "signal_jam", "name": "Signal Jam", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'\u00d73'" },
-    { "id": "sweep_and_clear", "name": "Sweep & Clear", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'\u00d73'" }
+    "scenarios": [
+    { "id": "blackout", "name": "Blackout", "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.", "specialRules": ["Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).", "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."], "vpConditions": ["Control a Data Relay at end of round = 1 VP per relay", "Control all 3 relays simultaneously at end of any round = bonus 2 VP", "Eliminate enemy operative = 1 VP", "Eliminate enemy Leader = 2 VP"], "deploymentType": "opposite_edges" },
+    { "id": "extraction", "name": "Extraction", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).", "objectives": "Place 1 VIP marker in the exact center of the table.", "specialRules": ["The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).", "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).", "The VIP exits the table at the player's deployment edge for victory points."], "vpConditions": ["Extract VIP off player's deployment edge = 5 VP", "VIP goes Down = -2 VP (still recoverable)", "VIP goes Out = -3 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "asymmetric" },
+    { "id": "scorched_data", "name": "Scorched Data", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'×3'", "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.", "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.", "specialRules": ["Hack Terminal: Interact action using TEC. Roll 2 TEC dice — 1+ success = hacked.", "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.", "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."], "vpConditions": ["Hack a terminal = 2 VP (one-time)", "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "diagonal_corners" },
+    { "id": "dead_drop", "name": "Dead Drop", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 4 Intel Package markers in the center band of the table — each at least 6\" from any table edge and at least 6\" from each other.", "specialRules": ["Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.", "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.", "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.", "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).", "Deliver: Move the carrying operative into your deployment zone to score."], "vpConditions": ["Deliver Standard Intel = 2 VP", "Deliver Priority Intel = 3 VP", "Deliver Decoy = 0 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "signal_jam", "name": "Signal Jam", "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Transmitter marker in the exact center of the table.", "specialRules": ["Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.", "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.", "Losing control resets your broadcast counter to 0.", "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."], "vpConditions": ["Control transmitter for 3 consecutive rounds = Immediate Victory", "Control transmitter at end of round = 1 VP", "Eliminate enemy operative = 1 VP", "If no one achieves broadcast victory, highest VP at end of round 6 wins"], "deploymentType": "opposite_edges" },
+    { "id": "sweep_and_clear", "name": "Sweep & Clear", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions — at least 6\" from the player's deployment edge).", "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.", "specialRules": ["A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.", "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).", "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."], "vpConditions": ["Clear a zone = 2 VP per zone", "All 4 zones cleared = bonus 3 VP (total victory)", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "sweep" }
   ]
 };
 
@@ -732,38 +732,190 @@ const SoloAISection = () => (
     </div>
 );
 
+const DeploymentDiagram = ({ scenarioId }) => {
+    const diagrams = {
+        blackout: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <line x1="10" y1="150" x2="290" y2="150" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <circle cx="80" cy="150" r="8" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <circle cx="150" cy="150" r="8" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <circle cx="220" cy="150" r="8" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="80" y="170" textAnchor="middle" fill="var(--accent-amber)" fontSize="9" fontFamily="Share Tech Mono">Relay</text>
+                <text x="150" y="170" textAnchor="middle" fill="var(--accent-amber)" fontSize="9" fontFamily="Share Tech Mono">Relay</text>
+                <text x="220" y="170" textAnchor="middle" fill="var(--accent-amber)" fontSize="9" fontFamily="Share Tech Mono">Relay</text>
+                <text x="150" y="32" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player A</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player B</text>
+                <text x="150" y="52" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+            </svg>
+        ),
+        extraction: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="10" width="280" height="140" fill="rgba(255,0,110,0.08)" stroke="rgba(255,0,110,0.3)" strokeWidth="1" strokeDasharray="4,4"/>
+                <polygon points="146,146 154,138 162,146 158,146 158,158 150,162 142,158 142,146" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="150" y="178" textAnchor="middle" fill="var(--accent-amber)" fontSize="9" fontFamily="Share Tech Mono">VIP</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="80" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Enemy Scatter</text>
+                <text x="150" y="95" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">opposite half</text>
+            </svg>
+        ),
+        scorched_data: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <polygon points="10,290 10,210 90,290" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <polygon points="290,10 290,90 210,10" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <circle cx="80" cy="80" r="7" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <circle cx="220" cy="80" r="7" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <circle cx="80" cy="220" r="7" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <circle cx="220" cy="220" r="7" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="80" y="97" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Terminal</text>
+                <text x="220" y="97" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Terminal</text>
+                <text x="80" y="237" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Terminal</text>
+                <text x="220" y="237" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Terminal</text>
+                <text x="40" y="270" textAnchor="middle" fill="var(--accent-cyan)" fontSize="9" fontFamily="Orbitron" fontWeight="bold">A</text>
+                <text x="260" y="40" textAnchor="middle" fill="var(--accent-magenta)" fontSize="9" fontFamily="Orbitron" fontWeight="bold">B</text>
+                <text x="40" y="282" textAnchor="middle" fill="var(--text-dim)" fontSize="7" fontFamily="Share Tech Mono">8" triangle</text>
+                <text x="260" y="52" textAnchor="middle" fill="var(--text-dim)" fontSize="7" fontFamily="Share Tech Mono">8" triangle</text>
+            </svg>
+        ),
+        dead_drop: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <rect x="70" y="120" width="12" height="12" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5" transform="rotate(0,76,126)"/>
+                <rect x="134" y="105" width="12" height="12" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <rect x="194" y="140" width="12" height="12" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <rect x="244" y="115" width="12" height="12" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="1.5"/>
+                <text x="76" y="148" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Intel</text>
+                <text x="140" y="133" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Intel</text>
+                <text x="200" y="168" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Intel</text>
+                <text x="250" y="143" textAnchor="middle" fill="var(--accent-amber)" fontSize="8" fontFamily="Share Tech Mono">Intel</text>
+                <text x="150" y="32" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player A</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player B</text>
+                <text x="150" y="52" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+            </svg>
+        ),
+        signal_jam: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="10" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(255,0,110,0.15)" stroke="rgba(255,0,110,0.4)" strokeWidth="1"/>
+                <circle cx="150" cy="150" r="56" fill="none" stroke="var(--accent-amber)" strokeWidth="1" strokeDasharray="5,3" opacity="0.6"/>
+                <circle cx="150" cy="150" r="12" fill="rgba(255,190,11,0.8)" stroke="var(--accent-amber)" strokeWidth="2"/>
+                <text x="150" y="178" textAnchor="middle" fill="var(--accent-amber)" fontSize="9" fontFamily="Share Tech Mono">Transmitter</text>
+                <text x="150" y="218" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">Interference Zone (6")</text>
+                <text x="150" y="32" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player A</text>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-magenta)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player B</text>
+                <text x="150" y="52" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+            </svg>
+        ),
+        sweep_and_clear: (
+            <svg viewBox="0 0 300 300" style={{ width: '100%', maxWidth: 300, height: 'auto' }}>
+                <rect x="10" y="10" width="280" height="280" fill="none" stroke="var(--text-dim)" strokeWidth="2"/>
+                <rect x="10" y="230" width="280" height="60" fill="rgba(0,212,255,0.15)" stroke="rgba(0,212,255,0.4)" strokeWidth="1"/>
+                <line x1="150" y1="10" x2="150" y2="290" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <line x1="10" y1="150" x2="290" y2="150" stroke="var(--text-dim)" strokeWidth="1" strokeDasharray="4,4"/>
+                <text x="80" y="85" textAnchor="middle" fill="var(--text-dim)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Zone 1</text>
+                <text x="220" y="85" textAnchor="middle" fill="var(--text-dim)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Zone 2</text>
+                <text x="80" y="200" textAnchor="middle" fill="var(--text-dim)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Zone 3</text>
+                <text x="220" y="200" textAnchor="middle" fill="var(--text-dim)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Zone 4</text>
+                <circle cx="55" cy="50" r="3" fill="var(--accent-red)"/><circle cx="100" cy="65" r="3" fill="var(--accent-red)"/><circle cx="70" cy="100" r="3" fill="var(--accent-red)"/>
+                <circle cx="195" cy="45" r="3" fill="var(--accent-red)"/><circle cx="240" cy="70" r="3" fill="var(--accent-red)"/><circle cx="210" cy="105" r="3" fill="var(--accent-red)"/>
+                <circle cx="60" cy="170" r="3" fill="var(--accent-red)"/><circle cx="105" cy="185" r="3" fill="var(--accent-red)"/><circle cx="80" cy="215" r="3" fill="var(--accent-red)"/>
+                <circle cx="200" cy="175" r="3" fill="var(--accent-red)"/><circle cx="245" cy="190" r="3" fill="var(--accent-red)"/><circle cx="220" cy="210" r="3" fill="var(--accent-red)"/>
+                <text x="150" y="268" textAnchor="middle" fill="var(--accent-cyan)" fontSize="10" fontFamily="Orbitron" fontWeight="bold">Player</text>
+                <text x="150" y="252" textAnchor="middle" fill="var(--text-dim)" fontSize="8" fontFamily="Share Tech Mono">6" deploy zone</text>
+            </svg>
+        ),
+    };
+    return diagrams[scenarioId] || null;
+};
+
+const ScenarioCard = ({ s }) => (
+    <div style={{ border: '1px solid var(--border)', borderRadius: 8, padding: 0, margin: '20px 0', background: 'var(--bg-card)', overflow: 'hidden' }}>
+        <div style={{ padding: '14px 18px', borderBottom: '1px solid var(--border)', background: 'var(--bg-panel)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <h4 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 17, color: 'var(--accent-cyan)', margin: 0 }}>{s.name}</h4>
+            <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
+                <span style={{ color: 'var(--accent-amber)' }}>{s.rounds} rounds</span>
+                <span style={{ color: 'var(--text-dim)' }}>{s.tableSize}</span>
+            </div>
+        </div>
+        <div style={{ padding: '16px 18px' }}>
+            <Para><Dim>{s.briefing}</Dim></Para>
+
+            <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap', alignItems: 'flex-start', margin: '16px 0' }}>
+                <div style={{ flex: '0 0 auto' }}>
+                    <DeploymentDiagram scenarioId={s.id} />
+                    <div style={{ display: 'flex', gap: 12, justifyContent: 'center', marginTop: 6, fontSize: 9 }}>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(0,212,255,0.3)', border: '1px solid var(--accent-cyan)' }}/> Player</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ display: 'inline-block', width: 10, height: 10, background: 'rgba(255,0,110,0.3)', border: '1px solid var(--accent-magenta)' }}/> Enemy</span>
+                        <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}><span style={{ display: 'inline-block', width: 10, height: 10, borderRadius: '50%', background: 'rgba(255,190,11,0.8)' }}/> Objective</span>
+                    </div>
+                </div>
+                <div style={{ flex: '1 1 280px', minWidth: 0 }}>
+                    <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--accent-magenta)', marginBottom: 4 }}>Deployment</div>
+                        <div style={{ fontSize: 12, lineHeight: 1.6 }}>{s.deployment}</div>
+                    </div>
+                    <div style={{ marginBottom: 12 }}>
+                        <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--accent-magenta)', marginBottom: 4 }}>Objectives</div>
+                        <div style={{ fontSize: 12, lineHeight: 1.6 }}>{s.objectives}</div>
+                    </div>
+                </div>
+            </div>
+
+            {s.specialRules && s.specialRules.length > 0 && (
+                <div style={{ marginBottom: 12 }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--accent-green)', marginBottom: 6 }}>Special Rules</div>
+                    <ul style={{ paddingLeft: 18, lineHeight: 1.8, fontSize: 12 }}>
+                        {s.specialRules.map((r, i) => <li key={i} style={{ color: 'var(--text-primary)', marginBottom: 4 }}>{r}</li>)}
+                    </ul>
+                </div>
+            )}
+
+            {s.vpConditions && s.vpConditions.length > 0 && (
+                <div style={{ borderTop: '1px solid var(--border)', paddingTop: 10, marginTop: 10 }}>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, textTransform: 'uppercase', letterSpacing: 2, color: 'var(--accent-amber)', marginBottom: 6 }}>Victory Points</div>
+                    <ul style={{ paddingLeft: 18, lineHeight: 1.8, fontSize: 12 }}>
+                        {s.vpConditions.map((v, i) => <li key={i} style={{ color: 'var(--accent-amber)' }}>{v}</li>)}
+                    </ul>
+                </div>
+            )}
+        </div>
+    </div>
+);
+
 const ScenariosSection = () => (
     <div>
         <SectionHeading id="scenarios" title="10. Scenarios" />
         <Para>
-            Each game uses a scenario that defines the mission, objectives, round count, and special rules.
+            Each game uses a scenario that defines the mission, objectives, deployment, round count, and special rules.
+            Each scenario has its own VP conditions in addition to the universal scoring rules below.
         </Para>
         <SubHeading>Scenario Structure</SubHeading>
         <RuleBox color="cyan">
             <div style={{ display: 'grid', gridTemplateColumns: 'auto 1fr', gap: '4px 16px', fontSize: 13 }}>
                 <Bright>Name:</Bright><span>The scenario's title.</span>
                 <Bright>Briefing:</Bright><span>Narrative setup and objectives.</span>
+                <Bright>Deployment:</Bright><span>Where each side places their operatives.</span>
+                <Bright>Objectives:</Bright><span>What markers to place and where.</span>
+                <Bright>Special Rules:</Bright><span>Scenario-specific mechanics.</span>
                 <Bright>Rounds:</Bright><span>How many rounds the game lasts.</span>
                 <Bright>Table Size:</Bright><span>Recommended play area.</span>
-                <Bright>Victory:</Bright><span>How VP are scored (see VP rules below).</span>
+                <Bright>VP Conditions:</Bright><span>How victory points are scored for this scenario.</span>
             </div>
         </RuleBox>
 
-        <SubHeading>Starter Scenarios</SubHeading>
-        {GAME_DATA.scenarios.map(s => (
-            <div key={s.id} style={{ border: '1px solid var(--border)', borderRadius: 6, padding: '12px 16px', margin: '12px 0', background: 'var(--bg-card)' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 8, flexWrap: 'wrap', gap: 8 }}>
-                    <h4 style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 15, color: 'var(--accent-cyan)' }}>{s.name}</h4>
-                    <div style={{ display: 'flex', gap: 12, fontSize: 11 }}>
-                        <span style={{ color: 'var(--accent-amber)' }}>{s.rounds} rounds</span>
-                        <span style={{ color: 'var(--text-dim)' }}>{s.tableSize}</span>
-                    </div>
-                </div>
-                <Para><Dim>{s.briefing}</Dim></Para>
-            </div>
-        ))}
-
-        <SubHeading>Victory Points</SubHeading>
+        <SubHeading>Universal Victory Points</SubHeading>
         <RuleBox color="magenta">
             <DataTable
                 compact
@@ -772,11 +924,13 @@ const ScenariosSection = () => (
                     ['Eliminate an enemy operative', '1 VP'],
                     ['Eliminate the enemy Leader', '2 VP'],
                     ['Control an objective at end of a round', '1 VP'],
-                    ['Scenario-specific bonus', 'Varies'],
                 ]}
             />
-            <Para style={{ marginTop: 8 }}><Dim>The player with the most VP at the end of the final round wins.</Dim></Para>
+            <Para style={{ marginTop: 8 }}><Dim>Each scenario also defines its own VP conditions. The player with the most VP at the end of the final round wins (unless a scenario specifies an alternate victory condition).</Dim></Para>
         </RuleBox>
+
+        <SubHeading>Scenarios</SubHeading>
+        {GAME_DATA.scenarios.map(s => <ScenarioCard key={s.id} s={s} />)}
     </div>
 );
 

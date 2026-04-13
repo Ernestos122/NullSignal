@@ -336,42 +336,127 @@
       "name": "Blackout",
       "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.",
       "rounds": 6,
-      "tableSize": "3'×3'"
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.",
+      "specialRules": [
+        "Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).",
+        "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."
+      ],
+      "vpConditions": [
+        "Control a Data Relay at end of round = 1 VP per relay",
+        "Control all 3 relays simultaneously at end of any round = bonus 2 VP",
+        "Eliminate enemy operative = 1 VP",
+        "Eliminate enemy Leader = 2 VP"
+      ],
+      "deploymentType": "opposite_edges"
     },
     {
       "id": "extraction",
       "name": "Extraction",
       "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.",
       "rounds": 6,
-      "tableSize": "3'×3'"
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).",
+      "objectives": "Place 1 VIP marker in the exact center of the table.",
+      "specialRules": [
+        "The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).",
+        "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).",
+        "The VIP exits the table at the player's deployment edge for victory points."
+      ],
+      "vpConditions": [
+        "Extract VIP off player's deployment edge = 5 VP",
+        "VIP goes Down = -2 VP (still recoverable)",
+        "VIP goes Out = -3 VP",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "asymmetric"
     },
     {
       "id": "scorched_data",
       "name": "Scorched Data",
       "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.",
       "rounds": 5,
-      "tableSize": "3'×3'"
+      "tableSize": "3'×3'",
+      "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.",
+      "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.",
+      "specialRules": [
+        "Hack Terminal: Interact action using TEC. Roll 2 TEC dice — 1+ success = hacked.",
+        "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.",
+        "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."
+      ],
+      "vpConditions": [
+        "Hack a terminal = 2 VP (one-time)",
+        "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "diagonal_corners"
     },
     {
       "id": "dead_drop",
       "name": "Dead Drop",
       "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.",
       "rounds": 6,
-      "tableSize": "3'×3'"
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Place 4 Intel Package markers in the center band of the table — each at least 6\" from any table edge and at least 6\" from each other.",
+      "specialRules": [
+        "Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.",
+        "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.",
+        "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.",
+        "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).",
+        "Deliver: Move the carrying operative into your deployment zone to score."
+      ],
+      "vpConditions": [
+        "Deliver Standard Intel = 2 VP",
+        "Deliver Priority Intel = 3 VP",
+        "Deliver Decoy = 0 VP",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "opposite_edges"
     },
     {
       "id": "signal_jam",
       "name": "Signal Jam",
       "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.",
       "rounds": 6,
-      "tableSize": "3'×3'"
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Place 1 Transmitter marker in the exact center of the table.",
+      "specialRules": [
+        "Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.",
+        "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.",
+        "Losing control resets your broadcast counter to 0.",
+        "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."
+      ],
+      "vpConditions": [
+        "Control transmitter for 3 consecutive rounds = Immediate Victory",
+        "Control transmitter at end of round = 1 VP",
+        "Eliminate enemy operative = 1 VP",
+        "If no one achieves broadcast victory, highest VP at end of round 6 wins"
+      ],
+      "deploymentType": "opposite_edges"
     },
     {
       "id": "sweep_and_clear",
       "name": "Sweep & Clear",
       "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.",
       "rounds": 6,
-      "tableSize": "3'×3'"
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions — at least 6\" from the player's deployment edge).",
+      "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.",
+      "specialRules": [
+        "A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.",
+        "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).",
+        "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."
+      ],
+      "vpConditions": [
+        "Clear a zone = 2 VP per zone",
+        "All 4 zones cleared = bonus 3 VP (total victory)",
+        "Eliminate enemy operative = 1 VP",
+        "Player operative goes Out = -1 VP"
+      ],
+      "deploymentType": "sweep"
     }
   ]
 }
