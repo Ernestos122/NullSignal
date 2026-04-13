@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NULL SIGNAL — Warband Forge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-black: #0a0a0f;
+            --bg-dark: #12121a;
+            --bg-panel: #1a1a2e;
+            --bg-card: #16213e;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff006e;
+            --accent-amber: #ffbe0b;
+            --accent-green: #00f5a0;
+            --accent-red: #ff3366;
+            --text-primary: #e0e0e0;
+            --text-dim: #8888aa;
+            --text-bright: #ffffff;
+            --border: #2a2a4a;
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-black);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .heading-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.08) 2px,
+                rgba(0, 0, 0, 0.08) 4px
+            );
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+        /* Glow utility */
+        .glow-cyan { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.05); }
+        .glow-magenta { box-shadow: 0 0 10px rgba(255, 0, 110, 0.3), inset 0 0 10px rgba(255, 0, 110, 0.05); }
+        .glow-amber { box-shadow: 0 0 10px rgba(255, 190, 11, 0.3), inset 0 0 10px rgba(255, 190, 11, 0.05); }
+        .glow-green { box-shadow: 0 0 10px rgba(0, 245, 160, 0.3), inset 0 0 10px rgba(0, 245, 160, 0.05); }
+
+        input[type="text"], input[type="file"] {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Animations */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.97; }
+            92% { opacity: 1; }
+            93% { opacity: 0.9; }
+            94% { opacity: 1; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Disable AMD loader before CDN scripts -->
+    <script>window.define = null;</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel" data-type="module">
+// ============================================================
+// GAME DATA
+// ============================================================
+const GAME_DATA = {
+  "stats": ["CMB", "REF", "GRT", "TEC", "AWR"],
+  "statLabels": {
+    "CMB": "Combat",
+    "REF": "Reflexes",
+    "GRT": "Grit",
+    "TEC": "Tech",
+    "AWR": "Awareness"
+  },
+  "diceTypes": ["d6", "d8", "d10", "d12"],
+  "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
+  "tiers": [
+    { "id": "leader", "name": "Leader", "cost": 0, "health": "d10", "statSpread": { "d8Count": 3, "d6Count": 2 }, "gearSlots": 2, "abilitySlots": 2 },
+    { "id": "specialist", "name": "Specialist", "cost": 3, "health": "d8", "statSpread": { "d8Count": 2, "d6Count": 3 }, "gearSlots": 1, "abilitySlots": 1 },
+    { "id": "operative", "name": "Operative", "cost": 2, "health": "d8", "statSpread": { "d8Count": 1, "d6Count": 4 }, "gearSlots": 0, "abilitySlots": 0 },
+    { "id": "recruit", "name": "Recruit", "cost": 1, "health": "d6", "statSpread": { "d8Count": 0, "d6Count": 5 }, "gearSlots": 0, "abilitySlots": 0 }
+  ],
+  "weapons": [
+    { "id": "pistol", "name": "Pistol", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Compact", "traitEffect": "Easy to conceal, common backup weapon." },
+    { "id": "smg", "name": "SMG", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "12\"", "hardCap": null, "meleeOnly": false, "trait": "Rapid", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "rifle", "name": "Rifle", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Reliable", "traitEffect": "No special trait — consistent and dependable." },
+    { "id": "shotgun", "name": "Shotgun", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Spread", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "blade", "name": "Blade", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Melee-only", "traitEffect": "Can only be used in base contact." },
+    { "id": "sniper_rifle", "name": "Sniper Rifle", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "30\"", "hardCap": null, "meleeOnly": false, "trait": "Precise", "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty." },
+    { "id": "lmg", "name": "LMG", "premium": true, "gearSlotCost": 1, "attackDice": 4, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Suppressive", "traitEffect": "Target suffers -2\" movement on their next activation." },
+    { "id": "launcher", "name": "Launcher", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Blast", "traitEffect": "All models within 2\" of the target point take hits." },
+    { "id": "power_weapon", "name": "Power Weapon", "premium": true, "gearSlotCost": 1, "attackDice": 3, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Piercing", "traitEffect": "Target's health die shifts an extra step on a failed health check." }
+  ],
+  "abilities": [
+    { "id": "hardened", "name": "Hardened", "effect": "+1 step to GRT die for recovery and morale checks." },
+    { "id": "cqb_expert", "name": "CQB Expert", "effect": "Gains a bonus attack die in brawls." },
+    { "id": "marksman", "name": "Marksman", "effect": "Gains a bonus attack die when shooting a target within range band." },
+    { "id": "medic", "name": "Medic", "effect": "Use Gear action: roll TEC — on success, attempt recovery on a Down ally in base contact." },
+    { "id": "hacker", "name": "Hacker", "effect": "Gains a bonus die on TEC checks made for scenario interactions." },
+    { "id": "networked", "name": "Networked", "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check." },
+    { "id": "stealthy", "name": "Stealthy", "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative." },
+    { "id": "spotter", "name": "Spotter", "effect": "Once per round, designate a target: all friendly shooters gain +1 attack die vs. that target this round." },
+    { "id": "resilient", "name": "Resilient", "effect": "The first failed health check each game is treated as a pass (health die still degrades one step)." },
+    { "id": "tactician", "name": "Tactician", "effect": "Once per round, swap activation order with one friendly operative." },
+    { "id": "rapid_assault", "name": "Rapid Assault", "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)." },
+    { "id": "pinning_fire", "name": "Pinning Fire", "effect": "Shoot action: instead of dealing damage, force the target to pass a GRT check or lose their next action." },
+    { "id": "breacher", "name": "Breacher", "effect": "Ignores the cover penalty when shooting." },
+    { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC — on success, restore one health step to a friendly operative in base contact." },
+    { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative." },
+    { "id": "heavy_weapons", "name": "Heavy Weapons", "effect": "May carry one premium weapon without spending a gear slot." },
+    { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
+  ]
+};
+
+// ============================================================
+// DERIVED HELPERS
+// ============================================================
+const STATS = GAME_DATA.stats;
+const STAT_LABELS = GAME_DATA.statLabels;
+const TIERS = Object.fromEntries(GAME_DATA.tiers.map(t => [t.id, t]));
+const WEAPONS = GAME_DATA.weapons;
+const STANDARD_WEAPONS = WEAPONS.filter(w => !w.premium);
+const PREMIUM_WEAPONS = WEAPONS.filter(w => w.premium);
+const ABILITIES = GAME_DATA.abilities;
+
+const TIER_COLORS = {
+    leader: 'var(--accent-amber)',
+    specialist: 'var(--accent-cyan)',
+    operative: 'var(--accent-green)',
+    recruit: 'var(--text-dim)',
+};
+
+const TIER_ORDER = ['leader', 'specialist', 'operative', 'recruit'];
+
+// ============================================================
+// FACTORIES
+// ============================================================
+const createOperative = (tierId) => ({
+    id: crypto.randomUUID(),
+    name: '',
+    tier: tierId,
+    stats: Object.fromEntries(GAME_DATA.stats.map(s => [s, 'd6'])),
+    weapon: 'rifle',
+    abilities: [],
+});
+
+const createWarband = () => ({
+    id: crypto.randomUUID(),
+    name: 'New Warband',
+    budget: 10,
+    operatives: [],
+});
+
+// ============================================================
+// CALCULATION HELPERS
+// ============================================================
+const getPointsUsed = (wb) => wb.operatives.reduce((sum, op) => sum + TIERS[op.tier].cost, 0);
+const getPointsRemaining = (wb) => wb.budget - getPointsUsed(wb);
+
+const hasHeavyWeapons = (op) => op.abilities.includes('heavy_weapons');
+
+const getGearSlotsTotal = (op) => TIERS[op.tier].gearSlots;
+
+const getGearSlotsUsed = (op) => {
+    const weapon = WEAPONS.find(w => w.id === op.weapon);
+    if (!weapon || !weapon.premium) return 0;
+    if (hasHeavyWeapons(op)) return 0;
+    return weapon.gearSlotCost;
+};
+
+const getGearSlotsFree = (op) => getGearSlotsTotal(op) - getGearSlotsUsed(op);
+
+const countD8s = (op) => Object.values(op.stats).filter(v => v === 'd8').length;
+
+const getMaxD8s = (op) => TIERS[op.tier].statSpread.d8Count;
+
+const hasLeader = (wb) => wb.operatives.some(op => op.tier === 'leader');
+
+const canAffordTier = (wb, tierId) => {
+    const cost = TIERS[tierId].cost;
+    return getPointsRemaining(wb) >= cost;
+};
+
+// ============================================================
+// LOCALSTORAGE HELPERS
+// ============================================================
+const LS_INDEX_KEY = 'nullSignal_warbandIndex';
+const LS_WARBAND_PREFIX = 'nullSignal_warband_';
+
+const loadIndex = () => {
+    try {
+        return JSON.parse(localStorage.getItem(LS_INDEX_KEY)) || [];
+    } catch { return []; }
+};
+
+const saveIndex = (index) => {
+    localStorage.setItem(LS_INDEX_KEY, JSON.stringify(index));
+};
+
+const loadWarband = (id) => {
+    try {
+        return JSON.parse(localStorage.getItem(LS_WARBAND_PREFIX + id));
+    } catch { return null; }
+};
+
+const saveWarband = (wb) => {
+    localStorage.setItem(LS_WARBAND_PREFIX + wb.id, JSON.stringify(wb));
+};
+
+const deleteWarbandFromStorage = (id) => {
+    localStorage.removeItem(LS_WARBAND_PREFIX + id);
+};
+
+// ============================================================
+// REACT COMPONENTS
+// ============================================================
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ---- Header ----
+function Header({ view, warband, onBack, onExport, onImport }) {
+    const ptsUsed = warband ? getPointsUsed(warband) : 0;
+    const ptsBudget = warband ? warband.budget : 0;
+    const overBudget = ptsUsed > ptsBudget;
+
+    return (
+        <header style={{
+            background: 'linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-dark) 100%)',
+            borderBottom: '1px solid var(--border)',
+            animation: 'flicker 4s infinite',
+        }} className="px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+            <div className="flex items-center gap-3">
+                {view === 'editor' && (
+                    <button onClick={onBack}
+                        className="text-2xl hover:scale-110 transition-transform"
+                        style={{ color: 'var(--accent-cyan)' }}
+                        title="Back to warband list">
+                        &#x2190;
+                    </button>
+                )}
+                <div>
+                    <h1 className="text-lg md:text-xl font-black tracking-widest" style={{ color: 'var(--accent-cyan)', letterSpacing: '0.2em' }}>
+                        NULL SIGNAL
+                    </h1>
+                    <div className="text-xs tracking-wider" style={{ color: 'var(--accent-magenta)', fontFamily: 'Orbitron, sans-serif' }}>
+                        WARBAND FORGE
+                    </div>
+                </div>
+            </div>
+
+            {view === 'editor' && warband && (
+                <div className="flex items-center gap-4 flex-wrap">
+                    <div className="text-sm heading-font" style={{
+                        color: overBudget ? 'var(--accent-red)' : 'var(--accent-green)',
+                        fontFamily: 'Orbitron, sans-serif',
+                    }}>
+                        {ptsUsed} / {ptsBudget} pts
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={onExport}
+                            className="px-3 py-1 text-xs rounded border transition-colors hover:bg-opacity-20"
+                            style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(0,212,255,0.15)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            EXPORT JSON
+                        </button>
+                        <button onClick={() => window.print()}
+                            className="px-3 py-1 text-xs rounded border transition-colors"
+                            style={{ borderColor: 'var(--text-dim)', color: 'var(--text-dim)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(136,136,170,0.15)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            PRINT
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {view === 'list' && (
+                <div className="flex gap-2">
+                    <label className="px-3 py-1 text-xs rounded border transition-colors cursor-pointer"
+                        style={{ borderColor: 'var(--accent-magenta)', color: 'var(--accent-magenta)', background: 'transparent' }}
+                        onMouseEnter={(e) => e.target.style.background = 'rgba(255,0,110,0.15)'}
+                        onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                        IMPORT JSON
+                        <input type="file" accept=".json" className="hidden" onChange={onImport} />
+                    </label>
+                </div>
+            )}
+        </header>
+    );
+}
+
+// ---- WarbandList ----
+function WarbandList({ index, onOpen, onDelete, onCreate }) {
+    return (
+        <div className="p-4 md:p-8 max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg heading-font" style={{ color: 'var(--text-bright)', fontFamily: 'Orbitron, sans-serif' }}>
+                    YOUR WARBANDS
+                </h2>
+                <button onClick={onCreate}
+                    className="px-4 py-2 rounded text-sm font-bold transition-all heading-font"
+                    style={{
+                        background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta))',
+                        color: 'var(--bg-black)',
+                        fontFamily: 'Orbitron, sans-serif',
+                    }}
+                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}>
+                    + NEW WARBAND
+                </button>
+            </div>
+
+            {index.length === 0 && (
+                <div className="text-center py-16" style={{ color: 'var(--text-dim)' }}>
+                    <div className="text-4xl mb-4">&#x25C8;</div>
+                    <p>No warbands found. Create one to begin.</p>
+                </div>
+            )}
+
+            <div className="grid gap-3">
+                {index.map(entry => (
+                    <div key={entry.id}
+                        className="flex items-center justify-between p-4 rounded border cursor-pointer transition-all"
+                        style={{
+                            background: 'var(--bg-panel)',
+                            borderColor: 'var(--border)',
+                        }}
+                        onClick={() => onOpen(entry.id)}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--accent-cyan)';
+                            e.currentTarget.style.boxShadow = '0 0 10px rgba(0,212,255,0.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--border)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}>
+                        <div>
+                            <div className="font-bold" style={{ color: 'var(--text-bright)' }}>
+                                {entry.name || 'Unnamed Warband'}
+                            </div>
+                            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                Last modified: {new Date(entry.lastModified).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <button onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
+                            className="px-3 py-1 text-xs rounded border transition-colors"
+                            style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(255,51,102,0.2)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            DELETE
+                        </button>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ---- OperativeListItem ----
+function OperativeListItem({ op, isSelected, onSelect, onDelete }) {
+    const tierColor = TIER_COLORS[op.tier];
+    const tierData = TIERS[op.tier];
+    return (
+        <div
+            className="flex items-center gap-2 p-2 rounded cursor-pointer transition-all group"
+            style={{
+                background: isSelected ? 'var(--bg-card)' : 'transparent',
+                borderLeft: isSelected ? `3px solid ${tierColor}` : '3px solid transparent',
+            }}
+            onClick={onSelect}
+            onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'rgba(22,33,62,0.5)'; }}
+            onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+        >
+            <span className="text-xs px-2 py-0.5 rounded font-bold uppercase tracking-wider"
+                style={{
+                    background: `${tierColor}22`,
+                    color: tierColor,
+                    border: `1px solid ${tierColor}44`,
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: '0.6rem',
+                    minWidth: '60px',
+                    textAlign: 'center',
+                }}>
+                {tierData.name}
+            </span>
+            <span className="flex-1 truncate text-sm" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                {op.name || 'Unnamed'}
+            </span>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-1"
+                style={{ color: 'var(--accent-red)' }}>
+                &#x2715;
+            </button>
+        </div>
+    );
+}
+
+// ---- StatAssignment ----
+function StatAssignment({ op, onUpdate }) {
+    const maxD8 = getMaxD8s(op);
+    const currentD8 = countD8s(op);
+    const isRecruit = op.tier === 'recruit';
+
+    const toggleStat = (stat) => {
+        if (isRecruit) return;
+        const current = op.stats[stat];
+        if (current === 'd6' && currentD8 < maxD8) {
+            onUpdate({ ...op, stats: { ...op.stats, [stat]: 'd8' } });
+        } else if (current === 'd8') {
+            onUpdate({ ...op, stats: { ...op.stats, [stat]: 'd6' } });
+        }
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Stats
+                </h3>
+                <span className="text-xs" style={{ color: currentD8 === maxD8 ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
+                    {currentD8}/{maxD8} d8 assigned
+                </span>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+                {STATS.map(stat => {
+                    const isD8 = op.stats[stat] === 'd8';
+                    const canUpgrade = !isRecruit && !isD8 && currentD8 < maxD8;
+                    return (
+                        <button key={stat}
+                            onClick={() => toggleStat(stat)}
+                            disabled={isRecruit}
+                            className="flex flex-col items-center p-2 rounded border transition-all"
+                            style={{
+                                background: isD8 ? 'rgba(0,212,255,0.1)' : 'var(--bg-dark)',
+                                borderColor: isD8 ? 'var(--accent-cyan)' : 'var(--border)',
+                                boxShadow: isD8 ? '0 0 12px rgba(0,212,255,0.3)' : 'none',
+                                cursor: isRecruit ? 'not-allowed' : 'pointer',
+                                opacity: isRecruit ? 0.6 : 1,
+                            }}>
+                            <span className="text-xs font-bold mb-1" style={{
+                                color: isD8 ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                                fontFamily: 'Orbitron, sans-serif',
+                                fontSize: '0.65rem',
+                            }}>
+                                {stat}
+                            </span>
+                            <span className="text-lg font-bold" style={{
+                                color: isD8 ? 'var(--text-bright)' : 'var(--text-dim)',
+                            }}>
+                                {op.stats[stat]}
+                            </span>
+                            <span className="text-xs mt-0.5" style={{ color: 'var(--text-dim)', fontSize: '0.6rem' }}>
+                                {STAT_LABELS[stat]}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+// ---- WeaponSelect ----
+function WeaponSelect({ op, onUpdate }) {
+    const totalGear = getGearSlotsTotal(op);
+    const usedGear = getGearSlotsUsed(op);
+    const currentWeapon = WEAPONS.find(w => w.id === op.weapon);
+    const hasHW = hasHeavyWeapons(op);
+
+    const selectWeapon = (weaponId) => {
+        onUpdate({ ...op, weapon: weaponId });
+    };
+
+    const canSelectPremium = (w) => {
+        if (hasHW) return true;
+        if (totalGear <= 0) return false;
+        // If currently selected weapon is premium and not free, switching to another premium is ok (same slot)
+        const currentIsPremium = currentWeapon && currentWeapon.premium && !hasHW;
+        if (currentIsPremium) return true;
+        return totalGear - usedGear >= w.gearSlotCost;
+    };
+
+    const renderWeaponRow = (w, isPremium) => {
+        const isSelected = op.weapon === w.id;
+        const disabled = isPremium && !canSelectPremium(w);
+        return (
+            <div key={w.id}
+                onClick={() => !disabled && selectWeapon(w.id)}
+                className="flex items-center gap-3 p-2 rounded border cursor-pointer transition-all"
+                style={{
+                    background: isSelected ? 'rgba(0,212,255,0.1)' : 'var(--bg-dark)',
+                    borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
+                    boxShadow: isSelected ? '0 0 8px rgba(0,212,255,0.2)' : 'none',
+                    opacity: disabled ? 0.35 : 1,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                }}>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                            {w.name}
+                        </span>
+                        {isPremium && (
+                            <span className="text-xs px-1 rounded" style={{
+                                background: 'rgba(255,190,11,0.2)',
+                                color: 'var(--accent-amber)',
+                                fontSize: '0.6rem',
+                            }}>
+                                PREMIUM
+                            </span>
+                        )}
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                        {w.trait}: {w.traitEffect}
+                    </div>
+                </div>
+                <div className="text-right text-xs whitespace-nowrap" style={{ color: 'var(--text-dim)' }}>
+                    <div>{w.attackDice}AD</div>
+                    <div>{w.rangeBand}</div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Weapon
+                </h3>
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                    Gear: {usedGear}/{totalGear} slots
+                </span>
+            </div>
+
+            <div className="mb-2">
+                <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-green)', fontSize: '0.6rem' }}>Standard</div>
+                <div className="grid gap-1">
+                    {STANDARD_WEAPONS.map(w => renderWeaponRow(w, false))}
+                </div>
+            </div>
+
+            <div>
+                <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-amber)', fontSize: '0.6rem' }}>Premium (1 gear slot)</div>
+                <div className="grid gap-1">
+                    {PREMIUM_WEAPONS.map(w => renderWeaponRow(w, true))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ---- AbilitySelect ----
+function AbilitySelect({ op, onUpdate }) {
+    const tierData = TIERS[op.tier];
+    const maxAbilities = tierData.abilitySlots;
+    const currentCount = op.abilities.length;
+
+    if (maxAbilities === 0) return null;
+
+    const toggleAbility = (abilityId) => {
+        const has = op.abilities.includes(abilityId);
+        let newAbilities;
+        if (has) {
+            newAbilities = op.abilities.filter(a => a !== abilityId);
+            // If removing heavy_weapons, check if current weapon is premium and no longer affordable
+            if (abilityId === 'heavy_weapons') {
+                const weapon = WEAPONS.find(w => w.id === op.weapon);
+                if (weapon && weapon.premium) {
+                    const gearTotal = getGearSlotsTotal(op);
+                    if (gearTotal < weapon.gearSlotCost) {
+                        onUpdate({ ...op, abilities: newAbilities, weapon: 'rifle' });
+                        return;
+                    }
+                }
+            }
+        } else {
+            if (currentCount >= maxAbilities) return;
+            newAbilities = [...op.abilities, abilityId];
+        }
+        onUpdate({ ...op, abilities: newAbilities });
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Abilities
+                </h3>
+                <span className="text-xs" style={{ color: currentCount === maxAbilities ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
+                    {currentCount}/{maxAbilities} selected
+                </span>
+            </div>
+            <div className="grid gap-1">
+                {ABILITIES.map(ability => {
+                    const isSelected = op.abilities.includes(ability.id);
+                    const disabled = !isSelected && currentCount >= maxAbilities;
+                    return (
+                        <div key={ability.id}
+                            onClick={() => !disabled && toggleAbility(ability.id)}
+                            className="flex items-start gap-2 p-2 rounded border transition-all"
+                            style={{
+                                background: isSelected ? 'rgba(255,0,110,0.08)' : 'var(--bg-dark)',
+                                borderColor: isSelected ? 'var(--accent-magenta)' : 'var(--border)',
+                                boxShadow: isSelected ? '0 0 8px rgba(255,0,110,0.2)' : 'none',
+                                opacity: disabled ? 0.35 : 1,
+                                cursor: disabled ? 'not-allowed' : 'pointer',
+                            }}>
+                            <div className="w-4 h-4 mt-0.5 rounded-sm border flex items-center justify-center flex-shrink-0"
+                                style={{
+                                    borderColor: isSelected ? 'var(--accent-magenta)' : 'var(--border)',
+                                    background: isSelected ? 'var(--accent-magenta)' : 'transparent',
+                                }}>
+                                {isSelected && <span style={{ color: 'var(--bg-black)', fontSize: '0.7rem', fontWeight: 'bold' }}>&#x2713;</span>}
+                            </div>
+                            <div className="flex-1">
+                                <div className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                                    {ability.name}
+                                </div>
+                                <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                    {ability.effect}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+// ---- OperativeDetail ----
+function OperativeDetail({ op, onUpdate }) {
+    const tierData = TIERS[op.tier];
+    const tierColor = TIER_COLORS[op.tier];
+
+    return (
+        <div className="space-y-5">
+            {/* Tier badge + summary */}
+            <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-xs px-3 py-1 rounded font-bold uppercase tracking-wider"
+                    style={{
+                        background: `${tierColor}22`,
+                        color: tierColor,
+                        border: `1px solid ${tierColor}66`,
+                        fontFamily: 'Orbitron, sans-serif',
+                    }}>
+                    {tierData.name}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                    HP: {tierData.health} &middot; Gear: {getGearSlotsUsed(op)}/{getGearSlotsTotal(op)} &middot; Abilities: {op.abilities.length}/{tierData.abilitySlots}
+                </span>
+            </div>
+
+            {/* Name input */}
+            <div>
+                <label className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Operative Name
+                </label>
+                <input type="text"
+                    value={op.name}
+                    onChange={(e) => onUpdate({ ...op, name: e.target.value })}
+                    placeholder="Enter operative name..."
+                    className="w-full px-3 py-2 rounded border text-sm outline-none transition-colors"
+                    style={{
+                        background: 'var(--bg-dark)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-bright)',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--accent-cyan)'}
+                    onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+                />
+            </div>
+
+            {/* Stat Assignment */}
+            <StatAssignment op={op} onUpdate={onUpdate} />
+
+            {/* Weapon Select */}
+            <WeaponSelect op={op} onUpdate={onUpdate} />
+
+            {/* Ability Select */}
+            <AbilitySelect op={op} onUpdate={onUpdate} />
+        </div>
+    );
+}
+
+// ---- WarbandEditor ----
+function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
+    const ptsUsed = getPointsUsed(warband);
+    const ptsRemaining = getPointsRemaining(warband);
+    const overBudget = ptsUsed > warband.budget;
+    const leaderExists = hasLeader(warband);
+    const selectedOp = warband.operatives.find(op => op.id === selectedOpId) || null;
+
+    const updateWarband = (newWb) => {
+        setWarband(newWb);
+    };
+
+    const addOperative = (tierId) => {
+        const newOp = createOperative(tierId);
+        const newWb = { ...warband, operatives: [...warband.operatives, newOp] };
+        updateWarband(newWb);
+        setSelectedOpId(newOp.id);
+    };
+
+    const deleteOperative = (opId) => {
+        const newOps = warband.operatives.filter(op => op.id !== opId);
+        updateWarband({ ...warband, operatives: newOps });
+        if (selectedOpId === opId) {
+            setSelectedOpId(newOps.length > 0 ? newOps[0].id : null);
+        }
+    };
+
+    const updateOperative = (updatedOp) => {
+        const newOps = warband.operatives.map(op => op.id === updatedOp.id ? updatedOp : op);
+        updateWarband({ ...warband, operatives: newOps });
+    };
+
+    const setBudget = (val) => {
+        updateWarband({ ...warband, budget: val });
+    };
+
+    const budgetOptions = [
+        { label: 'Small', value: 6 },
+        { label: 'Standard', value: 10 },
+        { label: 'Large', value: 15 },
+    ];
+
+    return (
+        <div className="flex flex-col md:flex-row h-full" style={{ minHeight: 'calc(100vh - 64px)' }}>
+            {/* Left Sidebar */}
+            <div className="w-full md:w-80 flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r"
+                style={{ background: 'var(--bg-dark)', borderColor: 'var(--border)' }}>
+                <div className="p-4 space-y-4">
+                    {/* Warband Name */}
+                    <div>
+                        <label className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                            Warband Name
+                        </label>
+                        <input type="text"
+                            value={warband.name}
+                            onChange={(e) => updateWarband({ ...warband, name: e.target.value })}
+                            className="w-full px-3 py-2 rounded border text-sm outline-none transition-colors"
+                            style={{
+                                background: 'var(--bg-black)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--text-bright)',
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--accent-cyan)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+                        />
+                    </div>
+
+                    {/* Budget Display */}
+                    <div className="p-3 rounded border" style={{ background: 'var(--bg-panel)', borderColor: 'var(--border)' }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                                Budget
+                            </span>
+                            <span className="text-lg font-bold" style={{
+                                color: overBudget ? 'var(--accent-red)' : 'var(--accent-green)',
+                                fontFamily: 'Orbitron, sans-serif',
+                            }}>
+                                {ptsUsed} / {warband.budget} pts
+                            </span>
+                        </div>
+                        {/* Budget bar */}
+                        <div className="w-full h-2 rounded-full overflow-hidden mb-3" style={{ background: 'var(--bg-black)' }}>
+                            <div className="h-full rounded-full transition-all"
+                                style={{
+                                    width: `${Math.min(100, (ptsUsed / warband.budget) * 100)}%`,
+                                    background: overBudget
+                                        ? 'var(--accent-red)'
+                                        : ptsUsed === warband.budget
+                                            ? 'var(--accent-green)'
+                                            : 'var(--accent-cyan)',
+                                }} />
+                        </div>
+                        {/* Game size buttons */}
+                        <div className="grid grid-cols-3 gap-1">
+                            {budgetOptions.map(opt => (
+                                <button key={opt.value}
+                                    onClick={() => setBudget(opt.value)}
+                                    className="px-2 py-1.5 text-xs rounded border transition-all"
+                                    style={{
+                                        background: warband.budget === opt.value ? 'rgba(0,212,255,0.15)' : 'transparent',
+                                        borderColor: warband.budget === opt.value ? 'var(--accent-cyan)' : 'var(--border)',
+                                        color: warband.budget === opt.value ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                                    }}>
+                                    {opt.label}<br />{opt.value}pts
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Add Operative Buttons */}
+                    <div>
+                        <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                            Add Operative
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                            {TIER_ORDER.map(tierId => {
+                                const tier = TIERS[tierId];
+                                const disabled = (tierId === 'leader' && leaderExists) || !canAffordTier(warband, tierId);
+                                const color = TIER_COLORS[tierId];
+                                return (
+                                    <button key={tierId}
+                                        onClick={() => addOperative(tierId)}
+                                        disabled={disabled}
+                                        className="px-2 py-2 text-xs rounded border transition-all"
+                                        style={{
+                                            borderColor: disabled ? 'var(--border)' : `${color}66`,
+                                            color: disabled ? 'var(--text-dim)' : color,
+                                            background: disabled ? 'transparent' : `${color}11`,
+                                            opacity: disabled ? 0.4 : 1,
+                                            cursor: disabled ? 'not-allowed' : 'pointer',
+                                        }}>
+                                        + {tier.name}
+                                        <span className="block text-xs" style={{ opacity: 0.7 }}>
+                                            {tier.cost === 0 ? 'Free' : `${tier.cost} pts`}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Roster List */}
+                    <div>
+                        <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                            Roster ({warband.operatives.length})
+                        </div>
+                        {warband.operatives.length === 0 && (
+                            <div className="text-xs text-center py-4" style={{ color: 'var(--text-dim)' }}>
+                                Add operatives to your warband
+                            </div>
+                        )}
+                        <div className="space-y-0.5">
+                            {warband.operatives.map(op => (
+                                <OperativeListItem
+                                    key={op.id}
+                                    op={op}
+                                    isSelected={selectedOpId === op.id}
+                                    onSelect={() => setSelectedOpId(op.id)}
+                                    onDelete={() => deleteOperative(op.id)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Detail Panel */}
+            <div className="flex-1 overflow-y-auto p-4 md:p-6" style={{ background: 'var(--bg-black)' }}>
+                {selectedOp ? (
+                    <OperativeDetail op={selectedOp} onUpdate={updateOperative} />
+                ) : (
+                    <div className="flex items-center justify-center h-full" style={{ minHeight: '300px' }}>
+                        <div className="text-center" style={{ color: 'var(--text-dim)' }}>
+                            <div className="text-5xl mb-4" style={{ color: 'var(--border)' }}>&#x25C7;</div>
+                            <p>Select an operative from the roster</p>
+                            <p className="text-xs mt-1">or add a new one to begin</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ============================================================
+// APP — Root Component
+// ============================================================
+function App() {
+    const [view, setView] = useState('list'); // 'list' | 'editor'
+    const [index, setIndex] = useState(() => loadIndex());
+    const [warband, setWarband] = useState(null);
+    const [selectedOpId, setSelectedOpId] = useState(null);
+
+    // Auto-save warband on every change
+    useEffect(() => {
+        if (!warband) return;
+        saveWarband(warband);
+        // Update index entry
+        setIndex(prev => {
+            const newIndex = prev.map(entry =>
+                entry.id === warband.id
+                    ? { ...entry, name: warband.name, lastModified: Date.now() }
+                    : entry
+            );
+            saveIndex(newIndex);
+            return newIndex;
+        });
+    }, [warband]);
+
+    const handleCreateWarband = () => {
+        const wb = createWarband();
+        saveWarband(wb);
+        const newEntry = { id: wb.id, name: wb.name, lastModified: Date.now() };
+        const newIndex = [...index, newEntry];
+        setIndex(newIndex);
+        saveIndex(newIndex);
+        setWarband(wb);
+        setSelectedOpId(null);
+        setView('editor');
+    };
+
+    const handleOpenWarband = (id) => {
+        const wb = loadWarband(id);
+        if (wb) {
+            setWarband(wb);
+            setSelectedOpId(wb.operatives.length > 0 ? wb.operatives[0].id : null);
+            setView('editor');
+        }
+    };
+
+    const handleDeleteWarband = (id) => {
+        if (!confirm('Delete this warband? This cannot be undone.')) return;
+        deleteWarbandFromStorage(id);
+        const newIndex = index.filter(e => e.id !== id);
+        setIndex(newIndex);
+        saveIndex(newIndex);
+        if (warband && warband.id === id) {
+            setWarband(null);
+            setView('list');
+        }
+    };
+
+    const handleBack = () => {
+        setView('list');
+        setWarband(null);
+        setSelectedOpId(null);
+    };
+
+    const handleExport = () => {
+        if (!warband) return;
+        const blob = new Blob([JSON.stringify(warband, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${warband.name || 'warband'}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+
+    const handleImport = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                imported.id = crypto.randomUUID(); // Assign new UUID
+                saveWarband(imported);
+                const newEntry = { id: imported.id, name: imported.name || 'Imported Warband', lastModified: Date.now() };
+                const newIndex = [...index, newEntry];
+                setIndex(newIndex);
+                saveIndex(newIndex);
+                setWarband(imported);
+                setSelectedOpId(imported.operatives && imported.operatives.length > 0 ? imported.operatives[0].id : null);
+                setView('editor');
+            } catch (err) {
+                alert('Failed to import: invalid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // reset input
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col">
+            <Header
+                view={view}
+                warband={warband}
+                onBack={handleBack}
+                onExport={handleExport}
+                onImport={handleImport}
+            />
+            {view === 'list' ? (
+                <WarbandList
+                    index={index}
+                    onOpen={handleOpenWarband}
+                    onDelete={handleDeleteWarband}
+                    onCreate={handleCreateWarband}
+                />
+            ) : (
+                warband && (
+                    <WarbandEditor
+                        warband={warband}
+                        setWarband={setWarband}
+                        selectedOpId={selectedOpId}
+                        setSelectedOpId={setSelectedOpId}
+                    />
+                )
+            )}
+        </div>
+    );
+}
+
+// ============================================================
+// MOUNT
+// ============================================================
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+    </script>
+</body>
+</html>
