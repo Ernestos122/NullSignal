@@ -241,6 +241,40 @@ const canAffordTier = (wb, tierId) => {
 };
 
 // ============================================================
+// VALIDATION
+// ============================================================
+const validateWarband = (wb) => {
+    const warnings = [];
+    if (!wb) return warnings;
+
+    // No Leader
+    if (!hasLeader(wb)) {
+        warnings.push({ text: 'No Leader in warband', level: 'amber' });
+    }
+
+    // Over budget
+    const ptsUsed = getPointsUsed(wb);
+    if (ptsUsed > wb.budget) {
+        warnings.push({ text: `Over budget by ${ptsUsed - wb.budget} point${ptsUsed - wb.budget !== 1 ? 's' : ''}`, level: 'red' });
+    }
+
+    // Per-operative checks
+    wb.operatives.forEach(op => {
+        const name = op.name || 'Unnamed';
+        const d8s = countD8s(op);
+        const maxD8s = getMaxD8s(op);
+        if (d8s !== maxD8s) {
+            warnings.push({ text: `${name}: stats not fully assigned (${d8s}/${maxD8s} d8s)`, level: 'amber' });
+        }
+        if (!op.weapon) {
+            warnings.push({ text: `${name}: no weapon selected`, level: 'amber' });
+        }
+    });
+
+    return warnings;
+};
+
+// ============================================================
 // LOCALSTORAGE HELPERS
 // ============================================================
 const LS_INDEX_KEY = 'nullSignal_warbandIndex';
@@ -312,7 +346,7 @@ const printRoster = (warband) => {
             const isDie = step.startsWith('d');
             const bg = isDie ? '#e0e0e0' : (step === 'DOWN' ? '#ffcc00' : '#ff4444');
             const color = step === 'OUT' ? '#fff' : '#111';
-            return `<span style="display:inline-block;padding:2px 6px;margin-right:3px;border-radius:3px;font-size:10px;font-weight:bold;background:${bg};color:${color};">${step}</span>`;
+            return `<span style="display:inline-flex;align-items:center;gap:2px;margin-right:3px;"><span style="display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:bold;background:${bg};color:${color};">${step}</span><span style="display:inline-block;width:8px;height:8px;border:1.5px solid #555;border-radius:1px;vertical-align:middle;"></span></span>`;
         }).join('<span style="font-size:10px;color:#999;margin-right:3px;">&rarr;</span>');
 
         return `
@@ -366,7 +400,7 @@ ${operativeCards}
 const { useState, useEffect, useCallback, useRef } = React;
 
 // ---- Header ----
-function Header({ view, warband, onBack, onExport, onImport }) {
+function Header({ view, warband, onBack, onExport, onImport, onDuplicate }) {
     const ptsUsed = warband ? getPointsUsed(warband) : 0;
     const ptsBudget = warband ? warband.budget : 0;
     const overBudget = ptsUsed > ptsBudget;
@@ -440,6 +474,13 @@ function Header({ view, warband, onBack, onExport, onImport }) {
                             onMouseLeave={(e) => e.target.style.background = 'transparent'}>
                             PRINT
                         </button>
+                        <button onClick={onDuplicate}
+                            className="px-3 py-1 text-xs rounded border transition-colors"
+                            style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(0,245,160,0.15)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            DUPLICATE
+                        </button>
                     </div>
                 </div>
             )}
@@ -460,7 +501,7 @@ function Header({ view, warband, onBack, onExport, onImport }) {
 }
 
 // ---- WarbandList ----
-function WarbandList({ index, onOpen, onDelete, onCreate }) {
+function WarbandList({ index, onOpen, onDelete, onCreate, onDuplicate }) {
     return (
         <div className="p-4 md:p-8 max-w-4xl mx-auto">
             <div className="flex items-center justify-between mb-6">
@@ -512,13 +553,22 @@ function WarbandList({ index, onOpen, onDelete, onCreate }) {
                                 Last modified: {new Date(entry.lastModified).toLocaleDateString()}
                             </div>
                         </div>
-                        <button onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
-                            className="px-3 py-1 text-xs rounded border transition-colors"
-                            style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)', background: 'transparent' }}
-                            onMouseEnter={(e) => e.target.style.background = 'rgba(255,51,102,0.2)'}
-                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
-                            DELETE
-                        </button>
+                        <div className="flex gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); onDuplicate(entry.id); }}
+                                className="px-3 py-1 text-xs rounded border transition-colors"
+                                style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'transparent' }}
+                                onMouseEnter={(e) => e.target.style.background = 'rgba(0,212,255,0.15)'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                                DUPLICATE
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
+                                className="px-3 py-1 text-xs rounded border transition-colors"
+                                style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)', background: 'transparent' }}
+                                onMouseEnter={(e) => e.target.style.background = 'rgba(255,51,102,0.2)'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                                DELETE
+                            </button>
+                        </div>
                     </div>
                 ))}
             </div>
@@ -955,6 +1005,105 @@ function AbilitySelect({ op, onUpdate }) {
     );
 }
 
+// ---- WarbandSummary ----
+function WarbandSummary({ warband }) {
+    const [warningsOpen, setWarningsOpen] = useState(false);
+    const warnings = validateWarband(warband);
+    const ptsUsed = getPointsUsed(warband);
+
+    // Cost breakdown by tier
+    const tierCounts = {};
+    let tierCostSum = 0;
+    warband.operatives.forEach(op => {
+        if (!tierCounts[op.tier]) tierCounts[op.tier] = { count: 0, cost: 0 };
+        tierCounts[op.tier].count++;
+        tierCounts[op.tier].cost += TIERS[op.tier].cost;
+        tierCostSum += TIERS[op.tier].cost;
+    });
+    const costParts = TIER_ORDER
+        .filter(tid => tierCounts[tid])
+        .map(tid => {
+            const t = TIERS[tid];
+            const c = tierCounts[tid];
+            return `${t.name} \u00d7${c.count} (${c.cost})`;
+        });
+
+    // Gear overview
+    let totalGearUsed = 0;
+    let totalGearAvail = 0;
+    warband.operatives.forEach(op => {
+        totalGearUsed += getGearSlotsUsed(op);
+        totalGearAvail += getGearSlotsTotal(op);
+    });
+
+    const hasWarnings = warnings.length > 0;
+
+    return (
+        <div className="p-3 rounded border" style={{
+            background: 'var(--bg-panel)',
+            borderColor: hasWarnings ? 'rgba(255,190,11,0.4)' : 'var(--border)',
+        }}>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-xs uppercase tracking-wider font-bold" style={{
+                    color: 'var(--accent-cyan)',
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: '0.65rem',
+                }}>Summary</span>
+                <span className="text-sm font-bold" style={{ color: 'var(--accent-cyan)' }}>
+                    {warband.operatives.length} Operative{warband.operatives.length !== 1 ? 's' : ''}
+                </span>
+            </div>
+
+            {/* Cost breakdown */}
+            {warband.operatives.length > 0 && (
+                <div className="text-xs mb-2" style={{ color: 'var(--text-dim)', lineHeight: '1.5' }}>
+                    {costParts.join(' + ')}
+                    {' = '}
+                    <span style={{ color: ptsUsed > warband.budget ? 'var(--accent-red)' : 'var(--accent-cyan)', fontWeight: 'bold' }}>
+                        {ptsUsed}/{warband.budget} pts
+                    </span>
+                </div>
+            )}
+
+            {/* Gear overview */}
+            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                Gear slots: <span style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>{totalGearUsed}/{totalGearAvail}</span> used
+            </div>
+
+            {/* Warnings */}
+            {hasWarnings && (
+                <div className="mt-2">
+                    <button
+                        onClick={() => setWarningsOpen(!warningsOpen)}
+                        className="flex items-center gap-2 text-xs px-2 py-1 rounded transition-colors w-full"
+                        style={{
+                            background: 'rgba(255,190,11,0.1)',
+                            color: 'var(--accent-amber)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: 'Share Tech Mono, monospace',
+                        }}>
+                        <span style={{ fontSize: '0.8rem' }}>{warningsOpen ? '\u25BC' : '\u25B6'}</span>
+                        <span>\u26A0 {warnings.length} warning{warnings.length !== 1 ? 's' : ''}</span>
+                    </button>
+                    {warningsOpen && (
+                        <div className="mt-1 space-y-1 pl-2" style={{ borderLeft: '2px solid rgba(255,190,11,0.3)' }}>
+                            {warnings.map((w, i) => (
+                                <div key={i} className="text-xs" style={{
+                                    color: w.level === 'red' ? 'var(--accent-red)' : 'var(--accent-amber)',
+                                    paddingLeft: '4px',
+                                }}>
+                                    {w.text}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
 // ---- OperativeDetail ----
 function OperativeDetail({ op, onUpdate }) {
     const tierData = TIERS[op.tier];
@@ -1074,6 +1223,9 @@ function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
             <div className={`w-full md:w-80 flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r ${mobileDetailView ? 'hidden md:block' : ''}`}
                 style={{ background: 'var(--bg-dark)', borderColor: 'var(--border)' }}>
                 <div className="p-4 space-y-4">
+                    {/* Warband Summary */}
+                    <WarbandSummary warband={warband} />
+
                     {/* Warband Name */}
                     <div>
                         <label className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
@@ -1274,6 +1426,23 @@ function App() {
         }
     };
 
+    const handleDuplicateWarband = (id) => {
+        const sourceId = id || (warband && warband.id);
+        if (!sourceId) return;
+        const source = loadWarband(sourceId);
+        if (!source) return;
+        const copy = JSON.parse(JSON.stringify(source));
+        copy.id = crypto.randomUUID();
+        copy.name = (copy.name || 'Warband') + ' (Copy)';
+        // Assign new UUIDs to operatives
+        copy.operatives = copy.operatives.map(op => ({ ...op, id: crypto.randomUUID() }));
+        saveWarband(copy);
+        const newEntry = { id: copy.id, name: copy.name, lastModified: Date.now() };
+        const newIndex = [...index, newEntry];
+        setIndex(newIndex);
+        saveIndex(newIndex);
+    };
+
     const handleBack = () => {
         setView('list');
         setWarband(null);
@@ -1322,6 +1491,7 @@ function App() {
                 onBack={handleBack}
                 onExport={handleExport}
                 onImport={handleImport}
+                onDuplicate={() => handleDuplicateWarband()}
             />
             {view === 'list' ? (
                 <WarbandList
@@ -1329,6 +1499,7 @@ function App() {
                     onOpen={handleOpenWarband}
                     onDelete={handleDeleteWarband}
                     onCreate={handleCreateWarband}
+                    onDuplicate={handleDuplicateWarband}
                 />
             ) : (
                 warband && (
