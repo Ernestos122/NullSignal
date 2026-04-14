@@ -179,12 +179,12 @@ No restrictions on tier composition — build whatever crew fits your minis and 
 
 | Tier | Cost | Health | Stat Spread | Gear Slots | Abilities |
 |------|------|--------|-------------|------------|-----------|
-| **Leader** | Free | d10 | 3×d8, 2×d6 | 2 | 2 |
+| **Leader** | Free | d10 | 2×d10, 3×d8 | 2 | 2 |
 | **Specialist** | 3 pts | d8 | 2×d8, 3×d6 | 1 | 1 |
 | **Operative** | 2 pts | d8 | 1×d8, 4×d6 | 0 | 0 |
 | **Recruit** | 1 pt | d6 | 5×d6 | 0 | 0 |
 
-**Stat assignment is free** — the player chooses which of the 5 stats (CMB, REF, GRT, TEC, AWR) receive the d8 slots. This lets the same tier produce very different operatives (a combat-focused Specialist vs. a tech-focused Specialist).
+**Stat assignment is free** — the player chooses which of the 5 stats (CMB, REF, GRT, TEC, AWR) receive the higher-die slots. Leaders assign 2 stats to d10 and 3 to d8; other tiers assign their d8 and d6 slots freely. This lets the same tier produce very different operatives (a combat-focused Specialist vs. a tech-focused Specialist).
 
 **Gear slots** can be spent on premium weapons or premium gear items. Each costs 1 gear slot. Every operative may also carry one **free gear item** (Frag Grenade, Smoke Grenade, or First Aid Kit) regardless of gear slots.
 

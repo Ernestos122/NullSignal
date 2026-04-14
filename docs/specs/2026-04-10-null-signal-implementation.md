@@ -59,7 +59,7 @@ The Forge is the most complex app and the heart of the project. Build it first.
       "name": "Leader",
       "cost": 0,
       "health": "d10",
-      "statSpread": { "d8Count": 3, "d6Count": 2 },
+      "statSpread": { "d10Count": 2, "d8Count": 3 },
       "gearSlots": 2,
       "abilitySlots": 2
     },

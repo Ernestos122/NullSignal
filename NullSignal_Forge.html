@@ -114,7 +114,7 @@ const GAME_DATA = {
   "diceTypes": ["d6", "d8", "d10", "d12"],
   "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
   "tiers": [
-    { "id": "leader", "name": "Leader", "cost": 0, "health": "d10", "statSpread": { "d8Count": 3, "d6Count": 2 }, "gearSlots": 2, "abilitySlots": 2 },
+    { "id": "leader", "name": "Leader", "cost": 0, "health": "d10", "statSpread": { "d10Count": 2, "d8Count": 3 }, "gearSlots": 2, "abilitySlots": 2 },
     { "id": "specialist", "name": "Specialist", "cost": 3, "health": "d8", "statSpread": { "d8Count": 2, "d6Count": 3 }, "gearSlots": 1, "abilitySlots": 1 },
     { "id": "operative", "name": "Operative", "cost": 2, "health": "d8", "statSpread": { "d8Count": 1, "d6Count": 4 }, "gearSlots": 0, "abilitySlots": 0 },
     { "id": "recruit", "name": "Recruit", "cost": 1, "health": "d6", "statSpread": { "d8Count": 0, "d6Count": 5 }, "gearSlots": 0, "abilitySlots": 0 }
@@ -187,15 +187,19 @@ const TIER_ORDER = ['leader', 'specialist', 'operative', 'recruit'];
 // ============================================================
 // FACTORIES
 // ============================================================
-const createOperative = (tierId) => ({
-    id: crypto.randomUUID(),
-    name: '',
-    tier: tierId,
-    stats: Object.fromEntries(GAME_DATA.stats.map(s => [s, 'd6'])),
-    weapon: 'rifle',
-    abilities: [],
-    gear: [],
-});
+const createOperative = (tierId) => {
+    const tier = TIERS[tierId];
+    const baseDie = (tier && tier.statSpread.d10Count > 0) ? 'd8' : 'd6';
+    return {
+        id: crypto.randomUUID(),
+        name: '',
+        tier: tierId,
+        stats: Object.fromEntries(GAME_DATA.stats.map(s => [s, baseDie])),
+        weapon: 'rifle',
+        abilities: [],
+        gear: [],
+    };
+};
 
 const createWarband = () => ({
     id: crypto.randomUUID(),
@@ -231,7 +235,20 @@ const getGearSlotsFree = (op) => getGearSlotsTotal(op) - getGearSlotsUsed(op);
 
 const countD8s = (op) => Object.values(op.stats).filter(v => v === 'd8').length;
 
+const countD10s = (op) => Object.values(op.stats).filter(v => v === 'd10').length;
+
 const getMaxD8s = (op) => TIERS[op.tier].statSpread.d8Count;
+
+const getMaxD10s = (op) => TIERS[op.tier].statSpread.d10Count || 0;
+
+const isLeaderTier = (op) => getMaxD10s(op) > 0;
+
+// Returns the "upgrade die" and "base die" for stat toggling based on tier
+const getTierDice = (op) => isLeaderTier(op)
+    ? { baseDie: 'd8', upgradeDie: 'd10', maxUpgrades: getMaxD10s(op) }
+    : { baseDie: 'd6', upgradeDie: 'd8', maxUpgrades: getMaxD8s(op) };
+
+const countUpgradeDice = (op) => isLeaderTier(op) ? countD10s(op) : countD8s(op);
 
 const hasLeader = (wb) => wb.operatives.some(op => op.tier === 'leader');
 
@@ -261,10 +278,10 @@ const validateWarband = (wb) => {
     // Per-operative checks
     wb.operatives.forEach(op => {
         const name = op.name || 'Unnamed';
-        const d8s = countD8s(op);
-        const maxD8s = getMaxD8s(op);
-        if (d8s !== maxD8s) {
-            warnings.push({ text: `${name}: stats not fully assigned (${d8s}/${maxD8s} d8s)`, level: 'amber' });
+        const { upgradeDie, maxUpgrades } = getTierDice(op);
+        const upgrades = countUpgradeDice(op);
+        if (upgrades !== maxUpgrades) {
+            warnings.push({ text: `${name}: stats not fully assigned (${upgrades}/${maxUpgrades} ${upgradeDie}s)`, level: 'amber' });
         }
         if (!op.weapon) {
             warnings.push({ text: `${name}: no weapon selected`, level: 'amber' });
@@ -624,19 +641,24 @@ function OperativeListItem({ op, isSelected, onSelect, onDelete }) {
 
 // ---- StatAssignment ----
 function StatAssignment({ op, onUpdate }) {
-    const maxD8 = getMaxD8s(op);
-    const currentD8 = countD8s(op);
     const isRecruit = op.tier === 'recruit';
+    const { baseDie, upgradeDie, maxUpgrades } = getTierDice(op);
+    const currentUpgrades = countUpgradeDice(op);
+    const isLeader = isLeaderTier(op);
 
     const toggleStat = (stat) => {
         if (isRecruit) return;
         const current = op.stats[stat];
-        if (current === 'd6' && currentD8 < maxD8) {
-            onUpdate({ ...op, stats: { ...op.stats, [stat]: 'd8' } });
-        } else if (current === 'd8') {
-            onUpdate({ ...op, stats: { ...op.stats, [stat]: 'd6' } });
+        if (current === baseDie && currentUpgrades < maxUpgrades) {
+            onUpdate({ ...op, stats: { ...op.stats, [stat]: upgradeDie } });
+        } else if (current === upgradeDie) {
+            onUpdate({ ...op, stats: { ...op.stats, [stat]: baseDie } });
         }
     };
+
+    const upgradeColor = isLeader ? 'var(--accent-amber)' : 'var(--accent-cyan)';
+    const upgradeGlow = isLeader ? 'rgba(255,190,11,0.3)' : 'rgba(0,212,255,0.3)';
+    const upgradeBg = isLeader ? 'rgba(255,190,11,0.1)' : 'rgba(0,212,255,0.1)';
 
     return (
         <div>
@@ -644,35 +666,34 @@ function StatAssignment({ op, onUpdate }) {
                 <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
                     Stats
                 </h3>
-                <span className="text-xs" style={{ color: currentD8 === maxD8 ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
-                    {currentD8}/{maxD8} d8 assigned
+                <span className="text-xs" style={{ color: currentUpgrades === maxUpgrades ? 'var(--accent-green)' : upgradeColor }}>
+                    {currentUpgrades}/{maxUpgrades} {upgradeDie} assigned
                 </span>
             </div>
             <div className="grid grid-cols-5 gap-2">
                 {STATS.map(stat => {
-                    const isD8 = op.stats[stat] === 'd8';
-                    const canUpgrade = !isRecruit && !isD8 && currentD8 < maxD8;
+                    const isUpgraded = op.stats[stat] === upgradeDie;
                     return (
                         <button key={stat}
                             onClick={() => toggleStat(stat)}
                             disabled={isRecruit}
                             className="flex flex-col items-center p-2 rounded border transition-all"
                             style={{
-                                background: isD8 ? 'rgba(0,212,255,0.1)' : 'var(--bg-dark)',
-                                borderColor: isD8 ? 'var(--accent-cyan)' : 'var(--border)',
-                                boxShadow: isD8 ? '0 0 12px rgba(0,212,255,0.3)' : 'none',
+                                background: isUpgraded ? upgradeBg : 'var(--bg-dark)',
+                                borderColor: isUpgraded ? upgradeColor : 'var(--border)',
+                                boxShadow: isUpgraded ? `0 0 12px ${upgradeGlow}` : 'none',
                                 cursor: isRecruit ? 'not-allowed' : 'pointer',
                                 opacity: isRecruit ? 0.6 : 1,
                             }}>
                             <span className="text-xs font-bold mb-1" style={{
-                                color: isD8 ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                                color: isUpgraded ? upgradeColor : 'var(--text-dim)',
                                 fontFamily: 'Orbitron, sans-serif',
                                 fontSize: '0.65rem',
                             }}>
                                 {stat}
                             </span>
                             <span className="text-lg font-bold" style={{
-                                color: isD8 ? 'var(--text-bright)' : 'var(--text-dim)',
+                                color: isUpgraded ? 'var(--text-bright)' : 'var(--text-dim)',
                             }}>
                                 {op.stats[stat]}
                             </span>
