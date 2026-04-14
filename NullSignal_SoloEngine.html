@@ -94,6 +94,40 @@
             transition: transform 0.2s ease-out;
         }
 
+        /* Roll-all flash animation */
+        @keyframes rollAllFlash {
+            0% { background: rgba(0, 212, 255, 0.3); }
+            50% { background: rgba(255, 0, 110, 0.3); }
+            100% { background: transparent; }
+        }
+        .roll-all-flash {
+            animation: rollAllFlash 0.6s ease-out;
+        }
+
+        /* Activation tracker styles */
+        .op-row-pending {
+            border-left: 3px solid var(--accent-cyan) !important;
+        }
+        .op-row-activated {
+            border-left: 3px solid var(--accent-green) !important;
+            opacity: 0.55;
+        }
+        .op-row-down {
+            border-left: 3px solid var(--accent-amber) !important;
+            opacity: 0.5;
+        }
+        .op-row-out {
+            border-left: 3px solid var(--border) !important;
+            opacity: 0.35;
+            text-decoration: line-through;
+        }
+
+        /* Roll-all summary panel */
+        .roll-all-summary {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
         /* Animations */
         @keyframes flicker {
             0%, 100% { opacity: 1; }
@@ -786,6 +820,9 @@ function PlayView({ initialState, onNewGame }) {
     const [defenderChoiceOpen, setDefenderChoiceOpen] = useState(false);
     const [recoveryRolling, setRecoveryRolling] = useState(null);
     const [recoveryResult, setRecoveryResult] = useState(null);
+    const [rollAllResults, setRollAllResults] = useState(null);
+    const [rollAllAnimating, setRollAllAnimating] = useState(false);
+    const [endPhaseRecoveryDone, setEndPhaseRecoveryDone] = useState({});
 
     // Persist game state
     useEffect(() => {
@@ -797,6 +834,19 @@ function PlayView({ initialState, onNewGame }) {
 
     const activeOp = gameState.operatives.find(o => o.id === activeOpId);
     const activeBehavior = activeOp ? BEHAVIOR_MAP[activeOp.behaviorTag] : null;
+
+    // Activation tracker counts
+    const TIER_ORDER = { leader: 0, specialist: 1, operative: 2, recruit: 3 };
+    const activeOps = gameState.operatives.filter(o => o.health !== 'OUT');
+    const activatedCount = activeOps.filter(o =>
+        gameState.activatedThisRound.includes(o.id) || o.health === 'DOWN'
+    ).length;
+    const totalActiveCount = activeOps.length;
+
+    // End phase: all checklist items checked?
+    const endPhaseDownOps = gameState.operatives.filter(o => o.health === 'DOWN');
+    const endPhaseAllRecoveryDone = endPhaseDownOps.length === 0 || endPhaseDownOps.every(o => endPhaseRecoveryDone[o.id]);
+    const allEndPhaseChecked = endPhaseChecks.recovery && endPhaseChecks.vp && endPhaseChecks.conditions && endPhaseChecks.advance && endPhaseAllRecoveryDone;
 
     const allActivated = gameState.operatives
         .filter(o => o.health !== 'OUT' && o.health !== 'DOWN')
@@ -832,6 +882,13 @@ function PlayView({ initialState, onNewGame }) {
             const result = rollD6();
             setRollResult(result);
             setRolling(false);
+            // Auto-mark as activated when rolling
+            if (activeOpId && !gameState.activatedThisRound.includes(activeOpId)) {
+                setGameState(prev => ({
+                    ...prev,
+                    activatedThisRound: [...prev.activatedThisRound, activeOpId],
+                }));
+            }
         }, 850);
     }
 
@@ -853,14 +910,58 @@ function PlayView({ initialState, onNewGame }) {
         }));
         setShowEndPhase(false);
         setEndPhaseChecks({ recovery: false, vp: false, conditions: false, advance: false });
+        setEndPhaseRecoveryDone({});
         setActiveOpId(null);
         setRollResult(null);
+        setRollAllResults(null);
     }
 
     function openEndPhase() {
         setShowEndPhase(true);
         setActiveOpId(null);
         setRollResult(null);
+    }
+
+    function performRollAll() {
+        if (rollAllAnimating) return;
+        setRollAllAnimating(true);
+        setRollAllResults(null);
+        setActiveOpId(null);
+        setRollResult(null);
+
+        setTimeout(() => {
+            const eligibleOps = gameState.operatives.filter(o =>
+                o.health !== 'OUT' && o.health !== 'DOWN' && !gameState.activatedThisRound.includes(o.id)
+            );
+
+            const results = eligibleOps.map(op => {
+                const roll = rollD6();
+                const behavior = BEHAVIOR_MAP[op.behaviorTag];
+                const actionEntry = getActionFromRoll(op.behaviorTag, roll);
+                return {
+                    id: op.id,
+                    name: op.name || TIER_MAP[op.tier]?.name || 'Unnamed',
+                    tier: op.tier,
+                    behaviorTag: op.behaviorTag,
+                    behaviorName: behavior?.name || op.behaviorTag,
+                    roll,
+                    action: actionEntry?.action || '',
+                };
+            });
+
+            // Sort: Leaders first, then Specialists, then Operatives, then Recruits
+            results.sort((a, b) => (TIER_ORDER[a.tier] || 99) - (TIER_ORDER[b.tier] || 99));
+
+            // Mark all rolled operatives as activated
+            const rolledIds = results.map(r => r.id);
+            setGameState(prev => ({
+                ...prev,
+                activatedThisRound: [...prev.activatedThisRound, ...rolledIds],
+            }));
+
+            setRollAllResults(results);
+            setRollAllAnimating(false);
+        }, 900);
     }
 
     function performRecovery(opId) {
@@ -884,8 +985,6 @@ function PlayView({ initialState, onNewGame }) {
 
     const roundProgress = ((gameState.currentRound) / totalRounds) * 100;
 
-    const downOps = gameState.operatives.filter(o => o.health === 'DOWN');
-
     return (
         <div className="flex flex-col h-full">
             {/* Turn Tracker Top Bar */}
@@ -902,6 +1001,12 @@ function PlayView({ initialState, onNewGame }) {
                     )}
                 </div>
                 <div className="flex items-center gap-2">
+                    <button onClick={performRollAll}
+                        disabled={rollAllAnimating || activatedCount >= totalActiveCount}
+                        className="heading-font text-xs font-bold px-3 py-1.5 rounded transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
+                        style={{ background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta))', color: '#fff', border: 'none' }}>
+                        {rollAllAnimating ? 'ROLLING...' : 'ROLL ALL AI'}
+                    </button>
                     <button onClick={openEndPhase}
                         className="text-xs font-bold px-3 py-1.5 rounded transition-all hover:scale-105"
                         style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
@@ -925,41 +1030,76 @@ function PlayView({ initialState, onNewGame }) {
 
                 {/* Left Panel - Operative List */}
                 <div className="lg:w-80 xl:w-96 overflow-y-auto p-4 space-y-2" style={{ background: 'var(--bg-dark)', borderRight: '1px solid var(--border)' }}>
-                    <h3 className="heading-font text-sm font-bold tracking-wider mb-2" style={{ color: 'var(--accent-cyan)' }}>
-                        AI OPERATIVES
-                    </h3>
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
+                            AI OPERATIVES
+                        </h3>
+                        <span className="text-xs font-bold px-2 py-1 rounded"
+                            style={{
+                                background: activatedCount >= totalActiveCount ? 'rgba(0,245,160,0.15)' : 'rgba(0,212,255,0.1)',
+                                color: activatedCount >= totalActiveCount ? 'var(--accent-green)' : 'var(--accent-cyan)',
+                                border: `1px solid ${activatedCount >= totalActiveCount ? 'var(--accent-green)' : 'var(--accent-cyan)'}44`,
+                            }}>
+                            Activated: {activatedCount}/{totalActiveCount} this round
+                        </span>
+                    </div>
                     {gameState.operatives.map(op => {
                         const isOut = op.health === 'OUT';
                         const isDown = op.health === 'DOWN';
                         const isActivated = gameState.activatedThisRound.includes(op.id);
                         const isSelected = activeOpId === op.id;
 
+                        // Determine row class for activation tracker
+                        let rowClass = 'op-row-pending';
+                        if (isOut) rowClass = 'op-row-out';
+                        else if (isDown) rowClass = 'op-row-down';
+                        else if (isActivated) rowClass = 'op-row-activated';
+
                         return (
                             <div key={op.id}
-                                className={`p-3 rounded-lg transition-all cursor-pointer ${isSelected ? 'glow-cyan' : ''}`}
+                                className={`p-3 rounded-lg transition-all cursor-pointer ${rowClass} ${isSelected ? 'glow-cyan' : ''}`}
                                 onClick={() => !isOut && selectOperative(op.id)}
                                 style={{
                                     background: isSelected ? 'rgba(0,212,255,0.08)' : 'var(--bg-panel)',
                                     border: `1px solid ${isSelected ? 'var(--accent-cyan)' : 'var(--border)'}`,
-                                    opacity: isOut ? 0.4 : (isDown ? 0.6 : 1),
-                                    textDecoration: isOut ? 'line-through' : 'none',
                                 }}>
                                 <div className="flex items-center justify-between gap-2 mb-1">
-                                    <span className="text-sm font-bold truncate" style={{ color: isOut ? 'var(--text-dim)' : 'var(--text-bright)' }}>
-                                        {op.name || TIER_MAP[op.tier]?.name || 'Unnamed'}
-                                    </span>
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        {/* Activation checkbox indicator */}
+                                        <span className="text-sm shrink-0" style={{ color: isOut ? 'var(--text-dim)' : (isActivated || isDown) ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
+                                            {isOut ? '\u2716' : (isActivated || isDown) ? '\u2713' : '\u25CB'}
+                                        </span>
+                                        <span className="text-sm font-bold truncate" style={{
+                                            color: isOut ? 'var(--text-dim)' : 'var(--text-bright)',
+                                            textDecoration: isOut ? 'line-through' : 'none',
+                                        }}>
+                                            {op.name || TIER_MAP[op.tier]?.name || 'Unnamed'}
+                                        </span>
+                                    </div>
                                     <HealthBadge health={op.health} onClick={(e) => { e.stopPropagation(); degradeHealth(op.id); }} />
                                 </div>
-                                <div className="flex items-center gap-2">
+                                <div className="flex items-center gap-2 flex-wrap">
                                     <TierBadge tierId={op.tier} />
                                     <TagBadge tagId={op.behaviorTag} />
-                                    {isActivated && !isOut && (
-                                        <span className="text-xs px-1.5 py-0.5 rounded"
-                                            style={{ background: 'rgba(0,245,160,0.15)', color: 'var(--accent-green)' }}>
+                                    {isActivated && !isOut && !isDown && (
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                            style={{ background: 'rgba(0,245,160,0.2)', color: 'var(--accent-green)', border: '1px solid var(--accent-green)44' }}>
                                             DONE
                                         </span>
                                     )}
-                                    {isDown && (
+                                    {isDown && !isOut && (
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                            style={{ background: 'rgba(255,190,11,0.2)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                                            DOWN
+                                        </span>
+                                    )}
+                                    {isOut && (
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                            style={{ background: 'rgba(102,20,41,0.3)', color: '#661429', border: '1px solid #66142944' }}>
+                                            OUT
+                                        </span>
+                                    )}
+                                    {isDown && !isOut && (
                                         <button onClick={(e) => { e.stopPropagation(); performRecovery(op.id); }}
                                             disabled={recoveryRolling === op.id}
                                             className="text-xs px-2 py-0.5 rounded transition-all hover:scale-105"
@@ -990,11 +1130,65 @@ function PlayView({ initialState, onNewGame }) {
                     {showEndPhase && (
                         <div className="rounded-lg p-6 fade-in-up" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-amber)44' }}>
                             <h3 className="heading-font text-lg font-bold tracking-wider mb-4" style={{ color: 'var(--accent-amber)' }}>
-                                END PHASE
+                                END PHASE CHECKLIST
                             </h3>
                             <div className="space-y-3">
+                                {/* Recovery checklist item with inline DOWN operative list */}
+                                <div className="p-2 rounded transition-all hover:bg-white/5">
+                                    <label className="flex items-center gap-3 cursor-pointer text-sm">
+                                        <input type="checkbox" checked={endPhaseChecks.recovery}
+                                            onChange={e => setEndPhaseChecks(prev => ({ ...prev, recovery: e.target.checked }))}
+                                            className="w-4 h-4 accent-cyan-400" />
+                                        <span style={{ color: endPhaseChecks.recovery ? 'var(--accent-green)' : 'var(--text-primary)', textDecoration: endPhaseChecks.recovery ? 'line-through' : 'none' }}>
+                                            Recovery rolls for DOWN operatives
+                                        </span>
+                                    </label>
+                                    {endPhaseDownOps.length > 0 && (
+                                        <div className="mt-2 ml-7 p-3 rounded space-y-2" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                            <div className="text-xs mb-1" style={{ color: 'var(--accent-amber)' }}>
+                                                Roll recovery for each DOWN operative:
+                                            </div>
+                                            {endPhaseDownOps.map(op => (
+                                                <div key={op.id} className="flex items-center justify-between py-1.5 px-2 rounded"
+                                                    style={{ background: endPhaseRecoveryDone[op.id] ? 'rgba(0,245,160,0.05)' : 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs" style={{ color: endPhaseRecoveryDone[op.id] ? 'var(--accent-green)' : 'var(--accent-amber)' }}>
+                                                            {endPhaseRecoveryDone[op.id] ? '\u2713' : '\u25CB'}
+                                                        </span>
+                                                        <span className="text-sm" style={{ color: endPhaseRecoveryDone[op.id] ? 'var(--accent-green)' : 'var(--text-primary)' }}>
+                                                            {op.name || TIER_MAP[op.tier]?.name}
+                                                        </span>
+                                                        {endPhaseRecoveryDone[op.id] && (
+                                                            <span className="text-xs" style={{ color: endPhaseRecoveryDone[op.id].success ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                                                                (Rolled {endPhaseRecoveryDone[op.id].roll} - {endPhaseRecoveryDone[op.id].success ? 'Recovered!' : 'Failed'})
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <button onClick={() => {
+                                                            if (recoveryRolling || endPhaseRecoveryDone[op.id]) return;
+                                                            setRecoveryRolling(op.id);
+                                                            setTimeout(() => {
+                                                                const result = rollD6();
+                                                                const success = result >= 4;
+                                                                if (success) updateOp(op.id, { health: 'd6' });
+                                                                setEndPhaseRecoveryDone(prev => ({ ...prev, [op.id]: { roll: result, success } }));
+                                                                setRecoveryResult({ opId: op.id, roll: result, success });
+                                                                setRecoveryRolling(null);
+                                                            }, 850);
+                                                        }}
+                                                        disabled={recoveryRolling === op.id || !!endPhaseRecoveryDone[op.id]}
+                                                        className="text-xs font-bold px-3 py-1 rounded transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                        style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                                                        {recoveryRolling === op.id ? 'Rolling...' : endPhaseRecoveryDone[op.id] ? 'Done' : 'Roll Recovery'}
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Other checklist items */}
                                 {[
-                                    { key: 'recovery', label: 'Recovery rolls for DOWN operatives' },
                                     { key: 'vp', label: 'Score VP for held objectives' },
                                     { key: 'conditions', label: 'Check scenario conditions' },
                                     { key: 'advance', label: 'Advance round' },
@@ -1009,33 +1203,86 @@ function PlayView({ initialState, onNewGame }) {
                                     </label>
                                 ))}
 
-                                {downOps.length > 0 && (
-                                    <div className="mt-3 p-3 rounded" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
-                                        <div className="text-xs mb-2" style={{ color: 'var(--accent-amber)' }}>DOWN operatives needing recovery:</div>
-                                        {downOps.map(op => (
-                                            <div key={op.id} className="flex items-center justify-between py-1">
-                                                <span className="text-sm">{op.name || TIER_MAP[op.tier]?.name}</span>
-                                                <button onClick={() => performRecovery(op.id)}
-                                                    disabled={recoveryRolling === op.id}
-                                                    className="text-xs px-2 py-1 rounded transition-all hover:scale-105"
-                                                    style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
-                                                    {recoveryRolling === op.id ? 'Rolling...' : 'Roll Recovery'}
-                                                </button>
-                                            </div>
-                                        ))}
+                                {/* Completion status hint */}
+                                {!allEndPhaseChecked && (
+                                    <div className="text-xs p-2 rounded" style={{ background: 'rgba(255,190,11,0.08)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)22' }}>
+                                        Check off all items{endPhaseDownOps.length > 0 ? ' and roll recovery for all DOWN operatives' : ''} to unlock the advance button.
                                     </div>
                                 )}
 
-                                <button onClick={nextRound} disabled={gameState.currentRound >= totalRounds}
-                                    className="heading-font w-full text-sm font-bold py-3 mt-4 rounded transition-all hover:scale-[1.01] disabled:opacity-30"
+                                <button onClick={nextRound} disabled={gameState.currentRound >= totalRounds || !allEndPhaseChecked}
+                                    className="heading-font w-full text-sm font-bold py-3 mt-4 rounded transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
                                     style={{
-                                        background: 'linear-gradient(135deg, var(--accent-amber), var(--accent-magenta))',
-                                        color: '#fff',
+                                        background: allEndPhaseChecked ? 'linear-gradient(135deg, var(--accent-amber), var(--accent-magenta))' : 'var(--bg-card)',
+                                        color: allEndPhaseChecked ? '#fff' : 'var(--text-dim)',
                                         border: 'none',
                                     }}>
-                                    {gameState.currentRound >= totalRounds ? 'GAME OVER' : `COMPLETE END PHASE — ADVANCE TO ROUND ${gameState.currentRound + 1}`}
+                                    {gameState.currentRound >= totalRounds ? 'GAME OVER' : `COMPLETE END PHASE \u2014 ADVANCE TO ROUND ${gameState.currentRound + 1}`}
                                 </button>
                             </div>
+                        </div>
+                    )}
+
+                    {/* Roll All Summary Panel */}
+                    {!showEndPhase && rollAllResults && rollAllResults.length > 0 && (
+                        <div className="rounded-lg p-4 fade-in-up roll-all-summary" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-magenta)44' }}>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="heading-font text-lg font-bold tracking-wider" style={{ color: 'var(--accent-magenta)' }}>
+                                    ROLL ALL RESULTS
+                                </h3>
+                                <button onClick={() => setRollAllResults(null)}
+                                    className="text-xs font-bold px-3 py-1 rounded transition-all hover:scale-105"
+                                    style={{ background: 'rgba(255,51,102,0.15)', color: 'var(--accent-red)', border: '1px solid var(--accent-red)44' }}>
+                                    DISMISS
+                                </button>
+                            </div>
+                            <div className="space-y-2">
+                                {rollAllResults.map((r, idx) => {
+                                    const tc = TAG_COLORS[r.behaviorTag] || {};
+                                    return (
+                                        <div key={r.id} className="p-3 rounded-lg roll-all-flash"
+                                            style={{
+                                                background: 'var(--bg-card)',
+                                                border: `1px solid ${tc.border || 'var(--border)'}44`,
+                                                animationDelay: `${idx * 0.08}s`,
+                                                animationFillMode: 'backwards',
+                                            }}>
+                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold" style={{ color: 'var(--text-bright)' }}>
+                                                        {r.name}
+                                                    </span>
+                                                    <TierBadge tierId={r.tier} />
+                                                    <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                                        style={{ background: tc.bg || 'var(--bg-panel)', color: tc.text || 'var(--text-dim)', border: `1px solid ${tc.border || 'var(--border)'}44` }}>
+                                                        {r.behaviorName}
+                                                    </span>
+                                                </div>
+                                                <span className="heading-font text-lg font-black px-2 py-0.5 rounded"
+                                                    style={{ background: 'rgba(0,245,160,0.15)', color: 'var(--accent-green)', border: '1px solid var(--accent-green)44', minWidth: '2rem', textAlign: 'center' }}>
+                                                    {r.roll}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm mt-1" style={{ color: 'var(--text-primary)' }}>
+                                                {r.action}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="text-xs mt-3 text-center" style={{ color: 'var(--text-dim)' }}>
+                                {rollAllResults.length} operative{rollAllResults.length !== 1 ? 's' : ''} rolled and marked activated
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Roll All Animating Indicator */}
+                    {!showEndPhase && rollAllAnimating && (
+                        <div className="rounded-lg p-8 text-center fade-in-up" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-cyan)44' }}>
+                            <div className="text-4xl mb-3 dice-rolling" style={{ color: 'var(--accent-cyan)', fontFamily: "'Orbitron', sans-serif", display: 'inline-block' }}>&#x2731;</div>
+                            <p className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
+                                ROLLING ALL AI OPERATIVES...
+                            </p>
                         </div>
                     )}
 
