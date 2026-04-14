@@ -71,6 +71,14 @@ d10 → d8 → d6 (floor) → DOWN → OUT
 
 Brawls are always simultaneous. Firefights give the defender a choice: Return Fire (mutual exchange) or Take Cover (defensive). No free attacks.
 
+### 3.0 Line of Sight (LOS)
+
+- An operative can see a target if you can draw an unobstructed straight line from any part of the operative's base to any part of the target's base.
+- Terrain features (walls, buildings, large containers) block LOS entirely if the line passes through them.
+- Other operatives (friendly or enemy) do NOT block LOS — you can shoot past them.
+- If in doubt, get down to model-eye-level and check. If you can see any part of the target, you have LOS.
+- **Partial LOS** = the target is partially obscured by terrain. This counts as Cover (attacker's CMB shifts down one step).
+
 ### 3.1 Firefights (Ranged Combat)
 
 1. Active operative declares Shoot action and chooses a target in **line of sight**
@@ -105,9 +113,29 @@ Brawls are always simultaneous. Firefights give the defender a choice: Return Fi
 
 Note: In brawls, there is no Take Cover option — both fighters are committed. The mutual exchange IS the defense. REF governs the Take Cover response in firefights and disengaging from melee.
 
-### 3.3 Opposed Checks
+### 3.3 Engagement & Disengagement
+
+**Engagement:** An operative in base contact with an enemy is **engaged**. Engaged operatives cannot Shoot or move away — they must Fight, Use Gear, or Interact on their activation.
+
+**Disengagement:** An engaged operative may attempt to disengage instead of fighting. Roll 2 REF dice — on 1+ success, the operative breaks free and may move up to 3" away (not their full movement). On failure, the operative stays engaged and loses their action for this activation. The enemy does NOT get a free attack.
+
+### 3.4 Opposed Checks
 
 For non-combat contested actions (e.g., hacking vs. firewall, spotting vs. stealth), both sides roll 2 dice of the relevant stat type. More successes wins. Ties go to the defender/status quo.
+
+### 3.5 Terrain & Cover
+
+Players assign terrain types when setting up the table before the game starts.
+
+**Open Ground:** No effect. Full movement, no cover.
+
+**Light Cover** (low walls, crates, vehicles): Operatives behind it gain Cover (attacker's CMB shifts down one step). Blocks LOS to models fully behind it. Does not slow movement.
+
+**Heavy Cover** (thick walls, buildings, reinforced positions): Operatives behind it gain Heavy Cover (attacker's CMB shifts down TWO steps). Blocks LOS completely. Does not slow movement.
+
+**Difficult Terrain** (rubble, debris, dense vegetation, barricades): Costs double movement to cross (1" of movement = 0.5" actual distance, effectively halving move speed through it). Does not provide cover by itself.
+
+**Height:** An operative on elevated terrain (rooftops, upper floors) has LOS over models and low terrain below them. They gain Light Cover against attackers below them (+1 height advantage).
 
 ---
 
@@ -277,6 +305,15 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 | **Ghost** | When this operative is hidden, enemies must pass AWR check at -1 to spot them |
 | **Heavy Weapons** | May carry one premium weapon without spending a gear slot |
 | **Commander** | All friendly operatives within 6" gain +1 to GRT for morale checks |
+
+### Hidden Status (Stealthy & Ghost Clarification)
+
+An operative with the Stealthy or Ghost ability starts the game Hidden. While Hidden:
+
+- Enemies beyond 12" must pass an AWR check (roll 2 AWR dice, 1+ success) before they can target this operative with a Shoot action. Failure means they cannot shoot this target this activation (they may choose a different target or action).
+- Ghost makes this check harder: enemies roll at -1 die (so 1 AWR die instead of 2).
+- An operative loses Hidden status when they: Shoot (unless they have a Suppressor), Fight, or are successfully targeted by an enemy. They remain Hidden if they only Move, Interact, or Use Gear.
+- Hidden status is not regained once lost (for simplicity).
 
 ---
 

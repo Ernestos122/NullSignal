@@ -241,15 +241,16 @@ const SECTIONS = [
     { id: 'core-stats', title: '2. Core Stats' },
     { id: 'health-system', title: '3. Health System' },
     { id: 'combat', title: '4. Combat' },
-    { id: 'turn-structure', title: '5. Turn Structure' },
-    { id: 'warband-building', title: '6. Warband Building' },
-    { id: 'weapons', title: '7. Weapons' },
-    { id: 'gear', title: '8. Gear' },
-    { id: 'abilities', title: '9. Abilities' },
-    { id: 'solo-ai', title: '10. Solo / Co-op AI' },
-    { id: 'ai-profiles', title: '11. Premade AI Profiles' },
-    { id: 'scenarios', title: '12. Scenarios' },
-    { id: 'quick-reference', title: '13. Quick Reference' },
+    { id: 'terrain', title: '5. Terrain & Cover' },
+    { id: 'turn-structure', title: '6. Turn Structure' },
+    { id: 'warband-building', title: '7. Warband Building' },
+    { id: 'weapons', title: '8. Weapons' },
+    { id: 'gear', title: '9. Gear' },
+    { id: 'abilities', title: '10. Abilities' },
+    { id: 'solo-ai', title: '11. Solo / Co-op AI' },
+    { id: 'ai-profiles', title: '12. Premade AI Profiles' },
+    { id: 'scenarios', title: '13. Scenarios' },
+    { id: 'quick-reference', title: '14. Quick Reference' },
 ];
 
 // ============================================================
@@ -463,6 +464,22 @@ const CombatSection = () => (
     <div>
         <SectionHeading id="combat" title="4. Combat" />
 
+        <SubHeading>Line of Sight (LOS)</SubHeading>
+        <RuleBox color="cyan">
+            <div style={{ textAlign: 'center', fontSize: 14, fontWeight: 'bold', marginBottom: 10, color: 'var(--accent-cyan)' }}>
+                If you can see it, you can shoot it. Terrain blocks, operatives don't.
+            </div>
+        </RuleBox>
+        <Para>An operative can see a target if you can draw an unobstructed straight line from any part of the operative's base to any part of the target's base.</Para>
+        <RuleBox color="green">
+            <ul style={{ paddingLeft: 20, lineHeight: 2.2 }}>
+                <li>Terrain features (walls, buildings, large containers) <Bright>block LOS entirely</Bright> if the line passes through them.</li>
+                <li>Other operatives (friendly or enemy) do <Bright>NOT</Bright> block LOS — you can shoot past them.</li>
+                <li>If in doubt, get down to model-eye-level and check. If you can see any part of the target, you have LOS.</li>
+                <li><CyanText>Partial LOS</CyanText> = the target is partially obscured by terrain. This counts as <Bright>Cover</Bright> (attacker's CMB shifts down one step).</li>
+            </ul>
+        </RuleBox>
+
         <SubHeading>Firefights (Ranged Combat)</SubHeading>
         <Para>When an operative shoots, the defender must make a <Bright>tactical choice</Bright>: trade fire or dive for cover.</Para>
         <RuleBox color="cyan">
@@ -532,6 +549,13 @@ const CombatSection = () => (
             </ul>
         </RuleBox>
 
+        <SubHeading>Engagement & Disengagement</SubHeading>
+        <RuleBox color="magenta">
+            <Para><Bright>Engagement:</Bright> An operative in base contact with an enemy is <CyanText>engaged</CyanText>. Engaged operatives cannot Shoot or move away — they must Fight, Use Gear, or Interact on their activation.</Para>
+            <Para><Bright>Disengagement:</Bright> An engaged operative may attempt to disengage instead of fighting. Roll <CyanText>2 REF dice</CyanText> — on 1+ success, the operative breaks free and may move up to <Bright>3"</Bright> away (not their full movement). On failure, the operative stays engaged and loses their action for this activation.</Para>
+            <Para><Dim>The enemy does NOT get a free attack when you attempt to disengage.</Dim></Para>
+        </RuleBox>
+
         <SubHeading>Opposed Checks</SubHeading>
         <Para>
             Some situations call for an opposed check: both sides roll 2 dice of the relevant stat. The side
@@ -540,9 +564,41 @@ const CombatSection = () => (
     </div>
 );
 
+const TerrainSection = () => (
+    <div>
+        <SectionHeading id="terrain" title="5. Terrain & Cover" />
+        <Para>Players assign terrain types when setting up the table before the game starts. Keep it simple — agree on what each piece of terrain counts as before the first round.</Para>
+
+        <DataTable
+            headers={['Terrain Type', 'Cover', 'Movement', 'LOS']}
+            rows={[
+                [<Bright>Open Ground</Bright>, 'None', 'Normal', 'No effect'],
+                [<Bright>Light Cover</Bright>, <span>Cover <Dim>(CMB -1 step)</Dim></span>, 'Normal', 'Blocks if fully behind'],
+                [<Bright>Heavy Cover</Bright>, <span>Heavy Cover <Dim>(CMB -2 steps)</Dim></span>, 'Normal', 'Blocks completely'],
+                [<Bright>Difficult Terrain</Bright>, 'None', <span style={{ color: 'var(--accent-amber)' }}>Double cost</span>, 'No effect'],
+            ]}
+        />
+
+        <SubHeading>Open Ground</SubHeading>
+        <Para>No effect. Full movement, no cover. The default for any area not designated as terrain.</Para>
+
+        <SubHeading>Light Cover</SubHeading>
+        <Para>Low walls, crates, vehicles. Operatives behind it gain Cover (attacker's CMB shifts down one step). Blocks LOS to models fully behind it. Does not slow movement.</Para>
+
+        <SubHeading>Heavy Cover</SubHeading>
+        <Para>Thick walls, buildings, reinforced positions. Operatives behind it gain Heavy Cover (attacker's CMB shifts down TWO steps). Blocks LOS completely. Does not slow movement.</Para>
+
+        <SubHeading>Difficult Terrain</SubHeading>
+        <Para>Rubble, debris, dense vegetation, barricades. Costs double movement to cross (1" of movement = 0.5" actual distance, effectively halving move speed through it). Does not provide cover by itself.</Para>
+
+        <SubHeading>Height</SubHeading>
+        <Para>An operative on elevated terrain (rooftops, upper floors) has LOS over models and low terrain below them. They gain Light Cover against attackers below them (+1 height advantage).</Para>
+    </div>
+);
+
 const TurnStructureSection = () => (
     <div>
-        <SectionHeading id="turn-structure" title="5. Turn Structure" />
+        <SectionHeading id="turn-structure" title="6. Turn Structure" />
         <Para>A game of Null Signal is played over <Bright>5–6 fixed rounds</Bright> (set by the scenario).</Para>
 
         <SubHeading>Round Sequence</SubHeading>
@@ -585,7 +641,7 @@ const TurnStructureSection = () => (
 
 const WarbandBuildingSection = () => (
     <div>
-        <SectionHeading id="warband-building" title="6. Warband Building" />
+        <SectionHeading id="warband-building" title="7. Warband Building" />
         <Para>
             Each warband is built to a <Bright>point budget</Bright>. The standard game uses <Bright>10 points</Bright>.
             Your <Bright>Leader is free</Bright> — every warband gets exactly one.
@@ -658,7 +714,7 @@ const WeaponsSection = () => {
     const premium = GAME_DATA.weapons.filter(w => w.premium);
     return (
         <div>
-            <SectionHeading id="weapons" title="7. Weapons" />
+            <SectionHeading id="weapons" title="8. Weapons" />
             <Para>
                 Every operative carries one weapon. <Bright>Standard weapons</Bright> are free and available to all.{' '}
                 <Bright>Premium weapons</Bright> cost 1 gear slot and are only available to operatives with gear slots.
@@ -709,7 +765,7 @@ const GearSection = () => {
     const premiumGear = (GAME_DATA.gear || []).filter(g => g.gearCost > 0);
     return (
     <div>
-        <SectionHeading id="gear" title="8. Gear" />
+        <SectionHeading id="gear" title="9. Gear" />
         <Para>
             Gear is split into two categories: <Bright>free gear</Bright> available to every operative, and{' '}
             <Bright>premium gear</Bright> that costs gear slots.
@@ -754,7 +810,7 @@ const GearSection = () => {
 
 const AbilitiesSection = () => (
     <div>
-        <SectionHeading id="abilities" title="9. Abilities" />
+        <SectionHeading id="abilities" title="10. Abilities" />
         <Para>
             Abilities are special skills assigned during warband building. Only <Bright>Leaders</Bright> and{' '}
             <Bright>Specialists</Bright> have ability slots.
@@ -766,12 +822,28 @@ const AbilitiesSection = () => (
                 a.effect,
             ])}
         />
+
+        <SubHeading>Hidden Status (Stealthy & Ghost)</SubHeading>
+        <Para>An operative with the <Bright>Stealthy</Bright> or <Bright>Ghost</Bright> ability starts the game <CyanText>Hidden</CyanText>.</Para>
+        <RuleBox color="green">
+            <Para><Bright>While Hidden:</Bright></Para>
+            <ul style={{ paddingLeft: 20, lineHeight: 2.2 }}>
+                <li>Enemies beyond <Bright>12"</Bright> must pass an AWR check (roll 2 AWR dice, 1+ success) before they can target this operative with a Shoot action. Failure = cannot shoot this target this activation.</li>
+                <li><Bright>Ghost</Bright> makes this harder: enemies roll at -1 die (1 AWR die instead of 2).</li>
+            </ul>
+            <Para><Bright>Losing Hidden:</Bright></Para>
+            <ul style={{ paddingLeft: 20, lineHeight: 2.2 }}>
+                <li>An operative loses Hidden when they: <CyanText>Shoot</CyanText> (unless they have a Suppressor), <CyanText>Fight</CyanText>, or are successfully targeted by an enemy.</li>
+                <li>They remain Hidden if they only Move, Interact, or Use Gear.</li>
+                <li><Dim>Hidden status is not regained once lost (for simplicity).</Dim></li>
+            </ul>
+        </RuleBox>
     </div>
 );
 
 const SoloAISection = () => (
     <div>
-        <SectionHeading id="solo-ai" title="10. Solo / Co-op AI" />
+        <SectionHeading id="solo-ai" title="11. Solo / Co-op AI" />
         <Para>
             Null Signal includes a full solo and co-op AI system. Enemy operatives are assigned a{' '}
             <Bright>behavior tag</Bright> that determines how they act each activation. Roll 1d6 on the
@@ -1188,7 +1260,7 @@ const AIProfileCard = ({ profile }) => {
 
 const AIProfilesSection = () => (
     <div>
-        <SectionHeading id="ai-profiles" title="11. Premade AI Profiles" />
+        <SectionHeading id="ai-profiles" title="12. Premade AI Profiles" />
         <Para>
             These are ready-to-play enemy warbands for solo, co-op, or quick PvP games. Each profile is built
             to the standard <Bright>10-point budget</Bright> with a distinct playstyle and tactical identity.
@@ -1210,7 +1282,7 @@ const ScenariosSection = () => {
     const pveScenarios = GAME_DATA.scenarios.filter(s => s.category === 'pve');
     return (
     <div>
-        <SectionHeading id="scenarios" title="12. Scenarios" />
+        <SectionHeading id="scenarios" title="13. Scenarios" />
         <Para>
             Each game uses a scenario that defines the mission, objectives, deployment, round count, and special rules.
             Each scenario has its own VP conditions in addition to the universal scoring rules below.
@@ -1260,7 +1332,7 @@ const QuickReferenceSection = () => {
     const premium = GAME_DATA.weapons.filter(w => w.premium);
     return (
         <div>
-            <SectionHeading id="quick-reference" title="13. Quick Reference" />
+            <SectionHeading id="quick-reference" title="14. Quick Reference" />
             <Para><Dim>Condensed tables for use during play. Print this section or keep it open on a second screen.</Dim></Para>
 
             <SubHeading>Health Track</SubHeading>
@@ -1335,6 +1407,39 @@ const QuickReferenceSection = () => {
                 </div>
             </RuleBox>
 
+            <SubHeading>Line of Sight</SubHeading>
+            <RuleBox color="cyan">
+                <div style={{ fontSize: 13, lineHeight: 2 }}>
+                    Draw a line from base to base. <Bright>Terrain blocks, operatives don't.</Bright> Partial LOS = Cover (CMB -1 step).
+                </div>
+            </RuleBox>
+
+            <SubHeading>Terrain Effects</SubHeading>
+            <DataTable compact headers={['Terrain', 'Cover', 'Movement', 'LOS']}
+                rows={[
+                    ['Open Ground', 'None', 'Normal', 'No effect'],
+                    ['Light Cover', 'CMB -1 step', 'Normal', 'Blocks if fully behind'],
+                    ['Heavy Cover', 'CMB -2 steps', 'Normal', 'Blocks completely'],
+                    ['Difficult', 'None', 'Double cost', 'No effect'],
+                    ['Height', 'Light Cover vs below', 'Normal', 'See over low terrain'],
+                ]}
+            />
+
+            <SubHeading>Disengage</SubHeading>
+            <RuleBox color="magenta">
+                <div style={{ fontSize: 13, lineHeight: 2 }}>
+                    Roll <Bright>2 REF dice</Bright>. 1+ success = break free, move up to 3". Fail = stay engaged, lose action. No free attacks.
+                </div>
+            </RuleBox>
+
+            <SubHeading>Hidden Status</SubHeading>
+            <RuleBox color="green">
+                <div style={{ fontSize: 13, lineHeight: 2 }}>
+                    <Bright>Stealthy/Ghost:</Bright> Starts Hidden. Enemies beyond 12" need AWR check (2 dice, 1+ success) to target. Ghost = 1 die instead.
+                    Lost when: Shoot (no Suppressor), Fight, or successfully targeted. <Dim>Not regained.</Dim>
+                </div>
+            </RuleBox>
+
             <SubHeading>Key Numbers</SubHeading>
             <RuleBox color="cyan">
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 13 }}>
@@ -1344,6 +1449,8 @@ const QuickReferenceSection = () => {
                     <div><Bright>Unarmed Melee:</Bright> 1 die</div>
                     <div><Bright>Default Stat Check:</Bright> 2 dice</div>
                     <div><Bright>Standard Budget:</Bright> 10 pts</div>
+                    <div><Bright>Disengage:</Bright> 2 REF dice, move 3"</div>
+                    <div><Bright>Hidden Check:</Bright> 2 AWR dice at 12"+</div>
                 </div>
             </RuleBox>
 
@@ -1570,6 +1677,7 @@ const App = () => {
                 <CoreStatsSection />
                 <HealthSystemSection />
                 <CombatSection />
+                <TerrainSection />
                 <TurnStructureSection />
                 <WarbandBuildingSection />
                 <WeaponsSection />

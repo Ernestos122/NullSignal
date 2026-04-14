@@ -1207,6 +1207,29 @@ function PlayView({ initialState, onNewGame }) {
                         )}
                     </div>
 
+                    {/* AI Engagement Behavior */}
+                    <div className="rounded-lg p-4" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-magenta)22' }}>
+                        <h3 className="heading-font text-sm font-bold tracking-wider mb-3" style={{ color: 'var(--accent-magenta)' }}>
+                            AI ENGAGEMENT RULES
+                        </h3>
+                        <div className="space-y-2">
+                            <div className="flex items-start gap-3 text-sm p-2 rounded"
+                                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                <span className="heading-font font-bold shrink-0" style={{ color: 'var(--accent-cyan)' }}>
+                                    Default:
+                                </span>
+                                <span style={{ color: 'var(--text-primary)' }}>If engaged at start of activation, AI always <strong style={{ color: 'var(--accent-magenta)' }}>Fights</strong> (never attempts to disengage).</span>
+                            </div>
+                            <div className="flex items-start gap-3 text-sm p-2 rounded"
+                                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                <span className="heading-font font-bold shrink-0" style={{ color: 'var(--accent-amber)' }}>
+                                    Exception:
+                                </span>
+                                <span style={{ color: 'var(--text-primary)' }}><strong style={{ color: 'var(--accent-amber)' }}>Cautious</strong> AI operatives attempt to <strong style={{ color: 'var(--accent-green)' }}>disengage first</strong> (2 REF dice, 1+ success = break free, move 3").</span>
+                            </div>
+                        </div>
+                    </div>
+
                     {/* Health Tracker Legend */}
                     <div className="rounded-lg p-4" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
                         <h3 className="heading-font text-sm font-bold tracking-wider mb-3" style={{ color: 'var(--text-dim)' }}>
