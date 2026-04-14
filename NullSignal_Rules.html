@@ -672,6 +672,258 @@ const WarbandBuildingSection = () => (
             Standard weapons are free and don't use slots. Every operative may also carry one <CyanText>free gear item</CyanText> regardless of gear slots.
         </Para>
 
+        <SubHeading>Building Your Warband</SubHeading>
+        <Para>
+            Use these eight steps to construct a complete warband. You do not need the Forge app — everything here is self-contained.
+        </Para>
+
+        {/* ── STEP 1 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 1 — CHOOSE YOUR BUDGET</div>
+            <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li><Bright>Standard game:</Bright> <CyanText>10 points</CyanText></li>
+                <li><Bright>Small (Skirmish):</Bright> <CyanText>6 points</CyanText></li>
+                <li><Bright>Large:</Bright> <CyanText>15 points</CyanText></li>
+            </ul>
+            <Para style={{ marginTop: 8, marginBottom: 0 }}>
+                Your <Bright>Leader is always free</Bright> and does not count against the budget.
+                Every warband must have <Bright>exactly one Leader</Bright>.
+            </Para>
+        </RuleBox>
+
+        {/* ── STEP 2 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 2 — CHOOSE YOUR OPERATIVES</div>
+            <Para>Spend your budget on additional operatives (the Leader is already free):</Para>
+            <DataTable
+                compact
+                headers={['Tier', 'Cost', 'Notes']}
+                rows={[
+                    [<Bright>Specialist</Bright>, <CyanText>3 pts</CyanText>, 'Skilled — 1 ability, 1 gear slot, strong stats'],
+                    [<Bright>Operative</Bright>, <CyanText>2 pts</CyanText>, 'Standard — no abilities, no gear slots'],
+                    [<Bright>Recruit</Bright>, <CyanText>1 pt</CyanText>, 'Basic — all d6 stats, no upgrades, no slots'],
+                ]}
+            />
+            <ul style={{ paddingLeft: 20, lineHeight: 2, marginTop: 4 }}>
+                <li>No limits on how many of each tier (maximum 1 Leader per warband).</li>
+                <li>You may spend <Bright>less</Bright> than your full budget.</li>
+            </ul>
+        </RuleBox>
+
+        {/* ── STEP 3 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 3 — ASSIGN STATS</div>
+            <Para>Each operative has five stats: <CyanText>CMB · REF · GRT · TEC · AWR</CyanText>. Assign die types according to your tier's spread — you choose which stats get the higher dice.</Para>
+            <DataTable
+                compact
+                headers={['Tier', 'Base', 'Upgrades', 'Final Spread']}
+                rows={[
+                    [<Bright>Leader</Bright>, 'd8 in all 5', 'Choose 2 stats → d10', '2×d10, 3×d8'],
+                    [<Bright>Specialist</Bright>, 'd6 in all 5', 'Choose 2 stats → d8', '2×d8, 3×d6'],
+                    [<Bright>Operative</Bright>, 'd6 in all 5', 'Choose 1 stat → d8', '1×d8, 4×d6'],
+                    [<Bright>Recruit</Bright>, 'd6 in all 5', 'No upgrades', '5×d6'],
+                ]}
+            />
+        </RuleBox>
+        <ExampleBox title="Stat Assignment Example">
+            A Specialist assigned as a sharpshooter might put d8 in <Bright>CMB</Bright> and <Bright>AWR</Bright>, leaving REF, GRT, and TEC at d6.
+            A brawler Specialist might choose <Bright>CMB</Bright> and <Bright>GRT</Bright>.
+        </ExampleBox>
+
+        {/* ── STEP 4 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 4 — CHOOSE A WEAPON</div>
+            <Para>Each operative picks <Bright>one weapon</Bright>. Standard weapons are free. Premium weapons cost 1 gear slot.</Para>
+            <Para><Dim>Only operatives with gear slots can take premium weapons — Leaders (2 slots) and Specialists (1 slot).</Dim></Para>
+
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, color: 'var(--accent-amber)', margin: '12px 0 4px', letterSpacing: 1, textTransform: 'uppercase' }}>Standard Weapons — Free</div>
+            <DataTable
+                compact
+                headers={['Weapon', 'Dice', 'Range Band', 'Hard Cap', 'Trait', 'Effect']}
+                rows={GAME_DATA.weapons.filter(w => !w.premium).map(w => [
+                    <Bright>{w.name}</Bright>,
+                    <CyanText>{w.attackDice}AD</CyanText>,
+                    w.rangeBand,
+                    w.hardCap || '—',
+                    <span style={{ color: 'var(--accent-amber)' }}>{w.trait}</span>,
+                    <Dim>{w.traitEffect}</Dim>,
+                ])}
+            />
+
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, color: 'var(--accent-magenta)', margin: '12px 0 4px', letterSpacing: 1, textTransform: 'uppercase' }}>Premium Weapons — 1 Gear Slot</div>
+            <DataTable
+                compact
+                headers={['Weapon', 'Dice', 'Range Band', 'Hard Cap', 'Trait', 'Effect']}
+                rows={GAME_DATA.weapons.filter(w => w.premium).map(w => [
+                    <Bright>{w.name}</Bright>,
+                    <CyanText>{w.attackDice}AD</CyanText>,
+                    w.rangeBand,
+                    w.hardCap || '—',
+                    <span style={{ color: 'var(--accent-magenta)' }}>{w.trait}</span>,
+                    <Dim>{w.traitEffect}</Dim>,
+                ])}
+            />
+        </RuleBox>
+
+        {/* ── STEP 5 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 5 — CHOOSE GEAR</div>
+            <Para>
+                <Bright>Every operative</Bright> may carry <CyanText>one free gear item</CyanText> at no cost and without spending a gear slot.
+                Operatives with remaining gear slots may also take premium gear items (1 slot each).
+                Gear slots are shared between premium weapons and premium gear.
+            </Para>
+
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, color: 'var(--accent-amber)', margin: '12px 0 4px', letterSpacing: 1, textTransform: 'uppercase' }}>Free Gear — Available to All</div>
+            <DataTable
+                compact
+                headers={['Gear', 'Type', 'Effect', 'Pro', 'Con']}
+                rows={(GAME_DATA.gear || []).filter(g => g.gearCost === 0).map(g => [
+                    <Bright>{g.name}</Bright>,
+                    <span style={{ color: g.type === 'one-use' ? 'var(--accent-red)' : g.type === 'reusable' ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>{g.type}</span>,
+                    <Dim>{g.effect}</Dim>,
+                    <span style={{ color: 'var(--accent-green)', fontSize: 12 }}>{g.pro}</span>,
+                    <span style={{ color: 'var(--accent-red)', fontSize: 12 }}>{g.con}</span>,
+                ])}
+            />
+
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, color: 'var(--accent-magenta)', margin: '12px 0 4px', letterSpacing: 1, textTransform: 'uppercase' }}>Premium Gear — 1 Gear Slot Each</div>
+            <DataTable
+                compact
+                headers={['Gear', 'Type', 'Effect', 'Pro', 'Con']}
+                rows={(GAME_DATA.gear || []).filter(g => g.gearCost > 0).map(g => [
+                    <Bright>{g.name}</Bright>,
+                    <span style={{ color: g.type === 'one-use' ? 'var(--accent-red)' : g.type === 'reusable' ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>{g.type}</span>,
+                    <Dim>{g.effect}</Dim>,
+                    <span style={{ color: 'var(--accent-green)', fontSize: 12 }}>{g.pro}</span>,
+                    <span style={{ color: 'var(--accent-red)', fontSize: 12 }}>{g.con}</span>,
+                ])}
+            />
+        </RuleBox>
+
+        {/* ── STEP 6 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 6 — CHOOSE ABILITIES</div>
+            <Para>
+                <Bright>Leaders</Bright> choose <CyanText>2 abilities</CyanText>.{' '}
+                <Bright>Specialists</Bright> choose <CyanText>1 ability</CyanText>.{' '}
+                <Bright>Operatives</Bright> and <Bright>Recruits</Bright> have no ability slots.
+                Pick from any ability — no restrictions.
+            </Para>
+            <DataTable
+                compact
+                headers={['Ability', 'Effect']}
+                rows={GAME_DATA.abilities.map(a => [
+                    <Bright>{a.name}</Bright>,
+                    a.effect,
+                ])}
+            />
+        </RuleBox>
+
+        {/* ── STEP 7 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 7 — NAME YOUR OPERATIVES</div>
+            <Para>
+                Give each operative a <Bright>callsign or name</Bright>. This helps identify them on the table during play and adds flavor to your warband. Names are cosmetic — no mechanical effect.
+            </Para>
+        </RuleBox>
+
+        {/* ── STEP 8 ─────────────────────────────────────────────── */}
+        <RuleBox color="cyan">
+            <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 13, color: 'var(--accent-cyan)', marginBottom: 8, letterSpacing: 1 }}>STEP 8 — RECORD YOUR WARBAND</div>
+            <Para>Write down each operative on a roster sheet:</Para>
+            <ul style={{ paddingLeft: 20, lineHeight: 2 }}>
+                <li>Name, Tier, Starting Health die</li>
+                <li>CMB · REF · GRT · TEC · AWR die types</li>
+                <li>Weapon, Gear item(s), Abilities</li>
+            </ul>
+            <Para style={{ marginTop: 8, marginBottom: 0 }}>
+                Or use the{' '}
+                <a href="NullSignal_Forge.html" style={{ color: 'var(--accent-cyan)', textDecoration: 'underline' }}>
+                    Null Signal Warband Forge app
+                </a>{' '}
+                to build and print your roster automatically.
+            </Para>
+        </RuleBox>
+
+        {/* ── ROSTER TEMPLATE ────────────────────────────────────── */}
+        <SubHeading>Warband Roster Template</SubHeading>
+        <Para><Dim>Copy or print this template to record your warband by hand.</Dim></Para>
+        {(() => {
+            const TEMPLATE_TEXT =
+`WARBAND NAME: _______________________
+BUDGET: _____ pts
+
+OPERATIVE 1:
+  Name: ____________  Tier: ________  Health: ___
+  CMB: ___  REF: ___  GRT: ___  TEC: ___  AWR: ___
+  Weapon: _______________
+  Gear: ________________
+  Abilities: ____________
+
+OPERATIVE 2:
+  Name: ____________  Tier: ________  Health: ___
+  CMB: ___  REF: ___  GRT: ___  TEC: ___  AWR: ___
+  Weapon: _______________
+  Gear: ________________
+  Abilities: ____________
+
+OPERATIVE 3:
+  Name: ____________  Tier: ________  Health: ___
+  CMB: ___  REF: ___  GRT: ___  TEC: ___  AWR: ___
+  Weapon: _______________
+  Gear: ________________
+  Abilities: ____________
+
+OPERATIVE 4:
+  Name: ____________  Tier: ________  Health: ___
+  CMB: ___  REF: ___  GRT: ___  TEC: ___  AWR: ___
+  Weapon: _______________
+  Gear: ________________
+  Abilities: ____________
+
+OPERATIVE 5:
+  Name: ____________  Tier: ________  Health: ___
+  CMB: ___  REF: ___  GRT: ___  TEC: ___  AWR: ___
+  Weapon: _______________
+  Gear: ________________
+  Abilities: ____________
+
+OPERATIVE 6:
+  Name: ____________  Tier: ________  Health: ___
+  CMB: ___  REF: ___  GRT: ___  TEC: ___  AWR: ___
+  Weapon: _______________
+  Gear: ________________
+  Abilities: ____________
+
+(add more operatives as needed)`;
+
+            const handleCopy = () => {
+                navigator.clipboard.writeText(TEMPLATE_TEXT).then(() => {
+                    const btn = document.getElementById('roster-copy-btn');
+                    if (btn) { btn.textContent = 'COPIED!'; setTimeout(() => { btn.textContent = 'COPY TO CLIPBOARD'; }, 2000); }
+                }).catch(() => {});
+            };
+
+            return (
+                <div style={{ border: '1px solid var(--border)', borderRadius: 6, background: 'var(--bg-card)', padding: '16px', margin: '12px 0' }}>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+                        <span style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 11, color: 'var(--text-dim)', letterSpacing: 2, textTransform: 'uppercase' }}>Roster Template</span>
+                        <button
+                            id="roster-copy-btn"
+                            onClick={handleCopy}
+                            style={{ fontFamily: 'Orbitron, sans-serif', fontSize: 10, letterSpacing: 1, background: 'transparent', border: '1px solid var(--accent-cyan)', color: 'var(--accent-cyan)', padding: '4px 12px', borderRadius: 4, cursor: 'pointer', textTransform: 'uppercase' }}
+                        >
+                            COPY TO CLIPBOARD
+                        </button>
+                    </div>
+                    <pre style={{ fontFamily: 'Share Tech Mono, monospace', fontSize: 12, lineHeight: 1.7, color: 'var(--text-primary)', whiteSpace: 'pre', overflowX: 'auto', margin: 0 }}>
+                        {TEMPLATE_TEXT}
+                    </pre>
+                </div>
+            );
+        })()}
+
         <SubHeading>Example Crews</SubHeading>
         <ExampleBox title="Balanced Crew (10 pts)">
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8 }}>
