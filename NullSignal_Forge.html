@@ -1,0 +1,1553 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NULL SIGNAL — Warband Forge</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-black: #0a0a0f;
+            --bg-dark: #12121a;
+            --bg-panel: #1a1a2e;
+            --bg-card: #16213e;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff006e;
+            --accent-amber: #ffbe0b;
+            --accent-green: #00f5a0;
+            --accent-red: #ff3366;
+            --text-primary: #e0e0e0;
+            --text-dim: #8888aa;
+            --text-bright: #ffffff;
+            --border: #2a2a4a;
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-black);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .heading-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.08) 2px,
+                rgba(0, 0, 0, 0.08) 4px
+            );
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+        /* Glow utility */
+        .glow-cyan { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.05); }
+        .glow-magenta { box-shadow: 0 0 10px rgba(255, 0, 110, 0.3), inset 0 0 10px rgba(255, 0, 110, 0.05); }
+        .glow-amber { box-shadow: 0 0 10px rgba(255, 190, 11, 0.3), inset 0 0 10px rgba(255, 190, 11, 0.05); }
+        .glow-green { box-shadow: 0 0 10px rgba(0, 245, 160, 0.3), inset 0 0 10px rgba(0, 245, 160, 0.05); }
+
+        input[type="text"], input[type="file"] {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Animations */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.97; }
+            92% { opacity: 1; }
+            93% { opacity: 0.9; }
+            94% { opacity: 1; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
+        }
+
+        @media (max-width: 768px) {
+            select, button, input { min-height: 44px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Disable AMD loader before CDN scripts -->
+    <script>window.define = null;</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel" data-type="module">
+// ============================================================
+// GAME DATA
+// ============================================================
+const GAME_DATA = {
+  "stats": ["CMB", "REF", "GRT", "TEC", "AWR"],
+  "statLabels": {
+    "CMB": "Combat",
+    "REF": "Reflexes",
+    "GRT": "Grit",
+    "TEC": "Tech",
+    "AWR": "Awareness"
+  },
+  "diceTypes": ["d6", "d8", "d10", "d12"],
+  "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
+  "tiers": [
+    { "id": "leader", "name": "Leader", "cost": 0, "health": "d10", "statSpread": { "d10Count": 2, "d8Count": 3 }, "gearSlots": 2, "abilitySlots": 2 },
+    { "id": "specialist", "name": "Specialist", "cost": 3, "health": "d8", "statSpread": { "d8Count": 2, "d6Count": 3 }, "gearSlots": 1, "abilitySlots": 1 },
+    { "id": "operative", "name": "Operative", "cost": 2, "health": "d8", "statSpread": { "d8Count": 1, "d6Count": 4 }, "gearSlots": 0, "abilitySlots": 0 },
+    { "id": "recruit", "name": "Recruit", "cost": 1, "health": "d6", "statSpread": { "d8Count": 0, "d6Count": 5 }, "gearSlots": 0, "abilitySlots": 0 }
+  ],
+  "weapons": [
+    { "id": "pistol", "name": "Pistol", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Compact", "traitEffect": "Easy to conceal, common backup weapon." },
+    { "id": "smg", "name": "SMG", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "12\"", "hardCap": null, "meleeOnly": false, "trait": "Rapid", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "rifle", "name": "Rifle", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Reliable", "traitEffect": "No special trait — consistent and dependable." },
+    { "id": "shotgun", "name": "Shotgun", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Spread", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "blade", "name": "Blade", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Melee-only", "traitEffect": "Can only be used in base contact." },
+    { "id": "sniper_rifle", "name": "Sniper Rifle", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "30\"", "hardCap": null, "meleeOnly": false, "trait": "Precise", "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty." },
+    { "id": "lmg", "name": "LMG", "premium": true, "gearSlotCost": 1, "attackDice": 4, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Suppressive", "traitEffect": "Target suffers -2\" movement on their next activation." },
+    { "id": "launcher", "name": "Launcher", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Blast", "traitEffect": "All models within 2\" of the target point take hits." },
+    { "id": "tactical_knife", "name": "Tactical Knife", "premium": true, "gearSlotCost": 1, "attackDice": 3, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Piercing", "traitEffect": "A heavy combat blade that finds gaps in armor. Target's health die shifts an extra step on failed check." }
+  ],
+  "abilities": [
+    { "id": "hardened", "name": "Hardened", "effect": "+1 step to GRT die for recovery and morale checks." },
+    { "id": "cqb_expert", "name": "CQB Expert", "effect": "Gains a bonus attack die in brawls." },
+    { "id": "marksman", "name": "Marksman", "effect": "Gains a bonus attack die when shooting a target within range band." },
+    { "id": "medic", "name": "Medic", "effect": "Use Gear action: roll TEC — on success, attempt recovery on a Down ally in base contact." },
+    { "id": "hacker", "name": "Hacker", "effect": "Gains a bonus die on TEC checks made for scenario interactions." },
+    { "id": "networked", "name": "Networked", "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check." },
+    { "id": "stealthy", "name": "Stealthy", "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative." },
+    { "id": "spotter", "name": "Spotter", "effect": "Once per round, designate a target: all friendly shooters gain +1 attack die vs. that target this round." },
+    { "id": "resilient", "name": "Resilient", "effect": "The first failed health check each game is treated as a pass (health die still degrades one step)." },
+    { "id": "tactician", "name": "Tactician", "effect": "Once per round, swap activation order with one friendly operative." },
+    { "id": "rapid_assault", "name": "Rapid Assault", "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)." },
+    { "id": "breacher", "name": "Breacher", "effect": "Ignores the cover penalty when shooting." },
+    { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC — on success, restore one health step to a friendly operative in base contact." },
+    { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative." },
+    { "id": "heavy_weapons", "name": "Heavy Weapons", "effect": "May carry one premium weapon without spending a gear slot." },
+    { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
+  ],
+  "gear": [
+    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 0, "type": "one-use", "effect": "Shoot action: 2\" blast within 8\". All models in radius take 1 hit.", "pro": "Area damage, ignores cover", "con": "One-use, short range, can hit friendlies in blast" },
+    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 0, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks all line of sight through it until end of next round.", "pro": "Blocks LOS, enables safe repositioning", "con": "One-use, blocks YOUR line of sight too" },
+    { "id": "first_aid_kit", "name": "First Aid Kit", "gearCost": 0, "type": "reusable", "effect": "Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll.", "pro": "Can stabilize downed allies without Medic ability", "con": "Requires base contact and uses your action, TEC check can fail" },
+    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "passive", "effect": "Passive: the first hit each game that would trigger a health check is ignored entirely (no roll, no degradation). Does not apply to subsequent hits.", "pro": "Fully absorbs one hit — no roll, no degradation", "con": "One-use protection, useless after first hit absorbed" },
+    { "id": "tactical_drone", "name": "Tactical Drone", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: reveal all hidden/stealthy enemies within 12\". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed.", "pro": "Guaranteed intel, counters stealth", "con": "Can be destroyed on use, uses your action" },
+    { "id": "comms_relay", "name": "Comms Relay", "gearCost": 1, "type": "passive", "effect": "Friendly ability auras (Commander, Networked, Spotter) extend to 12\" instead of 6\" while this operative is active.", "pro": "Doubles the effective range of support abilities", "con": "No direct combat benefit, useless if no aura abilities in warband" },
+    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6→d8) for this activation only. Discard after use.", "pro": "Clutch stat boost when you need it most", "con": "One-use, must declare at start of activation before rolling" },
+    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions.", "pro": "Makes TEC checks much more reliable", "con": "Only useful in scenarios with TEC interactions" },
+    { "id": "suppressor", "name": "Suppressor", "gearCost": 1, "type": "passive", "effect": "Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target.", "pro": "Stay hidden while shooting, powerful with Stealthy/Ghost abilities", "con": "No combat bonus, useless without stealth abilities or scenarios" }
+  ]
+};
+
+// ============================================================
+// DERIVED HELPERS
+// ============================================================
+const STATS = GAME_DATA.stats;
+const STAT_LABELS = GAME_DATA.statLabels;
+const TIERS = Object.fromEntries(GAME_DATA.tiers.map(t => [t.id, t]));
+const WEAPONS = GAME_DATA.weapons;
+const STANDARD_WEAPONS = WEAPONS.filter(w => !w.premium);
+const PREMIUM_WEAPONS = WEAPONS.filter(w => w.premium);
+const ABILITIES = GAME_DATA.abilities;
+const GEAR_ITEMS = GAME_DATA.gear;
+const FREE_GEAR = GEAR_ITEMS.filter(g => g.gearCost === 0);
+const PREMIUM_GEAR = GEAR_ITEMS.filter(g => g.gearCost > 0);
+
+const TIER_COLORS = {
+    leader: 'var(--accent-amber)',
+    specialist: 'var(--accent-cyan)',
+    operative: 'var(--accent-green)',
+    recruit: 'var(--text-dim)',
+};
+
+const TIER_ORDER = ['leader', 'specialist', 'operative', 'recruit'];
+
+// ============================================================
+// FACTORIES
+// ============================================================
+const createOperative = (tierId) => {
+    const tier = TIERS[tierId];
+    const baseDie = (tier && tier.statSpread.d10Count > 0) ? 'd8' : 'd6';
+    return {
+        id: crypto.randomUUID(),
+        name: '',
+        tier: tierId,
+        stats: Object.fromEntries(GAME_DATA.stats.map(s => [s, baseDie])),
+        weapon: 'rifle',
+        abilities: [],
+        gear: [],
+    };
+};
+
+const createWarband = () => ({
+    id: crypto.randomUUID(),
+    name: 'New Warband',
+    budget: 10,
+    operatives: [],
+});
+
+// ============================================================
+// CALCULATION HELPERS
+// ============================================================
+const getPointsUsed = (wb) => wb.operatives.reduce((sum, op) => sum + TIERS[op.tier].cost, 0);
+const getPointsRemaining = (wb) => wb.budget - getPointsUsed(wb);
+
+const hasHeavyWeapons = (op) => op.abilities.includes('heavy_weapons');
+
+const getGearSlotsTotal = (op) => TIERS[op.tier].gearSlots;
+
+const getGearSlotsUsed = (op) => {
+    let used = 0;
+    const weapon = WEAPONS.find(w => w.id === op.weapon);
+    const hasHW = op.abilities.includes('heavy_weapons');
+    if (weapon && weapon.premium && !hasHW) used += weapon.gearSlotCost || 1;
+    // Only count premium gear items (gearCost > 0) toward gear slots
+    used += (op.gear || []).filter(gId => {
+        const g = GEAR_ITEMS.find(gi => gi.id === gId);
+        return g && g.gearCost > 0;
+    }).length;
+    return used;
+};
+
+const getGearSlotsFree = (op) => getGearSlotsTotal(op) - getGearSlotsUsed(op);
+
+const countD8s = (op) => Object.values(op.stats).filter(v => v === 'd8').length;
+
+const countD10s = (op) => Object.values(op.stats).filter(v => v === 'd10').length;
+
+const getMaxD8s = (op) => TIERS[op.tier].statSpread.d8Count;
+
+const getMaxD10s = (op) => TIERS[op.tier].statSpread.d10Count || 0;
+
+const isLeaderTier = (op) => getMaxD10s(op) > 0;
+
+// Returns the "upgrade die" and "base die" for stat toggling based on tier
+const getTierDice = (op) => isLeaderTier(op)
+    ? { baseDie: 'd8', upgradeDie: 'd10', maxUpgrades: getMaxD10s(op) }
+    : { baseDie: 'd6', upgradeDie: 'd8', maxUpgrades: getMaxD8s(op) };
+
+const countUpgradeDice = (op) => isLeaderTier(op) ? countD10s(op) : countD8s(op);
+
+const hasLeader = (wb) => wb.operatives.some(op => op.tier === 'leader');
+
+const canAffordTier = (wb, tierId) => {
+    const cost = TIERS[tierId].cost;
+    return getPointsRemaining(wb) >= cost;
+};
+
+// ============================================================
+// VALIDATION
+// ============================================================
+const validateWarband = (wb) => {
+    const warnings = [];
+    if (!wb) return warnings;
+
+    // No Leader
+    if (!hasLeader(wb)) {
+        warnings.push({ text: 'No Leader in warband', level: 'amber' });
+    }
+
+    // Over budget
+    const ptsUsed = getPointsUsed(wb);
+    if (ptsUsed > wb.budget) {
+        warnings.push({ text: `Over budget by ${ptsUsed - wb.budget} point${ptsUsed - wb.budget !== 1 ? 's' : ''}`, level: 'red' });
+    }
+
+    // Per-operative checks
+    wb.operatives.forEach(op => {
+        const name = op.name || 'Unnamed';
+        const { upgradeDie, maxUpgrades } = getTierDice(op);
+        const upgrades = countUpgradeDice(op);
+        if (upgrades !== maxUpgrades) {
+            warnings.push({ text: `${name}: stats not fully assigned (${upgrades}/${maxUpgrades} ${upgradeDie}s)`, level: 'amber' });
+        }
+        if (!op.weapon) {
+            warnings.push({ text: `${name}: no weapon selected`, level: 'amber' });
+        }
+    });
+
+    return warnings;
+};
+
+// ============================================================
+// LOCALSTORAGE HELPERS
+// ============================================================
+const LS_INDEX_KEY = 'nullSignal_warbandIndex';
+const LS_WARBAND_PREFIX = 'nullSignal_warband_';
+
+const loadIndex = () => {
+    try {
+        return JSON.parse(localStorage.getItem(LS_INDEX_KEY)) || [];
+    } catch { return []; }
+};
+
+const saveIndex = (index) => {
+    localStorage.setItem(LS_INDEX_KEY, JSON.stringify(index));
+};
+
+const loadWarband = (id) => {
+    try {
+        return JSON.parse(localStorage.getItem(LS_WARBAND_PREFIX + id));
+    } catch { return null; }
+};
+
+const saveWarband = (wb) => {
+    localStorage.setItem(LS_WARBAND_PREFIX + wb.id, JSON.stringify(wb));
+};
+
+const deleteWarbandFromStorage = (id) => {
+    localStorage.removeItem(LS_WARBAND_PREFIX + id);
+};
+
+// ============================================================
+// PRINT ROSTER
+// ============================================================
+const printRoster = (warband) => {
+    const opCount = warband.operatives.length;
+    const ptsUsed = getPointsUsed(warband);
+    const ptsBudget = warband.budget;
+
+    const healthTrack = ['d10', 'd8', 'd6', 'DOWN', 'OUT'];
+
+    const getHealthSlice = (startDie) => {
+        const idx = healthTrack.indexOf(startDie);
+        return healthTrack.slice(idx);
+    };
+
+    const operativeCards = warband.operatives.map(op => {
+        const tier = TIERS[op.tier];
+        const weapon = WEAPONS.find(w => w.id === op.weapon);
+        const abilities = op.abilities.map(aId => ABILITIES.find(a => a.id === aId)).filter(Boolean);
+        const hpSlice = getHealthSlice(tier.health);
+        const statsHtml = STATS.map(s => `<span style="margin-right:8px;"><strong>${s}:</strong> ${op.stats[s]}</span>`).join('');
+        const weaponHtml = weapon
+            ? `<div style="margin-top:6px;padding:4px 6px;background:#f0f0f0;border-radius:3px;font-size:10px;">
+                 <strong>${weapon.name}</strong> &mdash; ${weapon.attackDice}AD, ${weapon.rangeBand}
+                 <br/><em>${weapon.trait}: ${weapon.traitEffect}</em>
+               </div>`
+            : '';
+        const gearItems = (op.gear || []).map(gId => GEAR_ITEMS.find(g => g.id === gId)).filter(Boolean);
+        const gearHtml = gearItems.length > 0
+            ? gearItems.map(g => {
+                const typeLabel = g.type === 'one-use' ? '[1x]' : g.type === 'reusable' ? '[R]' : '[P]';
+                const costLabel = g.gearCost === 0 ? '<span style="color:#22c55e;">[FREE]</span>' : '<span style="color:#eab308;">[PREMIUM]</span>';
+                return `<div style="margin-top:4px;font-size:10px;padding:2px 6px;background:#e8f4f8;border-radius:3px;"><strong>${g.name}</strong> <span style="color:#666;">${typeLabel}</span> ${costLabel} ${g.effect}</div>`;
+            }).join('')
+            : '';
+        const abilitiesHtml = abilities.length > 0
+            ? abilities.map(a => `<div style="margin-top:4px;font-size:10px;"><strong>${a.name}:</strong> ${a.effect}</div>`).join('')
+            : '';
+        const hpHtml = hpSlice.map(step => {
+            const isDie = step.startsWith('d');
+            const bg = isDie ? '#e0e0e0' : (step === 'DOWN' ? '#ffcc00' : '#ff4444');
+            const color = step === 'OUT' ? '#fff' : '#111';
+            return `<span style="display:inline-flex;align-items:center;gap:2px;margin-right:3px;"><span style="display:inline-block;padding:2px 6px;border-radius:3px;font-size:10px;font-weight:bold;background:${bg};color:${color};">${step}</span><span style="display:inline-block;width:8px;height:8px;border:1.5px solid #555;border-radius:1px;vertical-align:middle;"></span></span>`;
+        }).join('<span style="font-size:10px;color:#999;margin-right:3px;">&rarr;</span>');
+
+        return `
+        <div style="width:63mm;height:88mm;border:1px solid #333;border-radius:4px;padding:8px;font-size:11px;overflow:hidden;display:flex;flex-direction:column;page-break-inside:avoid;box-sizing:border-box;">
+            <div style="background:#1a1a2e;color:#fff;margin:-8px -8px 6px -8px;padding:6px 8px;border-radius:4px 4px 0 0;">
+                <div style="font-family:'Orbitron',sans-serif;font-size:8px;text-transform:uppercase;letter-spacing:2px;color:#aaa;">${tier.name}</div>
+                <div style="font-family:'Orbitron',sans-serif;font-size:12px;font-weight:bold;color:#fff;margin-top:2px;">${op.name || 'Unnamed'}</div>
+            </div>
+            <div style="font-size:10px;margin-bottom:6px;">${statsHtml}</div>
+            ${weaponHtml}
+            ${gearHtml ? '<div style="margin-top:4px;">' + gearHtml + '</div>' : ''}
+            ${abilitiesHtml ? '<div style="margin-top:6px;border-top:1px solid #ddd;padding-top:4px;">' + abilitiesHtml + '</div>' : ''}
+            <div style="margin-top:auto;border-top:1px solid #ddd;padding-top:6px;">
+                <div style="font-size:9px;color:#666;margin-bottom:3px;font-family:\'Orbitron\',sans-serif;text-transform:uppercase;letter-spacing:1px;">Health Track</div>
+                <div>${hpHtml}</div>
+            </div>
+        </div>`;
+    }).join('\n');
+
+    const html = `<!DOCTYPE html>
+<html><head>
+<meta charset="UTF-8"/>
+<title>${warband.name || 'Warband'} - Roster</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet"/>
+<style>
+    * { margin:0; padding:0; box-sizing:border-box; }
+    body { font-family:'Share Tech Mono',monospace; background:#fff; color:#111; padding:20px; }
+    h1, h2 { font-family:'Orbitron',sans-serif; }
+    @media print { body { padding:10px; } }
+</style>
+</head><body>
+<div style="text-align:center;margin-bottom:20px;">
+    <h1 style="font-size:22px;letter-spacing:4px;margin-bottom:4px;">${warband.name || 'Unnamed Warband'}</h1>
+    <h2 style="font-size:13px;font-weight:400;color:#666;">${opCount} operative${opCount !== 1 ? 's' : ''} &middot; ${ptsUsed}/${ptsBudget} pts</h2>
+</div>
+<div style="display:flex;flex-wrap:wrap;gap:10px;justify-content:center;">
+${operativeCards}
+</div>
+</body></html>`;
+
+    const win = window.open('', '_blank');
+    if (!win) { alert('Please allow popups to print.'); return; }
+    win.document.write(html);
+    win.document.close();
+    win.onload = () => { win.print(); win.onafterprint = () => win.close(); };
+};
+
+// ============================================================
+// REACT COMPONENTS
+// ============================================================
+const { useState, useEffect, useCallback, useRef } = React;
+
+// ---- Header ----
+function Header({ view, warband, onBack, onExport, onImport, onDuplicate }) {
+    const ptsUsed = warband ? getPointsUsed(warband) : 0;
+    const ptsBudget = warband ? warband.budget : 0;
+    const overBudget = ptsUsed > ptsBudget;
+
+    return (
+        <header style={{
+            background: 'linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-dark) 100%)',
+            borderBottom: '1px solid var(--border)',
+        }} className="px-4 py-3 flex items-center justify-between flex-wrap gap-2">
+            {/* Left section: back arrow (editor) + brand */}
+            <div className="flex items-center gap-3">
+                {view === 'editor' && (
+                    <button onClick={onBack}
+                        className="text-2xl hover:scale-110 transition-transform"
+                        style={{ color: 'var(--accent-cyan)' }}
+                        title="Back to warband list">
+                        &#x2190;
+                    </button>
+                )}
+                <div>
+                    <h1 style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '0.2em', color: 'var(--accent-cyan)', margin: 0, lineHeight: 1.3 }}>
+                        NULL SIGNAL
+                    </h1>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '0.7rem', color: 'var(--accent-magenta)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        WARBAND FORGE
+                    </div>
+                </div>
+            </div>
+
+            {/* Center section: nav links */}
+            <nav className="flex items-center gap-2">
+                <a href="NullSignal_Forge.html" style={{
+                    color: 'var(--accent-cyan)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', fontSize: 11, padding: '5px 12px',
+                    border: '1px solid var(--accent-cyan)', borderRadius: 4,
+                }}>FORGE</a>
+                <a href="NullSignal_Rules.html" style={{
+                    color: 'var(--text-dim)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', fontSize: 11, padding: '5px 12px',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.target.style.color = 'var(--accent-cyan)'; e.target.style.borderColor = 'var(--accent-cyan)'; }}
+                onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+                >RULES</a>
+                <a href="NullSignal_SoloEngine.html" style={{
+                    color: 'var(--text-dim)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', fontSize: 11, padding: '5px 12px',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.target.style.color = 'var(--accent-cyan)'; e.target.style.borderColor = 'var(--accent-cyan)'; }}
+                onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+                >SOLO ENGINE</a>
+            </nav>
+
+            {/* Right section: action buttons */}
+            {view === 'editor' && warband && (
+                <div className="flex items-center gap-4 flex-wrap">
+                    <div style={{
+                        fontFamily: 'Orbitron, sans-serif', fontSize: '0.85rem',
+                        color: overBudget ? 'var(--accent-red)' : 'var(--accent-green)',
+                    }}>
+                        {ptsUsed} / {ptsBudget} pts
+                    </div>
+                    <div className="flex gap-2">
+                        <button onClick={onExport}
+                            className="px-3 py-1 text-xs rounded border transition-colors hover:bg-opacity-20"
+                            style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(0,212,255,0.15)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            EXPORT JSON
+                        </button>
+                        <button onClick={() => printRoster(warband)}
+                            className="px-3 py-1 text-xs rounded border transition-colors"
+                            style={{ borderColor: 'var(--text-dim)', color: 'var(--text-dim)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(136,136,170,0.15)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            PRINT
+                        </button>
+                        <button onClick={onDuplicate}
+                            className="px-3 py-1 text-xs rounded border transition-colors"
+                            style={{ borderColor: 'var(--accent-green)', color: 'var(--accent-green)', background: 'transparent' }}
+                            onMouseEnter={(e) => e.target.style.background = 'rgba(0,245,160,0.15)'}
+                            onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                            DUPLICATE
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {view === 'list' && (
+                <div className="flex gap-2">
+                    <label className="px-3 py-1 text-xs rounded border transition-colors cursor-pointer"
+                        style={{ borderColor: 'var(--accent-magenta)', color: 'var(--accent-magenta)', background: 'transparent' }}
+                        onMouseEnter={(e) => e.target.style.background = 'rgba(255,0,110,0.15)'}
+                        onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                        IMPORT JSON
+                        <input type="file" accept=".json" className="hidden" onChange={onImport} />
+                    </label>
+                </div>
+            )}
+        </header>
+    );
+}
+
+// ---- WarbandList ----
+function WarbandList({ index, onOpen, onDelete, onCreate, onDuplicate }) {
+    return (
+        <div className="p-4 md:p-8 max-w-4xl mx-auto">
+            <div className="flex items-center justify-between mb-6">
+                <h2 className="text-lg heading-font" style={{ color: 'var(--text-bright)', fontFamily: 'Orbitron, sans-serif' }}>
+                    YOUR WARBANDS
+                </h2>
+                <button onClick={onCreate}
+                    className="px-4 py-2 rounded text-sm font-bold transition-all heading-font"
+                    style={{
+                        background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta))',
+                        color: 'var(--bg-black)',
+                        fontFamily: 'Orbitron, sans-serif',
+                    }}
+                    onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
+                    onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}>
+                    + NEW WARBAND
+                </button>
+            </div>
+
+            {index.length === 0 && (
+                <div className="text-center py-16" style={{ color: 'var(--text-dim)' }}>
+                    <div className="text-4xl mb-4">&#x25C8;</div>
+                    <p>No warbands found. Create one to begin.</p>
+                </div>
+            )}
+
+            <div className="grid gap-3">
+                {index.map(entry => (
+                    <div key={entry.id}
+                        className="flex items-center justify-between p-4 rounded border cursor-pointer transition-all"
+                        style={{
+                            background: 'var(--bg-panel)',
+                            borderColor: 'var(--border)',
+                        }}
+                        onClick={() => onOpen(entry.id)}
+                        onMouseEnter={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--accent-cyan)';
+                            e.currentTarget.style.boxShadow = '0 0 10px rgba(0,212,255,0.2)';
+                        }}
+                        onMouseLeave={(e) => {
+                            e.currentTarget.style.borderColor = 'var(--border)';
+                            e.currentTarget.style.boxShadow = 'none';
+                        }}>
+                        <div>
+                            <div className="font-bold" style={{ color: 'var(--text-bright)' }}>
+                                {entry.name || 'Unnamed Warband'}
+                            </div>
+                            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                Last modified: {new Date(entry.lastModified).toLocaleDateString()}
+                            </div>
+                        </div>
+                        <div className="flex gap-2">
+                            <button onClick={(e) => { e.stopPropagation(); onDuplicate(entry.id); }}
+                                className="px-3 py-1 text-xs rounded border transition-colors"
+                                style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'transparent' }}
+                                onMouseEnter={(e) => e.target.style.background = 'rgba(0,212,255,0.15)'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                                DUPLICATE
+                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); onDelete(entry.id); }}
+                                className="px-3 py-1 text-xs rounded border transition-colors"
+                                style={{ borderColor: 'var(--accent-red)', color: 'var(--accent-red)', background: 'transparent' }}
+                                onMouseEnter={(e) => e.target.style.background = 'rgba(255,51,102,0.2)'}
+                                onMouseLeave={(e) => e.target.style.background = 'transparent'}>
+                                DELETE
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+// ---- OperativeListItem ----
+function OperativeListItem({ op, isSelected, onSelect, onDelete }) {
+    const tierColor = TIER_COLORS[op.tier];
+    const tierData = TIERS[op.tier];
+    return (
+        <div
+            className="flex items-center gap-2 p-2 rounded cursor-pointer transition-all group"
+            style={{
+                background: isSelected ? 'var(--bg-card)' : 'transparent',
+                borderLeft: isSelected ? `3px solid ${tierColor}` : '3px solid transparent',
+            }}
+            onClick={onSelect}
+            onMouseEnter={(e) => { if (!isSelected) e.currentTarget.style.background = 'rgba(22,33,62,0.5)'; }}
+            onMouseLeave={(e) => { if (!isSelected) e.currentTarget.style.background = 'transparent'; }}
+        >
+            <span className="text-xs px-2 py-0.5 rounded font-bold uppercase tracking-wider"
+                style={{
+                    background: `${tierColor}22`,
+                    color: tierColor,
+                    border: `1px solid ${tierColor}44`,
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: '0.6rem',
+                    minWidth: '60px',
+                    textAlign: 'center',
+                }}>
+                {tierData.name}
+            </span>
+            <span className="flex-1 truncate text-sm" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                {op.name || 'Unnamed'}
+            </span>
+            <button onClick={(e) => { e.stopPropagation(); onDelete(); }}
+                className="opacity-0 group-hover:opacity-100 transition-opacity text-xs px-1"
+                style={{ color: 'var(--accent-red)' }}>
+                &#x2715;
+            </button>
+        </div>
+    );
+}
+
+// ---- StatAssignment ----
+function StatAssignment({ op, onUpdate }) {
+    const isRecruit = op.tier === 'recruit';
+    const { baseDie, upgradeDie, maxUpgrades } = getTierDice(op);
+    const currentUpgrades = countUpgradeDice(op);
+    const isLeader = isLeaderTier(op);
+
+    const toggleStat = (stat) => {
+        if (isRecruit) return;
+        const current = op.stats[stat];
+        if (current === baseDie && currentUpgrades < maxUpgrades) {
+            onUpdate({ ...op, stats: { ...op.stats, [stat]: upgradeDie } });
+        } else if (current === upgradeDie) {
+            onUpdate({ ...op, stats: { ...op.stats, [stat]: baseDie } });
+        }
+    };
+
+    const upgradeColor = isLeader ? 'var(--accent-amber)' : 'var(--accent-cyan)';
+    const upgradeGlow = isLeader ? 'rgba(255,190,11,0.3)' : 'rgba(0,212,255,0.3)';
+    const upgradeBg = isLeader ? 'rgba(255,190,11,0.1)' : 'rgba(0,212,255,0.1)';
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Stats
+                </h3>
+                <span className="text-xs" style={{ color: currentUpgrades === maxUpgrades ? 'var(--accent-green)' : upgradeColor }}>
+                    {currentUpgrades}/{maxUpgrades} {upgradeDie} assigned
+                </span>
+            </div>
+            <div className="grid grid-cols-5 gap-2">
+                {STATS.map(stat => {
+                    const isUpgraded = op.stats[stat] === upgradeDie;
+                    return (
+                        <button key={stat}
+                            onClick={() => toggleStat(stat)}
+                            disabled={isRecruit}
+                            className="flex flex-col items-center p-2 rounded border transition-all"
+                            style={{
+                                background: isUpgraded ? upgradeBg : 'var(--bg-dark)',
+                                borderColor: isUpgraded ? upgradeColor : 'var(--border)',
+                                boxShadow: isUpgraded ? `0 0 12px ${upgradeGlow}` : 'none',
+                                cursor: isRecruit ? 'not-allowed' : 'pointer',
+                                opacity: isRecruit ? 0.6 : 1,
+                            }}>
+                            <span className="text-xs font-bold mb-1" style={{
+                                color: isUpgraded ? upgradeColor : 'var(--text-dim)',
+                                fontFamily: 'Orbitron, sans-serif',
+                                fontSize: '0.65rem',
+                            }}>
+                                {stat}
+                            </span>
+                            <span className="text-lg font-bold" style={{
+                                color: isUpgraded ? 'var(--text-bright)' : 'var(--text-dim)',
+                            }}>
+                                {op.stats[stat]}
+                            </span>
+                            <span className="text-xs mt-0.5" style={{ color: 'var(--text-dim)', fontSize: '0.6rem' }}>
+                                {STAT_LABELS[stat]}
+                            </span>
+                        </button>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+// ---- WeaponSelect ----
+function WeaponSelect({ op, onUpdate }) {
+    const totalGear = getGearSlotsTotal(op);
+    const usedGear = getGearSlotsUsed(op);
+    const currentWeapon = WEAPONS.find(w => w.id === op.weapon);
+    const hasHW = hasHeavyWeapons(op);
+
+    const selectWeapon = (weaponId) => {
+        const newWeapon = WEAPONS.find(w => w.id === weaponId);
+        const newWeaponCost = (newWeapon && newWeapon.premium && !hasHW) ? (newWeapon.gearSlotCost || 1) : 0;
+        const gearItems = op.gear || [];
+        const freeGear = gearItems.filter(gId => { const g = GEAR_ITEMS.find(gi => gi.id === gId); return g && g.gearCost === 0; });
+        const premiumGear = gearItems.filter(gId => { const g = GEAR_ITEMS.find(gi => gi.id === gId); return g && g.gearCost > 0; });
+        const available = totalGear - newWeaponCost;
+        // Trim only premium gear items if weapon switch would exceed slots; free gear always stays
+        const trimmedPremium = premiumGear.slice(0, Math.max(0, available));
+        onUpdate({ ...op, weapon: weaponId, gear: [...freeGear, ...trimmedPremium] });
+    };
+
+    const canSelectPremium = (w) => {
+        if (hasHW) return true;
+        if (totalGear <= 0) return false;
+        // If currently selected weapon is premium and not free, switching to another premium is ok (same slot)
+        const currentIsPremium = currentWeapon && currentWeapon.premium && !hasHW;
+        if (currentIsPremium) return true;
+        // Available = total - premium gear items used (weapon slot not yet counted since current weapon is standard)
+        const premiumGearUsed = (op.gear || []).filter(gId => {
+            const g = GEAR_ITEMS.find(gi => gi.id === gId);
+            return g && g.gearCost > 0;
+        }).length;
+        return totalGear - premiumGearUsed >= w.gearSlotCost;
+    };
+
+    const renderWeaponRow = (w, isPremium) => {
+        const isSelected = op.weapon === w.id;
+        const disabled = isPremium && !canSelectPremium(w);
+        return (
+            <div key={w.id}
+                onClick={() => !disabled && selectWeapon(w.id)}
+                className="flex items-center gap-3 p-2 rounded border cursor-pointer transition-all"
+                style={{
+                    background: isSelected ? 'rgba(0,212,255,0.1)' : 'var(--bg-dark)',
+                    borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
+                    boxShadow: isSelected ? '0 0 8px rgba(0,212,255,0.2)' : 'none',
+                    opacity: disabled ? 0.35 : 1,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                }}>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                            {w.name}
+                        </span>
+                        {isPremium && (
+                            <span className="text-xs px-1 rounded" style={{
+                                background: 'rgba(255,190,11,0.2)',
+                                color: 'var(--accent-amber)',
+                                fontSize: '0.6rem',
+                            }}>
+                                PREMIUM
+                            </span>
+                        )}
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                        {w.trait}: {w.traitEffect}
+                    </div>
+                </div>
+                <div className="text-right text-xs whitespace-nowrap" style={{ color: 'var(--text-dim)' }}>
+                    <div>{w.attackDice}AD</div>
+                    <div>{w.rangeBand}</div>
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Weapon
+                </h3>
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                    Gear: {usedGear}/{totalGear} slots
+                </span>
+            </div>
+
+            <div className="mb-2">
+                <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-green)', fontSize: '0.6rem' }}>Standard</div>
+                <div className="grid gap-1">
+                    {STANDARD_WEAPONS.map(w => renderWeaponRow(w, false))}
+                </div>
+            </div>
+
+            <div>
+                <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-amber)', fontSize: '0.6rem' }}>Premium (1 gear slot)</div>
+                <div className="grid gap-1">
+                    {PREMIUM_WEAPONS.map(w => renderWeaponRow(w, true))}
+                </div>
+            </div>
+        </div>
+    );
+}
+
+// ---- GearSelect ----
+function GearSelect({ op, onUpdate }) {
+    const totalGear = getGearSlotsTotal(op);
+    const usedGear = getGearSlotsUsed(op);
+    const premiumSlotsFree = totalGear - usedGear;
+    const currentGear = op.gear || [];
+
+    // Find current free gear (gearCost === 0)
+    const currentFreeGear = currentGear.find(gId => {
+        const g = GEAR_ITEMS.find(gi => gi.id === gId);
+        return g && g.gearCost === 0;
+    });
+
+    const selectFreeGear = (gearId) => {
+        // Radio-button style: remove any existing free gear, add the new one
+        const withoutFree = currentGear.filter(gId => {
+            const g = GEAR_ITEMS.find(gi => gi.id === gId);
+            return g && g.gearCost > 0;
+        });
+        if (currentFreeGear === gearId) {
+            // Deselect
+            onUpdate({ ...op, gear: withoutFree });
+        } else {
+            onUpdate({ ...op, gear: [...withoutFree, gearId] });
+        }
+    };
+
+    const togglePremiumGear = (gearId) => {
+        const has = currentGear.includes(gearId);
+        if (has) {
+            onUpdate({ ...op, gear: currentGear.filter(g => g !== gearId) });
+        } else {
+            if (premiumSlotsFree <= 0) return;
+            onUpdate({ ...op, gear: [...currentGear, gearId] });
+        }
+    };
+
+    const TYPE_COLORS = {
+        'one-use': { bg: 'rgba(255,51,102,0.15)', color: 'var(--accent-red)', label: 'ONE-USE' },
+        'reusable': { bg: 'rgba(0,245,160,0.15)', color: 'var(--accent-green)', label: 'REUSABLE' },
+        'passive': { bg: 'rgba(0,212,255,0.15)', color: 'var(--accent-cyan)', label: 'PASSIVE' },
+    };
+
+    const renderGearRow = (item, isSelected, disabled, onClick, isRadio) => {
+        const typeStyle = TYPE_COLORS[item.type] || TYPE_COLORS['passive'];
+        return (
+            <div key={item.id}
+                onClick={() => !disabled && onClick(item.id)}
+                className="flex items-start gap-2 p-2 rounded border transition-all"
+                style={{
+                    background: isSelected ? 'rgba(0,212,255,0.08)' : 'var(--bg-dark)',
+                    borderColor: isSelected ? 'var(--accent-cyan)' : 'var(--border)',
+                    boxShadow: isSelected ? '0 0 8px rgba(0,212,255,0.2)' : 'none',
+                    opacity: disabled ? 0.35 : 1,
+                    cursor: disabled ? 'not-allowed' : 'pointer',
+                }}>
+                <div className="mt-0.5 flex items-center justify-center flex-shrink-0"
+                    style={{
+                        width: 16, height: 16,
+                        borderRadius: isRadio ? '50%' : 3,
+                        border: `2px solid ${isSelected ? 'var(--accent-cyan)' : 'var(--border)'}`,
+                        background: isSelected ? 'var(--accent-cyan)' : 'transparent',
+                    }}>
+                    {isSelected && <span style={{ color: 'var(--bg-black)', fontSize: '0.7rem', fontWeight: 'bold' }}>{isRadio ? '\u25CF' : '\u2713'}</span>}
+                </div>
+                <div className="flex-1">
+                    <div className="flex items-center gap-2">
+                        <span className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                            {item.name}
+                        </span>
+                        <span className="text-xs px-1.5 py-0.5 rounded" style={{
+                            background: typeStyle.bg,
+                            color: typeStyle.color,
+                            fontSize: '0.55rem',
+                            fontWeight: 'bold',
+                            letterSpacing: '0.05em',
+                        }}>
+                            {typeStyle.label}
+                        </span>
+                    </div>
+                    <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                        {item.effect}
+                    </div>
+                    {(item.pro || item.con) && (
+                        <div className="text-xs mt-1" style={{ color: 'var(--text-dim)', opacity: 0.7, fontSize: '0.65rem' }}>
+                            {item.pro && <span style={{ color: 'var(--accent-green)' }}>+ {item.pro}</span>}
+                            {item.pro && item.con && <span> &middot; </span>}
+                            {item.con && <span style={{ color: 'var(--accent-red)' }}>- {item.con}</span>}
+                        </div>
+                    )}
+                </div>
+            </div>
+        );
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Gear
+                </h3>
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                    Premium: {usedGear}/{totalGear} slots
+                </span>
+            </div>
+
+            {/* Free Gear Section */}
+            <div className="mb-3">
+                <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-green)', fontSize: '0.6rem' }}>
+                    Free Gear (pick one)
+                </div>
+                <div className="grid gap-1">
+                    {FREE_GEAR.map(item => {
+                        const isSelected = currentFreeGear === item.id;
+                        return renderGearRow(item, isSelected, false, selectFreeGear, true);
+                    })}
+                </div>
+            </div>
+
+            {/* Premium Gear Section */}
+            {totalGear > 0 && (
+                <div>
+                    <div className="text-xs mb-1 uppercase tracking-wider" style={{ color: 'var(--accent-amber)', fontSize: '0.6rem' }}>
+                        Premium Gear (1 slot each)
+                    </div>
+                    <div className="grid gap-1">
+                        {PREMIUM_GEAR.map(item => {
+                            const isSelected = currentGear.includes(item.id);
+                            const disabled = !isSelected && premiumSlotsFree <= 0;
+                            return renderGearRow(item, isSelected, disabled, togglePremiumGear, false);
+                        })}
+                    </div>
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ---- AbilitySelect ----
+function AbilitySelect({ op, onUpdate }) {
+    const tierData = TIERS[op.tier];
+    const maxAbilities = tierData.abilitySlots;
+    const currentCount = op.abilities.length;
+
+    if (maxAbilities === 0) return null;
+
+    const toggleAbility = (abilityId) => {
+        const has = op.abilities.includes(abilityId);
+        let newAbilities;
+        if (has) {
+            newAbilities = op.abilities.filter(a => a !== abilityId);
+            // If removing heavy_weapons, check if current weapon is premium and no longer affordable
+            if (abilityId === 'heavy_weapons') {
+                const weapon = WEAPONS.find(w => w.id === op.weapon);
+                if (weapon && weapon.premium) {
+                    const gearTotal = getGearSlotsTotal(op);
+                    const weaponCost = weapon.gearSlotCost || 1;
+                    const premiumGearCount = (op.gear || []).filter(gId => {
+                        const g = GEAR_ITEMS.find(gi => gi.id === gId);
+                        return g && g.gearCost > 0;
+                    }).length;
+                    if (gearTotal < weaponCost + premiumGearCount) {
+                        // Not enough slots — reset weapon to free, keep gear
+                        onUpdate({ ...op, abilities: newAbilities, weapon: 'rifle' });
+                        return;
+                    }
+                }
+            }
+        } else {
+            if (currentCount >= maxAbilities) return;
+            newAbilities = [...op.abilities, abilityId];
+        }
+        onUpdate({ ...op, abilities: newAbilities });
+    };
+
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-2">
+                <h3 className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Abilities
+                </h3>
+                <span className="text-xs" style={{ color: currentCount === maxAbilities ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
+                    {currentCount}/{maxAbilities} selected
+                </span>
+            </div>
+            <div className="grid gap-1">
+                {ABILITIES.map(ability => {
+                    const isSelected = op.abilities.includes(ability.id);
+                    const disabled = !isSelected && currentCount >= maxAbilities;
+                    return (
+                        <div key={ability.id}
+                            onClick={() => !disabled && toggleAbility(ability.id)}
+                            className="flex items-start gap-2 p-2 rounded border transition-all"
+                            style={{
+                                background: isSelected ? 'rgba(255,0,110,0.08)' : 'var(--bg-dark)',
+                                borderColor: isSelected ? 'var(--accent-magenta)' : 'var(--border)',
+                                boxShadow: isSelected ? '0 0 8px rgba(255,0,110,0.2)' : 'none',
+                                opacity: disabled ? 0.35 : 1,
+                                cursor: disabled ? 'not-allowed' : 'pointer',
+                            }}>
+                            <div className="w-4 h-4 mt-0.5 rounded-sm border flex items-center justify-center flex-shrink-0"
+                                style={{
+                                    borderColor: isSelected ? 'var(--accent-magenta)' : 'var(--border)',
+                                    background: isSelected ? 'var(--accent-magenta)' : 'transparent',
+                                }}>
+                                {isSelected && <span style={{ color: 'var(--bg-black)', fontSize: '0.7rem', fontWeight: 'bold' }}>&#x2713;</span>}
+                            </div>
+                            <div className="flex-1">
+                                <div className="text-sm font-bold" style={{ color: isSelected ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                                    {ability.name}
+                                </div>
+                                <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                    {ability.effect}
+                                </div>
+                            </div>
+                        </div>
+                    );
+                })}
+            </div>
+        </div>
+    );
+}
+
+// ---- WarbandSummary ----
+function WarbandSummary({ warband }) {
+    const [warningsOpen, setWarningsOpen] = useState(false);
+    const warnings = validateWarband(warband);
+    const ptsUsed = getPointsUsed(warband);
+
+    // Cost breakdown by tier
+    const tierCounts = {};
+    let tierCostSum = 0;
+    warband.operatives.forEach(op => {
+        if (!tierCounts[op.tier]) tierCounts[op.tier] = { count: 0, cost: 0 };
+        tierCounts[op.tier].count++;
+        tierCounts[op.tier].cost += TIERS[op.tier].cost;
+        tierCostSum += TIERS[op.tier].cost;
+    });
+    const costParts = TIER_ORDER
+        .filter(tid => tierCounts[tid])
+        .map(tid => {
+            const t = TIERS[tid];
+            const c = tierCounts[tid];
+            return `${t.name} \u00d7${c.count} (${c.cost})`;
+        });
+
+    // Gear overview
+    let totalGearUsed = 0;
+    let totalGearAvail = 0;
+    warband.operatives.forEach(op => {
+        totalGearUsed += getGearSlotsUsed(op);
+        totalGearAvail += getGearSlotsTotal(op);
+    });
+
+    const hasWarnings = warnings.length > 0;
+
+    return (
+        <div className="p-3 rounded border" style={{
+            background: 'var(--bg-panel)',
+            borderColor: hasWarnings ? 'rgba(255,190,11,0.4)' : 'var(--border)',
+        }}>
+            <div className="flex items-center justify-between mb-2">
+                <span className="text-xs uppercase tracking-wider font-bold" style={{
+                    color: 'var(--accent-cyan)',
+                    fontFamily: 'Orbitron, sans-serif',
+                    fontSize: '0.65rem',
+                }}>Summary</span>
+                <span className="text-sm font-bold" style={{ color: 'var(--accent-cyan)' }}>
+                    {warband.operatives.length} Operative{warband.operatives.length !== 1 ? 's' : ''}
+                </span>
+            </div>
+
+            {/* Cost breakdown */}
+            {warband.operatives.length > 0 && (
+                <div className="text-xs mb-2" style={{ color: 'var(--text-dim)', lineHeight: '1.5' }}>
+                    {costParts.join(' + ')}
+                    {' = '}
+                    <span style={{ color: ptsUsed > warband.budget ? 'var(--accent-red)' : 'var(--accent-cyan)', fontWeight: 'bold' }}>
+                        {ptsUsed}/{warband.budget} pts
+                    </span>
+                </div>
+            )}
+
+            {/* Gear overview */}
+            <div className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                Gear slots: <span style={{ color: 'var(--accent-cyan)', fontWeight: 'bold' }}>{totalGearUsed}/{totalGearAvail}</span> used
+            </div>
+
+            {/* Warnings */}
+            {hasWarnings && (
+                <div className="mt-2">
+                    <button
+                        onClick={() => setWarningsOpen(!warningsOpen)}
+                        className="flex items-center gap-2 text-xs px-2 py-1 rounded transition-colors w-full"
+                        style={{
+                            background: 'rgba(255,190,11,0.1)',
+                            color: 'var(--accent-amber)',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontFamily: 'Share Tech Mono, monospace',
+                        }}>
+                        <span style={{ fontSize: '0.8rem' }}>{warningsOpen ? '\u25BC' : '\u25B6'}</span>
+                        <span>\u26A0 {warnings.length} warning{warnings.length !== 1 ? 's' : ''}</span>
+                    </button>
+                    {warningsOpen && (
+                        <div className="mt-1 space-y-1 pl-2" style={{ borderLeft: '2px solid rgba(255,190,11,0.3)' }}>
+                            {warnings.map((w, i) => (
+                                <div key={i} className="text-xs" style={{
+                                    color: w.level === 'red' ? 'var(--accent-red)' : 'var(--accent-amber)',
+                                    paddingLeft: '4px',
+                                }}>
+                                    {w.text}
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            )}
+        </div>
+    );
+}
+
+// ---- OperativeDetail ----
+function OperativeDetail({ op, onUpdate }) {
+    const tierData = TIERS[op.tier];
+    const tierColor = TIER_COLORS[op.tier];
+
+    return (
+        <div className="space-y-5">
+            {/* Tier badge + summary */}
+            <div className="flex items-center gap-3 flex-wrap">
+                <span className="text-xs px-3 py-1 rounded font-bold uppercase tracking-wider"
+                    style={{
+                        background: `${tierColor}22`,
+                        color: tierColor,
+                        border: `1px solid ${tierColor}66`,
+                        fontFamily: 'Orbitron, sans-serif',
+                    }}>
+                    {tierData.name}
+                </span>
+                <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                    HP: {tierData.health} &middot; Gear: {getGearSlotsUsed(op)}/{getGearSlotsTotal(op)} &middot; Abilities: {op.abilities.length}/{tierData.abilitySlots}
+                </span>
+            </div>
+
+            {/* Name input */}
+            <div>
+                <label className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                    Operative Name
+                </label>
+                <input type="text"
+                    value={op.name}
+                    onChange={(e) => onUpdate({ ...op, name: e.target.value })}
+                    placeholder="Enter operative name..."
+                    className="w-full px-3 py-2 rounded border text-sm outline-none transition-colors"
+                    style={{
+                        background: 'var(--bg-dark)',
+                        borderColor: 'var(--border)',
+                        color: 'var(--text-bright)',
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = 'var(--accent-cyan)'}
+                    onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+                />
+            </div>
+
+            {/* Stat Assignment */}
+            <StatAssignment op={op} onUpdate={onUpdate} />
+
+            {/* Weapon Select */}
+            <WeaponSelect op={op} onUpdate={onUpdate} />
+
+            {/* Gear Select */}
+            <GearSelect op={op} onUpdate={onUpdate} />
+
+            {/* Ability Select */}
+            <AbilitySelect op={op} onUpdate={onUpdate} />
+        </div>
+    );
+}
+
+// ---- WarbandEditor ----
+function WarbandEditor({ warband, setWarband, selectedOpId, setSelectedOpId }) {
+    const ptsUsed = getPointsUsed(warband);
+    const ptsRemaining = getPointsRemaining(warband);
+    const overBudget = ptsUsed > warband.budget;
+    const leaderExists = hasLeader(warband);
+    const selectedOp = warband.operatives.find(op => op.id === selectedOpId) || null;
+    const [mobileDetailView, setMobileDetailView] = useState(false);
+
+    const isMobile = () => window.innerWidth < 768;
+
+    const updateWarband = (newWb) => {
+        setWarband(newWb);
+    };
+
+    const addOperative = (tierId) => {
+        const newOp = createOperative(tierId);
+        const newWb = { ...warband, operatives: [...warband.operatives, newOp] };
+        updateWarband(newWb);
+        setSelectedOpId(newOp.id);
+        if (isMobile()) setMobileDetailView(true);
+    };
+
+    const deleteOperative = (opId) => {
+        const newOps = warband.operatives.filter(op => op.id !== opId);
+        updateWarband({ ...warband, operatives: newOps });
+        if (selectedOpId === opId) {
+            setSelectedOpId(newOps.length > 0 ? newOps[0].id : null);
+        }
+    };
+
+    const updateOperative = (updatedOp) => {
+        const newOps = warband.operatives.map(op => op.id === updatedOp.id ? updatedOp : op);
+        updateWarband({ ...warband, operatives: newOps });
+    };
+
+    const setBudget = (val) => {
+        updateWarband({ ...warband, budget: val });
+    };
+
+    const budgetOptions = [
+        { label: 'Small', value: 6 },
+        { label: 'Standard', value: 10 },
+        { label: 'Large', value: 15 },
+    ];
+
+    const handleSelectOp = (opId) => {
+        setSelectedOpId(opId);
+        if (isMobile()) setMobileDetailView(true);
+    };
+
+    const handleMobileBack = () => {
+        setMobileDetailView(false);
+    };
+
+    return (
+        <div className="flex flex-col md:flex-row h-full" style={{ minHeight: 'calc(100vh - 64px)' }}>
+            {/* Left Sidebar — hidden on mobile when viewing detail */}
+            <div className={`w-full md:w-80 flex-shrink-0 overflow-y-auto border-b md:border-b-0 md:border-r ${mobileDetailView ? 'hidden md:block' : ''}`}
+                style={{ background: 'var(--bg-dark)', borderColor: 'var(--border)' }}>
+                <div className="p-4 space-y-4">
+                    {/* Warband Summary */}
+                    <WarbandSummary warband={warband} />
+
+                    {/* Warband Name */}
+                    <div>
+                        <label className="text-xs uppercase tracking-wider block mb-1" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                            Warband Name
+                        </label>
+                        <input type="text"
+                            value={warband.name}
+                            onChange={(e) => updateWarband({ ...warband, name: e.target.value })}
+                            className="w-full px-3 py-2 rounded border text-sm outline-none transition-colors"
+                            style={{
+                                background: 'var(--bg-black)',
+                                borderColor: 'var(--border)',
+                                color: 'var(--text-bright)',
+                            }}
+                            onFocus={(e) => e.target.style.borderColor = 'var(--accent-cyan)'}
+                            onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+                        />
+                    </div>
+
+                    {/* Budget Display */}
+                    <div className="p-3 rounded border" style={{ background: 'var(--bg-panel)', borderColor: 'var(--border)' }}>
+                        <div className="flex items-center justify-between mb-2">
+                            <span className="text-xs uppercase tracking-wider" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                                Budget
+                            </span>
+                            <span className="text-lg font-bold" style={{
+                                color: overBudget ? 'var(--accent-red)' : 'var(--accent-green)',
+                                fontFamily: 'Orbitron, sans-serif',
+                            }}>
+                                {ptsUsed} / {warband.budget} pts
+                            </span>
+                        </div>
+                        {/* Budget bar */}
+                        <div className="w-full h-2 rounded-full overflow-hidden mb-3" style={{ background: 'var(--bg-black)' }}>
+                            <div className="h-full rounded-full transition-all"
+                                style={{
+                                    width: `${Math.min(100, (ptsUsed / warband.budget) * 100)}%`,
+                                    background: overBudget
+                                        ? 'var(--accent-red)'
+                                        : ptsUsed === warband.budget
+                                            ? 'var(--accent-green)'
+                                            : 'var(--accent-cyan)',
+                                }} />
+                        </div>
+                        {/* Game size buttons */}
+                        <div className="grid grid-cols-3 gap-1">
+                            {budgetOptions.map(opt => (
+                                <button key={opt.value}
+                                    onClick={() => setBudget(opt.value)}
+                                    className="px-2 py-1.5 text-xs rounded border transition-all"
+                                    style={{
+                                        background: warband.budget === opt.value ? 'rgba(0,212,255,0.15)' : 'transparent',
+                                        borderColor: warband.budget === opt.value ? 'var(--accent-cyan)' : 'var(--border)',
+                                        color: warband.budget === opt.value ? 'var(--accent-cyan)' : 'var(--text-dim)',
+                                    }}>
+                                    {opt.label}<br />{opt.value}pts
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+
+                    {/* Add Operative Buttons */}
+                    <div>
+                        <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                            Add Operative
+                        </div>
+                        <div className="grid grid-cols-2 gap-1">
+                            {TIER_ORDER.map(tierId => {
+                                const tier = TIERS[tierId];
+                                const disabled = (tierId === 'leader' && leaderExists) || !canAffordTier(warband, tierId);
+                                const color = TIER_COLORS[tierId];
+                                return (
+                                    <button key={tierId}
+                                        onClick={() => addOperative(tierId)}
+                                        disabled={disabled}
+                                        className="px-2 py-2 text-xs rounded border transition-all"
+                                        style={{
+                                            borderColor: disabled ? 'var(--border)' : `${color}66`,
+                                            color: disabled ? 'var(--text-dim)' : color,
+                                            background: disabled ? 'transparent' : `${color}11`,
+                                            opacity: disabled ? 0.4 : 1,
+                                            cursor: disabled ? 'not-allowed' : 'pointer',
+                                        }}>
+                                        + {tier.name}
+                                        <span className="block text-xs" style={{ opacity: 0.7 }}>
+                                            {tier.cost === 0 ? 'Free' : `${tier.cost} pts`}
+                                        </span>
+                                    </button>
+                                );
+                            })}
+                        </div>
+                    </div>
+
+                    {/* Roster List */}
+                    <div>
+                        <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-dim)', fontFamily: 'Orbitron, sans-serif' }}>
+                            Roster ({warband.operatives.length})
+                        </div>
+                        {warband.operatives.length === 0 && (
+                            <div className="text-xs text-center py-4" style={{ color: 'var(--text-dim)' }}>
+                                Add operatives to your warband
+                            </div>
+                        )}
+                        <div className="space-y-0.5">
+                            {warband.operatives.map(op => (
+                                <OperativeListItem
+                                    key={op.id}
+                                    op={op}
+                                    isSelected={selectedOpId === op.id}
+                                    onSelect={() => handleSelectOp(op.id)}
+                                    onDelete={() => deleteOperative(op.id)}
+                                />
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Detail Panel — hidden on mobile when viewing roster list */}
+            <div className={`flex-1 overflow-y-auto p-4 md:p-6 ${!mobileDetailView ? 'hidden md:block' : ''}`} style={{ background: 'var(--bg-black)' }}>
+                {/* Mobile back button */}
+                <button onClick={handleMobileBack}
+                    className="md:hidden flex items-center gap-2 mb-4 px-3 py-2 rounded border text-sm transition-colors"
+                    style={{ borderColor: 'var(--accent-cyan)', color: 'var(--accent-cyan)', background: 'transparent' }}>
+                    &#x2190; Back to Roster
+                </button>
+                {selectedOp ? (
+                    <OperativeDetail op={selectedOp} onUpdate={updateOperative} />
+                ) : (
+                    <div className="flex items-center justify-center h-full" style={{ minHeight: '300px' }}>
+                        <div className="text-center" style={{ color: 'var(--text-dim)' }}>
+                            <div className="text-5xl mb-4" style={{ color: 'var(--border)' }}>&#x25C7;</div>
+                            <p>Select an operative from the roster</p>
+                            <p className="text-xs mt-1">or add a new one to begin</p>
+                        </div>
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
+
+// ============================================================
+// APP — Root Component
+// ============================================================
+function App() {
+    const [view, setView] = useState('list'); // 'list' | 'editor'
+    const [index, setIndex] = useState(() => loadIndex());
+    const [warband, setWarband] = useState(null);
+    const [selectedOpId, setSelectedOpId] = useState(null);
+
+    // Auto-save warband on every change
+    useEffect(() => {
+        if (!warband) return;
+        saveWarband(warband);
+        // Update index entry
+        setIndex(prev => {
+            const newIndex = prev.map(entry =>
+                entry.id === warband.id
+                    ? { ...entry, name: warband.name, lastModified: Date.now() }
+                    : entry
+            );
+            saveIndex(newIndex);
+            return newIndex;
+        });
+    }, [warband]);
+
+    const handleCreateWarband = () => {
+        const wb = createWarband();
+        saveWarband(wb);
+        const newEntry = { id: wb.id, name: wb.name, lastModified: Date.now() };
+        const newIndex = [...index, newEntry];
+        setIndex(newIndex);
+        saveIndex(newIndex);
+        setWarband(wb);
+        setSelectedOpId(null);
+        setView('editor');
+    };
+
+    const handleOpenWarband = (id) => {
+        const wb = loadWarband(id);
+        if (wb) {
+            setWarband(wb);
+            setSelectedOpId(wb.operatives.length > 0 ? wb.operatives[0].id : null);
+            setView('editor');
+        }
+    };
+
+    const handleDeleteWarband = (id) => {
+        if (!confirm('Delete this warband? This cannot be undone.')) return;
+        deleteWarbandFromStorage(id);
+        const newIndex = index.filter(e => e.id !== id);
+        setIndex(newIndex);
+        saveIndex(newIndex);
+        if (warband && warband.id === id) {
+            setWarband(null);
+            setView('list');
+        }
+    };
+
+    const handleDuplicateWarband = (id) => {
+        const sourceId = id || (warband && warband.id);
+        if (!sourceId) return;
+        const source = loadWarband(sourceId);
+        if (!source) return;
+        const copy = JSON.parse(JSON.stringify(source));
+        copy.id = crypto.randomUUID();
+        copy.name = (copy.name || 'Warband') + ' (Copy)';
+        // Assign new UUIDs to operatives
+        copy.operatives = copy.operatives.map(op => ({ ...op, id: crypto.randomUUID() }));
+        saveWarband(copy);
+        const newEntry = { id: copy.id, name: copy.name, lastModified: Date.now() };
+        const newIndex = [...index, newEntry];
+        setIndex(newIndex);
+        saveIndex(newIndex);
+    };
+
+    const handleBack = () => {
+        setView('list');
+        setWarband(null);
+        setSelectedOpId(null);
+    };
+
+    const handleExport = () => {
+        if (!warband) return;
+        const blob = new Blob([JSON.stringify(warband, null, 2)], { type: 'application/json' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `${warband.name || 'warband'}.json`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+    };
+
+    const handleImport = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (ev) => {
+            try {
+                const imported = JSON.parse(ev.target.result);
+                imported.id = crypto.randomUUID(); // Assign new UUID
+                saveWarband(imported);
+                const newEntry = { id: imported.id, name: imported.name || 'Imported Warband', lastModified: Date.now() };
+                const newIndex = [...index, newEntry];
+                setIndex(newIndex);
+                saveIndex(newIndex);
+                setWarband(imported);
+                setSelectedOpId(imported.operatives && imported.operatives.length > 0 ? imported.operatives[0].id : null);
+                setView('editor');
+            } catch (err) {
+                alert('Failed to import: invalid JSON file.');
+            }
+        };
+        reader.readAsText(file);
+        e.target.value = ''; // reset input
+    };
+
+    return (
+        <div className="min-h-screen flex flex-col">
+            <Header
+                view={view}
+                warband={warband}
+                onBack={handleBack}
+                onExport={handleExport}
+                onImport={handleImport}
+                onDuplicate={() => handleDuplicateWarband()}
+            />
+            {view === 'list' ? (
+                <WarbandList
+                    index={index}
+                    onOpen={handleOpenWarband}
+                    onDelete={handleDeleteWarband}
+                    onCreate={handleCreateWarband}
+                    onDuplicate={handleDuplicateWarband}
+                />
+            ) : (
+                warband && (
+                    <WarbandEditor
+                        warband={warband}
+                        setWarband={setWarband}
+                        selectedOpId={selectedOpId}
+                        setSelectedOpId={setSelectedOpId}
+                    />
+                )
+            )}
+        </div>
+    );
+}
+
+// ============================================================
+// MOUNT
+// ============================================================
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+    </script>
+</body>
+</html>

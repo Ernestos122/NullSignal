@@ -59,7 +59,7 @@ The Forge is the most complex app and the heart of the project. Build it first.
       "name": "Leader",
       "cost": 0,
       "health": "d10",
-      "statSpread": { "d8Count": 3, "d6Count": 2 },
+      "statSpread": { "d10Count": 2, "d8Count": 3 },
       "gearSlots": 2,
       "abilitySlots": 2
     },
@@ -114,7 +114,6 @@ The Forge is the most complex app and the heart of the project. Build it first.
     { "id": "resilient", "name": "Resilient", "effect": "First failed health check each game treated as pass (health still degrades)" },
     { "id": "tactician", "name": "Tactician", "effect": "Once per round, swap activation order with one friendly operative" },
     { "id": "rapid_assault", "name": "Rapid Assault", "effect": "After a successful Fight action, may move 3\"" },
-    { "id": "pinning_fire", "name": "Pinning Fire", "effect": "Shoot action: instead of damage, target passes GRT check or loses next action" },
     { "id": "breacher", "name": "Breacher", "effect": "Ignores cover penalty when shooting" },
     { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC to restore one health step to ally in contact" },
     { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies pass AWR check at -1 to spot" },
@@ -164,11 +163,12 @@ The Forge is the most complex app and the heart of the project. Build it first.
     }
   ],
   "scenarios": [
-    { "id": "blackout", "name": "Blackout", "briefing": "Seize and hold data relay points in a blacked-out district", "rounds": 6, "tableSize": "3x3" },
-    { "id": "extraction", "name": "Extraction", "briefing": "Locate and extract a VIP from a hostile zone", "rounds": 6, "tableSize": "3x3" },
+    { "id": "lockdown", "name": "Lockdown", "briefing": "Seize and hold critical locations (flexible: 1, 3, or 5 objective layouts)", "rounds": 6, "tableSize": "3x3" },
     { "id": "scorched_data", "name": "Scorched Data", "briefing": "Race to hack/destroy terminals before the enemy does", "rounds": 5, "tableSize": "3x3" },
     { "id": "dead_drop", "name": "Dead Drop", "briefing": "Retrieve intel packages scattered across the map, exfil to deployment zone", "rounds": 6, "tableSize": "3x3" },
-    { "id": "signal_jam", "name": "Signal Jam", "briefing": "Hold the central transmitter for 3 consecutive rounds to win", "rounds": 6, "tableSize": "3x3" },
+    { "id": "headhunter", "name": "Headhunter", "briefing": "Eliminate high-value enemy targets", "rounds": 6, "tableSize": "3x3" },
+    { "id": "crash_site", "name": "Crash Site", "briefing": "Recover cargo from a downed drone and deliver it home", "rounds": 6, "tableSize": "3x3" },
+    { "id": "extraction", "name": "Extraction", "briefing": "Locate and extract a VIP from a hostile zone", "rounds": 6, "tableSize": "3x3" },
     { "id": "sweep_clear", "name": "Sweep & Clear", "briefing": "Eliminate all hostiles in a building complex (solo/co-op focused)", "rounds": 5, "tableSize": "2x2" }
   ]
 }

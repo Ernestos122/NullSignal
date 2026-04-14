@@ -1,0 +1,1579 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>NULL SIGNAL — Solo Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+    <style>
+        :root {
+            --bg-black: #0a0a0f;
+            --bg-dark: #12121a;
+            --bg-panel: #1a1a2e;
+            --bg-card: #16213e;
+            --accent-cyan: #00d4ff;
+            --accent-magenta: #ff006e;
+            --accent-amber: #ffbe0b;
+            --accent-green: #00f5a0;
+            --accent-red: #ff3366;
+            --text-primary: #e0e0e0;
+            --text-dim: #8888aa;
+            --text-bright: #ffffff;
+            --border: #2a2a4a;
+            --border-glow: rgba(0, 212, 255, 0.3);
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Share Tech Mono', monospace;
+            background: var(--bg-black);
+            color: var(--text-primary);
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        h1, h2, h3, .heading-font {
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        /* Scanline overlay */
+        body::after {
+            content: '';
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 9999;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0, 0, 0, 0.08) 2px,
+                rgba(0, 0, 0, 0.08) 4px
+            );
+        }
+
+        /* Custom scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: var(--bg-dark); }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+
+        /* Glow utility */
+        .glow-cyan { box-shadow: 0 0 10px rgba(0, 212, 255, 0.3), inset 0 0 10px rgba(0, 212, 255, 0.05); }
+        .glow-magenta { box-shadow: 0 0 10px rgba(255, 0, 110, 0.3), inset 0 0 10px rgba(255, 0, 110, 0.05); }
+        .glow-amber { box-shadow: 0 0 10px rgba(255, 190, 11, 0.3), inset 0 0 10px rgba(255, 190, 11, 0.05); }
+        .glow-green { box-shadow: 0 0 10px rgba(0, 245, 160, 0.3), inset 0 0 10px rgba(0, 245, 160, 0.05); }
+
+        input[type="text"], select {
+            font-family: 'Share Tech Mono', monospace;
+        }
+
+        /* Dice animation */
+        @keyframes diceRoll {
+            0%, 100% { transform: rotateX(0deg); }
+            25% { transform: rotateX(90deg); }
+            50% { transform: rotateX(180deg); }
+            75% { transform: rotateX(270deg); }
+        }
+
+        @keyframes diceSpin {
+            0% { transform: rotate(0deg) scale(1); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(1); }
+            75% { transform: rotate(270deg) scale(1.1); }
+            100% { transform: rotate(360deg) scale(1); }
+        }
+
+        .dice-rolling {
+            animation: diceSpin 0.15s linear infinite;
+        }
+
+        .dice-settled {
+            animation: none;
+            transition: transform 0.2s ease-out;
+        }
+
+        /* Roll-all flash animation */
+        @keyframes rollAllFlash {
+            0% { background: rgba(0, 212, 255, 0.3); }
+            50% { background: rgba(255, 0, 110, 0.3); }
+            100% { background: transparent; }
+        }
+        .roll-all-flash {
+            animation: rollAllFlash 0.6s ease-out;
+        }
+
+        /* Activation tracker styles */
+        .op-row-pending {
+            border-left: 3px solid var(--accent-cyan) !important;
+        }
+        .op-row-activated {
+            border-left: 3px solid var(--accent-green) !important;
+            opacity: 0.55;
+        }
+        .op-row-down {
+            border-left: 3px solid var(--accent-amber) !important;
+            opacity: 0.5;
+        }
+        .op-row-out {
+            border-left: 3px solid var(--border) !important;
+            opacity: 0.35;
+            text-decoration: line-through;
+        }
+
+        /* Roll-all summary panel */
+        .roll-all-summary {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        /* Animations */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.97; }
+            92% { opacity: 1; }
+            93% { opacity: 0.9; }
+            94% { opacity: 1; }
+        }
+
+        @keyframes pulse-glow {
+            0%, 100% { box-shadow: 0 0 5px rgba(0, 212, 255, 0.2); }
+            50% { box-shadow: 0 0 15px rgba(0, 212, 255, 0.5); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .fade-in-up {
+            animation: fadeInUp 0.3s ease-out;
+        }
+
+        @media (max-width: 768px) {
+            select, button, input { min-height: 44px; }
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <!-- Disable AMD loader before CDN scripts -->
+    <script>window.define = null;</script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <script type="text/babel" data-type="module">
+// ============================================================
+// GAME DATA
+// ============================================================
+const GAME_DATA = {
+  "stats": ["CMB", "REF", "GRT", "TEC", "AWR"],
+  "statLabels": {
+    "CMB": "Combat",
+    "REF": "Reflexes",
+    "GRT": "Grit",
+    "TEC": "Tech",
+    "AWR": "Awareness"
+  },
+  "diceTypes": ["d6", "d8", "d10", "d12"],
+  "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
+  "tiers": [
+    { "id": "leader", "name": "Leader", "cost": 0, "health": "d10", "statSpread": { "d10Count": 2, "d8Count": 3 }, "gearSlots": 2, "abilitySlots": 2 },
+    { "id": "specialist", "name": "Specialist", "cost": 3, "health": "d8", "statSpread": { "d8Count": 2, "d6Count": 3 }, "gearSlots": 1, "abilitySlots": 1 },
+    { "id": "operative", "name": "Operative", "cost": 2, "health": "d8", "statSpread": { "d8Count": 1, "d6Count": 4 }, "gearSlots": 0, "abilitySlots": 0 },
+    { "id": "recruit", "name": "Recruit", "cost": 1, "health": "d6", "statSpread": { "d8Count": 0, "d6Count": 5 }, "gearSlots": 0, "abilitySlots": 0 }
+  ],
+  "weapons": [
+    { "id": "pistol", "name": "Pistol", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Compact", "traitEffect": "Easy to conceal, common backup weapon." },
+    { "id": "smg", "name": "SMG", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "12\"", "hardCap": null, "meleeOnly": false, "trait": "Rapid", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "rifle", "name": "Rifle", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Reliable", "traitEffect": "No special trait — consistent and dependable." },
+    { "id": "shotgun", "name": "Shotgun", "premium": false, "gearSlotCost": 0, "attackDice": 3, "rangeBand": "8\"", "hardCap": "16\"", "meleeOnly": false, "trait": "Spread", "traitEffect": "+1 attack die within 6\"." },
+    { "id": "blade", "name": "Blade", "premium": false, "gearSlotCost": 0, "attackDice": 2, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Melee-only", "traitEffect": "Can only be used in base contact." },
+    { "id": "sniper_rifle", "name": "Sniper Rifle", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "30\"", "hardCap": null, "meleeOnly": false, "trait": "Precise", "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty." },
+    { "id": "lmg", "name": "LMG", "premium": true, "gearSlotCost": 1, "attackDice": 4, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Suppressive", "traitEffect": "Target suffers -2\" movement on their next activation." },
+    { "id": "launcher", "name": "Launcher", "premium": true, "gearSlotCost": 1, "attackDice": 2, "rangeBand": "20\"", "hardCap": null, "meleeOnly": false, "trait": "Blast", "traitEffect": "All models within 2\" of the target point take hits." },
+    { "id": "tactical_knife", "name": "Tactical Knife", "premium": true, "gearSlotCost": 1, "attackDice": 3, "rangeBand": "Melee", "hardCap": "Melee", "meleeOnly": true, "trait": "Piercing", "traitEffect": "A heavy combat blade that finds gaps in armor. Target's health die shifts an extra step on failed check." }
+  ],
+  "abilities": [
+    { "id": "hardened", "name": "Hardened", "effect": "+1 step to GRT die for recovery and morale checks." },
+    { "id": "cqb_expert", "name": "CQB Expert", "effect": "Gains a bonus attack die in brawls." },
+    { "id": "marksman", "name": "Marksman", "effect": "Gains a bonus attack die when shooting a target within range band." },
+    { "id": "medic", "name": "Medic", "effect": "Use Gear action: roll TEC — on success, attempt recovery on a Down ally in base contact." },
+    { "id": "hacker", "name": "Hacker", "effect": "Gains a bonus die on TEC checks made for scenario interactions." },
+    { "id": "networked", "name": "Networked", "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check." },
+    { "id": "stealthy", "name": "Stealthy", "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative." },
+    { "id": "spotter", "name": "Spotter", "effect": "Once per round, designate a target: all friendly shooters gain +1 attack die vs. that target this round." },
+    { "id": "resilient", "name": "Resilient", "effect": "The first failed health check each game is treated as a pass (health die still degrades one step)." },
+    { "id": "tactician", "name": "Tactician", "effect": "Once per round, swap activation order with one friendly operative." },
+    { "id": "rapid_assault", "name": "Rapid Assault", "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)." },
+    { "id": "breacher", "name": "Breacher", "effect": "Ignores the cover penalty when shooting." },
+    { "id": "field_repair", "name": "Field Repair", "effect": "Use Gear action: roll TEC — on success, restore one health step to a friendly operative in base contact." },
+    { "id": "ghost", "name": "Ghost", "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative." },
+    { "id": "heavy_weapons", "name": "Heavy Weapons", "effect": "May carry one premium weapon without spending a gear slot." },
+    { "id": "commander", "name": "Commander", "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks." }
+  ],
+  "gear": [
+    { "id": "frag_grenade", "name": "Frag Grenade", "gearCost": 0, "type": "one-use", "effect": "Shoot action: 2\" blast within 8\". All models in radius take 1 hit.", "pro": "Area damage, ignores cover", "con": "One-use, short range, can hit friendlies in blast" },
+    { "id": "smoke_grenade", "name": "Smoke Grenade", "gearCost": 0, "type": "one-use", "effect": "Action: place 3\" smoke cloud within 8\". Blocks all line of sight through it until end of next round.", "pro": "Blocks LOS, enables safe repositioning", "con": "One-use, blocks YOUR line of sight too" },
+    { "id": "first_aid_kit", "name": "First Aid Kit", "gearCost": 0, "type": "reusable", "effect": "Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll.", "pro": "Can stabilize downed allies without Medic ability", "con": "Requires base contact and uses your action, TEC check can fail" },
+    { "id": "armor_vest", "name": "Armor Vest", "gearCost": 1, "type": "passive", "effect": "Passive: the first hit each game that would trigger a health check is ignored entirely (no roll, no degradation). Does not apply to subsequent hits.", "pro": "Fully absorbs one hit — no roll, no degradation", "con": "One-use protection, useless after first hit absorbed" },
+    { "id": "tactical_drone", "name": "Tactical Drone", "gearCost": 1, "type": "reusable", "effect": "Use Gear action: reveal all hidden/stealthy enemies within 12\". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed.", "pro": "Guaranteed intel, counters stealth", "con": "Can be destroyed on use, uses your action" },
+    { "id": "comms_relay", "name": "Comms Relay", "gearCost": 1, "type": "passive", "effect": "Friendly ability auras (Commander, Networked, Spotter) extend to 12\" instead of 6\" while this operative is active.", "pro": "Doubles the effective range of support abilities", "con": "No direct combat benefit, useless if no aura abilities in warband" },
+    { "id": "combat_stims", "name": "Combat Stims", "gearCost": 1, "type": "one-use", "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6→d8) for this activation only. Discard after use.", "pro": "Clutch stat boost when you need it most", "con": "One-use, must declare at start of activation before rolling" },
+    { "id": "hacking_deck", "name": "Hacking Deck", "gearCost": 1, "type": "passive", "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions.", "pro": "Makes TEC checks much more reliable", "con": "Only useful in scenarios with TEC interactions" },
+    { "id": "suppressor", "name": "Suppressor", "gearCost": 1, "type": "passive", "effect": "Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target.", "pro": "Stay hidden while shooting, powerful with Stealthy/Ghost abilities", "con": "No combat bonus, useless without stealth abilities or scenarios" }
+  ],
+  "behaviorTags": [
+    {
+      "id": "aggressive",
+      "name": "Aggressive",
+      "personality": "Closes distance aggressively, prefers melee over shooting. Gets into combat as fast as possible.",
+      "table": [
+        { "roll": "1-2", "action": "Move toward nearest visible enemy. Fight if in base contact." },
+        { "roll": "3-4", "action": "Move toward nearest enemy. Shoot if in line of sight." },
+        { "roll": "5-6", "action": "Full move toward nearest enemy. Fight if in contact; otherwise Shoot." }
+      ]
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "personality": "Holds position, shoots from cover. Prioritizes staying behind cover and engaging enemies at range.",
+      "table": [
+        { "roll": "1-2", "action": "If in cover: Shoot nearest visible enemy. If not in cover: move to nearest available cover." },
+        { "roll": "3-4", "action": "Hold position. Shoot nearest visible enemy." },
+        { "roll": "5-6", "action": "Move to better cover within 6\". Shoot nearest visible enemy if possible." }
+      ]
+    },
+    {
+      "id": "cautious",
+      "name": "Cautious",
+      "personality": "Avoids risk and repositions frequently. Maintains maximum range and uses cover to survive.",
+      "table": [
+        { "roll": "1-2", "action": "Move away from nearest enemy to maintain range. Shoot if able." },
+        { "roll": "3-4", "action": "Move toward nearest objective. Interact if in contact." },
+        { "roll": "5-6", "action": "Move to cover with best sight lines. Shoot nearest visible enemy." }
+      ]
+    },
+    {
+      "id": "flanker",
+      "name": "Flanker",
+      "personality": "Seeks angles and avoids the frontline. Moves to the sides or rear of enemies to attack from unexpected angles.",
+      "table": [
+        { "roll": "1-2", "action": "Move toward the flank or rear of the nearest enemy. Shoot if in line of sight." },
+        { "roll": "3-4", "action": "If behind cover with line of sight to enemy rear: Shoot. Otherwise reposition to a better angle." },
+        { "roll": "5-6", "action": "Move to the closest enemy not currently engaged by a friendly. Shoot or Fight as appropriate." }
+      ]
+    }
+  ],
+    "scenarios": [
+    { "id": "lockdown", "name": "Lockdown", "category": "pvp", "briefing": "Seize and hold critical locations. The more you control, the faster you win. Choose your objectives: a single high-value point, a contested center zone, or a network of relay nodes spread across the district.", "rounds": 6, "tableSize": "3'×3'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Before the game, players agree on one objective layout: (A) Single Point — 1 objective in the center. Control for 3 consecutive rounds = immediate win. Worth 2 VP/round. (B) Three Points — 3 objectives along the center line (center, 8\" left, 8\" right). Each worth 1 VP/round. Control all 3 simultaneously = bonus 2 VP. (C) Five Zones — Divide the table into 4 quarters plus a central zone. Quarters worth 1 VP/round, center worth 2 VP/round.", "specialRules": ["Control = more operatives within 3\" than the enemy at end of round.", "For Single Point layout: consecutive control counter resets if control is lost.", "Players agree on layout during setup. If they can't agree, roll d6: 1-2 = Single Point, 3-4 = Three Points, 5-6 = Five Zones."], "vpConditions": ["Control objective(s) at end of round = VP as defined by layout", "Control all objectives simultaneously (Three Points layout) = bonus 2 VP", "3 consecutive rounds of control (Single Point layout) = Immediate Victory", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "scorched_data", "name": "Scorched Data", "category": "pvp", "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.", "rounds": 5, "tableSize": "3'\u00d73'", "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.", "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.", "specialRules": ["Hack Terminal: Interact action using TEC. Roll 2 TEC dice \u2014 1+ success = hacked.", "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.", "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."], "vpConditions": ["Hack a terminal = 2 VP (one-time)", "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "diagonal_corners" },
+    { "id": "dead_drop", "name": "Dead Drop", "category": "pvp", "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 4 Intel Package markers in the center band of the table \u2014 each at least 6\" from any table edge and at least 6\" from each other.", "specialRules": ["Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.", "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.", "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.", "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).", "Deliver: Move the carrying operative into your deployment zone to score."], "vpConditions": ["Deliver Standard Intel = 2 VP", "Deliver Priority Intel = 3 VP", "Deliver Decoy = 0 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "headhunter", "name": "Headhunter", "category": "pvp", "briefing": "Intel says they have high-value targets. Find them, eliminate them, and send a message.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 2 objective markers on the center line, each 8\" from center (left and right). These are intel caches.", "specialRules": ["Priority Targets: Eliminating the enemy Leader = 3 VP (instead of the usual 2). Eliminating a Specialist = 2 VP (instead of 1).", "Intel Cache: Interact action at a cache marker. Roll AWR \u2014 on success, you learn the positions of all hidden/stealthy enemies (negates Stealthy and Ghost for the rest of the round).", "First Blood: The first player to eliminate an enemy operative gains +1 bonus VP."], "vpConditions": ["Eliminate enemy Leader = 3 VP", "Eliminate enemy Specialist = 2 VP", "Eliminate other enemy = 1 VP", "First Blood = 1 bonus VP", "Control intel cache at end of game = 1 VP"], "deploymentType": "opposite_edges" },
+    { "id": "crash_site", "name": "Crash Site", "category": "pvp", "briefing": "A cargo drone just went down in the middle of the district. Both teams want what\u2019s inside. Grab the cargo and get it home.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).", "objectives": "Place 1 Crash Site marker in the exact center. Place 3 Cargo tokens on the crash site.", "specialRules": ["Recover Cargo: Interact action at the crash site to pick up 1 cargo token. One per activation.", "Carrying: An operative carrying cargo has -2\" movement. Can only carry 1 token.", "Drop: Cargo drops if carrier goes Down.", "Deliver: Move carrying operative into your deployment zone to score. Cargo is removed from play once delivered.", "The crash site is dangerous terrain \u2014 any operative ending activation within 2\" of it rolls 1d6: on a 1, take 1 hit (fuel leak)."], "vpConditions": ["Deliver cargo to your deployment zone = 2 VP per token", "Eliminate enemy operative = 1 VP", "All 3 cargo delivered by one side = bonus 2 VP"], "deploymentType": "opposite_edges" },
+    { "id": "extraction", "name": "Extraction", "category": "pve", "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).", "objectives": "Place 1 VIP marker in the exact center of the table.", "specialRules": ["The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).", "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).", "The VIP exits the table at the player's deployment edge for victory points."], "vpConditions": ["Extract VIP off player's deployment edge = 5 VP", "VIP goes Down = -2 VP (still recoverable)", "VIP goes Out = -3 VP", "Eliminate enemy operative = 1 VP"], "deploymentType": "asymmetric" },
+    { "id": "sweep_and_clear", "name": "Sweep & Clear", "category": "pve", "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions \u2014 at least 6\" from the player's deployment edge).", "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.", "specialRules": ["A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.", "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).", "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."], "vpConditions": ["Clear a zone = 2 VP per zone", "All 4 zones cleared = bonus 3 VP (total victory)", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "sweep" },
+    { "id": "holdout", "name": "Holdout", "category": "pve", "briefing": "They know where you are and they\u2019re coming. Dig in, hold your ground, and survive until extraction arrives.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of the table center. AI operatives deploy along all four table edges (within 3\" of edge).", "objectives": "Place 1 Holdout Point marker in the exact center. The player must maintain control at the end of round 6.", "specialRules": ["Wave System: The AI warband starts with a basic force. At the end of rounds 2, 4, and 6, reinforcements arrive \u2014 roll d6 per reinforcement wave: 1-2 = 2 Recruits (Aggressive), 3-4 = 1 Operative + 1 Recruit (Aggressive), 5-6 = 1 Specialist + 1 Recruit (mixed).", "Reinforcement entry: Roll d6 for each new operative: 1=North, 2=East, 3=South, 4=West, 5-6=closest edge to the Holdout Point.", "Surrounded: AI operatives always count as having line of sight for target priority (they know where you are)."], "vpConditions": ["Survive to end of round 6 with at least 1 operative standing = 5 VP", "Control Holdout Point at end of round 6 = 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out = -1 VP"], "deploymentType": "center_holdout" },
+    { "id": "data_heist", "name": "Data Heist", "category": "pve", "briefing": "A corporate server farm sits in the heart of enemy territory. Get in, hack the data, and get out before they lock you down.", "rounds": 6, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 6\" of one table edge. AI operatives deploy in the opposite half, concentrated around 2 Server Terminal markers.", "objectives": "Place 2 Server Terminal markers in the opposite half of the table, each at least 8\" from the player's deployment edge and 6\" apart.", "specialRules": ["Hack Server: Interact action at a terminal. Roll TEC \u2014 2+ successes = hacked. 1 success = partial (need another Interact action to finish). 0 = security alert triggered.", "Security Alert: If triggered (0 successes on hack, or an AI operative spots a player within 6\" of a terminal), all AI operatives gain +1 die to CMB for the rest of the game (heightened security).", "Exfiltration: After hacking both servers, player operatives must exit via their deployment edge to secure the data.", "Stealth Phase: AI operatives do not activate until a player operative is spotted (within line of sight and 12\" of an AI operative, or a failed hack triggers alert). Until then, AI operatives remain stationary."], "vpConditions": ["Hack server terminal = 2 VP each", "Both servers hacked = bonus 2 VP", "Exfil at least 1 operative after both hacks = 3 VP", "No security alert triggered = bonus 2 VP", "Player operative goes Out = -1 VP"], "deploymentType": "asymmetric" },
+    { "id": "ambush", "name": "Ambush", "category": "pve", "briefing": "Your patrol walked right into a trap. Hostiles on all sides. Fight your way to the extraction point before they close the net.", "rounds": 5, "tableSize": "3'\u00d73'", "deployment": "Player deploys within 4\" of the table center (patrol starting position). AI operatives deploy along all four table edges, within 4\" of edges.", "objectives": "Place 1 Extraction Point marker on a randomly determined table edge (roll d6: 1-2 North, 3-4 East, 5 South, 6 West).", "specialRules": ["Ambush: AI has initiative automatically on round 1 (no roll).", "Closing Net: From round 3 onward, at the end of each round, all AI operatives that didn\u2019t activate this round may move 3\" toward the nearest player operative (the net tightens).", "Extraction: A player operative in contact with the Extraction Point may exit the table as their action. Exited operatives are safe.", "Urgency: If no player operative has exited by end of round 4, the extraction point moves 6\" toward center (extraction window shrinking)."], "vpConditions": ["Extract operative (exit at extraction point) = 2 VP each", "Extract Leader = 3 VP", "Extract more than half your warband = bonus 3 VP", "Eliminate enemy operative = 1 VP", "Player operative goes Out before extraction = -1 VP"], "deploymentType": "center_ambush" },
+    { "id": "bug_hunt", "name": "Bug Hunt", "category": "pve", "briefing": "Something\u2019s in the building complex. Room by room, floor by floor \u2014 find them before they find you.", "rounds": 6, "tableSize": "2'\u00d72'", "deployment": "Player deploys within 6\" of one table edge. AI operatives are placed face-down (hidden) by the player across the rest of the table \u2014 at least one per zone.", "objectives": "Divide the table into 6 zones (3x2 grid). AI operatives are hidden in each zone.", "specialRules": ["Hidden Enemies: AI operatives start face-down (hidden). A player operative entering a zone with hidden enemies must roll AWR \u2014 on 1+ success, reveal all hidden enemies in that zone. On 0 successes, the hidden enemies get a free activation (ambush) before being revealed.", "Ambush Activation: Revealed enemies via failed AWR check immediately activate (one each) before normal play resumes.", "Sweep: A zone is considered cleared when all enemies in it are Out.", "Close Quarters: All ranges reduced \u2014 weapon range bands halved (round up). The table is tight."], "vpConditions": ["Clear a zone = 2 VP", "All zones cleared = bonus 4 VP", "Reveal enemies without triggering ambush = 1 VP per zone", "Player operative goes Out = -1 VP"], "deploymentType": "sweep_6zone" }
+  ],
+  "aiProfiles": [
+    { "id": "street_wolves", "name": "Street Wolves", "description": "A large street gang that overwhelms with numbers.", "style": "Horde / Aggressive", "budget": 10, "operatives": [{ "name": "Pack Alpha", "tier": "leader", "behavior": "defensive" },{ "name": "Enforcer", "tier": "operative", "behavior": "aggressive" },{ "name": "Enforcer", "tier": "operative", "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "gear": ["frag_grenade"], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "gear": ["smoke_grenade"], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "gear": ["frag_grenade"], "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "behavior": "flanker" },{ "name": "Runner", "tier": "recruit", "behavior": "aggressive" },{ "name": "Runner", "tier": "recruit", "behavior": "aggressive" }] },
+    { "id": "obsidian_corp", "name": "Obsidian Corp Security", "description": "Professional corporate security team.", "style": "Balanced / Defensive", "budget": 10, "operatives": [{ "name": "Shift Commander", "tier": "leader", "gear": ["armor_vest"], "behavior": "defensive" },{ "name": "Overwatch", "tier": "specialist", "behavior": "cautious" },{ "name": "Point Man", "tier": "operative", "gear": ["frag_grenade"], "behavior": "aggressive" },{ "name": "Trooper", "tier": "operative", "behavior": "defensive" },{ "name": "Patrol", "tier": "recruit", "behavior": "defensive" },{ "name": "Patrol", "tier": "recruit", "gear": ["first_aid_kit"], "behavior": "cautious" },{ "name": "Patrol", "tier": "recruit", "behavior": "defensive" }] },
+    { "id": "ghost_protocol", "name": "Ghost Protocol", "description": "Elite black ops team. Few in number but highly skilled.", "style": "Elite / Stealth", "budget": 10, "operatives": [{ "name": "Phantom Lead", "tier": "leader", "behavior": "flanker" },{ "name": "Wraith", "tier": "specialist", "behavior": "flanker" },{ "name": "Shade", "tier": "specialist", "gear": ["hacking_deck"], "behavior": "cautious" },{ "name": "Striker", "tier": "operative", "behavior": "aggressive" },{ "name": "Striker", "tier": "operative", "behavior": "flanker" }] },
+    { "id": "iron_jackals", "name": "Iron Jackals", "description": "Brutal close-combat gang that rushes the enemy.", "style": "Melee / Rush", "budget": 10, "operatives": [{ "name": "Pit Boss", "tier": "leader", "gear": ["combat_stims"], "behavior": "aggressive" },{ "name": "Gunner", "tier": "specialist", "behavior": "defensive" },{ "name": "Charger", "tier": "operative", "gear": ["frag_grenade"], "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "behavior": "aggressive" },{ "name": "Mutt", "tier": "recruit", "behavior": "flanker" },{ "name": "Mutt", "tier": "recruit", "behavior": "aggressive" }] },
+    { "id": "neon_shadows", "name": "Neon Shadows", "description": "Tech-savvy infiltration team.", "style": "Tech / Infiltration", "budget": 10, "operatives": [{ "name": "Netrunner Prime", "tier": "leader", "gear": ["hacking_deck"], "behavior": "cautious" },{ "name": "Signal", "tier": "specialist", "gear": ["comms_relay"], "behavior": "flanker" },{ "name": "Cipher", "tier": "specialist", "behavior": "flanker" },{ "name": "Proxy", "tier": "operative", "behavior": "cautious" },{ "name": "Proxy", "tier": "operative", "behavior": "defensive" }] },
+    { "id": "razorback_militia", "name": "Razorback Militia", "description": "Dug-in territorial militia. Patient and disciplined.", "style": "Defensive / Hold", "budget": 10, "operatives": [{ "name": "Warden", "tier": "leader", "gear": ["armor_vest"], "behavior": "defensive" },{ "name": "Heavy", "tier": "specialist", "behavior": "defensive" },{ "name": "Sentry", "tier": "operative", "behavior": "defensive" },{ "name": "Sentry", "tier": "operative", "behavior": "defensive" },{ "name": "Lookout", "tier": "recruit", "gear": ["smoke_grenade"], "behavior": "cautious" },{ "name": "Lookout", "tier": "recruit", "gear": ["smoke_grenade"], "behavior": "cautious" },{ "name": "Lookout", "tier": "recruit", "behavior": "defensive" }] }
+  ]
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+const { useState, useEffect, useRef, useCallback, useMemo } = React;
+
+function rollD6() {
+    return Math.floor(Math.random() * 6) + 1;
+}
+
+function generateId() {
+    return Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
+}
+
+const TIER_MAP = {};
+GAME_DATA.tiers.forEach(t => TIER_MAP[t.id] = t);
+
+const BEHAVIOR_MAP = {};
+GAME_DATA.behaviorTags.forEach(b => BEHAVIOR_MAP[b.id] = b);
+
+const TAG_COLORS = {
+    aggressive: { bg: 'rgba(255, 51, 102, 0.2)', border: '#ff3366', text: '#ff3366' },
+    defensive: { bg: 'rgba(0, 212, 255, 0.2)', border: '#00d4ff', text: '#00d4ff' },
+    cautious: { bg: 'rgba(255, 190, 11, 0.2)', border: '#ffbe0b', text: '#ffbe0b' },
+    flanker: { bg: 'rgba(255, 0, 110, 0.2)', border: '#ff006e', text: '#ff006e' },
+};
+
+const HEALTH_COLORS = {
+    d10: '#00f5a0',
+    d8: '#4ade80',
+    d6: '#ffbe0b',
+    DOWN: '#ff3366',
+    OUT: '#661429',
+};
+
+const HEALTH_TRACK = ['d10', 'd8', 'd6', 'DOWN', 'OUT'];
+
+function getNextHealth(current) {
+    const idx = HEALTH_TRACK.indexOf(current);
+    if (idx < HEALTH_TRACK.length - 1) return HEALTH_TRACK[idx + 1];
+    return current;
+}
+
+function getBehaviorTagFromRoll(roll) {
+    if (roll <= 2) return 'aggressive';
+    if (roll <= 4) return 'defensive';
+    if (roll === 5) return 'cautious';
+    return 'flanker';
+}
+
+function getActionFromRoll(behaviorId, roll) {
+    const behavior = BEHAVIOR_MAP[behaviorId];
+    if (!behavior) return '';
+    if (roll <= 2) return behavior.table[0];
+    if (roll <= 4) return behavior.table[1];
+    return behavior.table[2];
+}
+
+function calcWarbandCost(operatives) {
+    return operatives.reduce((sum, op) => sum + (TIER_MAP[op.tier]?.cost || 0), 0);
+}
+
+// ============================================================
+// PERSISTENCE
+// ============================================================
+const STORAGE_KEYS = {
+    warband: 'nullSignal_aiWarband',
+    game: 'nullSignal_soloGameState',
+};
+
+function saveWarband(warband) {
+    try { localStorage.setItem(STORAGE_KEYS.warband, JSON.stringify(warband)); } catch(e) {}
+}
+
+function loadWarband() {
+    try {
+        const d = localStorage.getItem(STORAGE_KEYS.warband);
+        return d ? JSON.parse(d) : null;
+    } catch(e) { return null; }
+}
+
+function saveGameState(state) {
+    try { localStorage.setItem(STORAGE_KEYS.game, JSON.stringify(state)); } catch(e) {}
+}
+
+function loadGameState() {
+    try {
+        const d = localStorage.getItem(STORAGE_KEYS.game);
+        return d ? JSON.parse(d) : null;
+    } catch(e) { return null; }
+}
+
+function clearGameState() {
+    try { localStorage.removeItem(STORAGE_KEYS.game); } catch(e) {}
+}
+
+// ============================================================
+// COMPONENTS
+// ============================================================
+
+// --- Header ---
+function Header({ view, onNavigate }) {
+    return (
+        <header className="px-4 py-3 flex items-center justify-between flex-wrap gap-2"
+            style={{ background: 'linear-gradient(180deg, var(--bg-panel) 0%, var(--bg-dark) 100%)', borderBottom: '1px solid var(--border)' }}>
+            {/* Left section: brand stacked */}
+            <div className="flex items-center gap-3">
+                <div>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontWeight: 900, fontSize: '1.1rem', letterSpacing: '0.2em', color: 'var(--accent-cyan)', lineHeight: 1.3 }}>
+                        NULL SIGNAL
+                    </div>
+                    <div style={{ fontFamily: 'Orbitron, sans-serif', fontSize: '0.7rem', color: 'var(--accent-magenta)', textTransform: 'uppercase', letterSpacing: '0.1em' }}>
+                        SOLO ENGINE
+                    </div>
+                </div>
+            </div>
+
+            {/* Center section: nav links */}
+            <nav className="flex items-center gap-2">
+                <a href="NullSignal_Forge.html" style={{
+                    color: 'var(--text-dim)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', fontSize: 11, padding: '5px 12px',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.target.style.color = 'var(--accent-cyan)'; e.target.style.borderColor = 'var(--accent-cyan)'; }}
+                onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+                >FORGE</a>
+                <a href="NullSignal_Rules.html" style={{
+                    color: 'var(--text-dim)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', fontSize: 11, padding: '5px 12px',
+                    border: '1px solid var(--border)', borderRadius: 4,
+                    transition: 'all 0.15s',
+                }}
+                onMouseEnter={e => { e.target.style.color = 'var(--accent-cyan)'; e.target.style.borderColor = 'var(--accent-cyan)'; }}
+                onMouseLeave={e => { e.target.style.color = 'var(--text-dim)'; e.target.style.borderColor = 'var(--border)'; }}
+                >RULES</a>
+                <a href="NullSignal_SoloEngine.html" style={{
+                    color: 'var(--accent-cyan)', textDecoration: 'none',
+                    fontFamily: 'Share Tech Mono, monospace', fontSize: 11, padding: '5px 12px',
+                    border: '1px solid var(--accent-cyan)', borderRadius: 4,
+                }}>SOLO ENGINE</a>
+            </nav>
+
+            {/* Right section: empty */}
+            <div></div>
+        </header>
+    );
+}
+
+// --- Tier Badge ---
+function TierBadge({ tierId }) {
+    const tier = TIER_MAP[tierId];
+    if (!tier) return null;
+    const colors = {
+        leader: 'var(--accent-amber)',
+        specialist: 'var(--accent-cyan)',
+        operative: 'var(--accent-green)',
+        recruit: 'var(--text-dim)',
+    };
+    const c = colors[tierId] || 'var(--text-dim)';
+    return (
+        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+            style={{ background: `${c}22`, color: c, border: `1px solid ${c}44` }}>
+            {tier.name}
+        </span>
+    );
+}
+
+// --- Behavior Tag Badge ---
+function TagBadge({ tagId }) {
+    const tc = TAG_COLORS[tagId];
+    const tag = BEHAVIOR_MAP[tagId];
+    if (!tc || !tag) return null;
+    return (
+        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+            style={{ background: tc.bg, color: tc.text, border: `1px solid ${tc.border}44` }}>
+            {tag.name}
+        </span>
+    );
+}
+
+// --- Health Badge ---
+function HealthBadge({ health, onClick }) {
+    const c = HEALTH_COLORS[health] || '#888';
+    const isDown = health === 'DOWN';
+    const isOut = health === 'OUT';
+    return (
+        <button onClick={onClick}
+            className="text-xs font-bold px-2 py-1 rounded cursor-pointer transition-all hover:scale-110"
+            title="Click to degrade health"
+            style={{
+                background: `${c}22`,
+                color: c,
+                border: `1px solid ${c}66`,
+                textDecoration: isOut ? 'line-through' : 'none',
+                opacity: isOut ? 0.5 : 1,
+            }}>
+            {health}
+        </button>
+    );
+}
+
+// --- Dice Roller Visual ---
+function DiceRollerVisual({ rolling, result, onRoll, label }) {
+    const [displayNum, setDisplayNum] = useState(1);
+    const intervalRef = useRef(null);
+
+    useEffect(() => {
+        if (rolling) {
+            let count = 0;
+            const maxTicks = 16;
+            const tick = () => {
+                count++;
+                setDisplayNum(rollD6());
+                if (count >= maxTicks) {
+                    clearInterval(intervalRef.current);
+                    // Final result is set by parent
+                }
+            };
+            intervalRef.current = setInterval(tick, 50);
+            return () => clearInterval(intervalRef.current);
+        }
+    }, [rolling]);
+
+    useEffect(() => {
+        if (result !== null && !rolling) {
+            setDisplayNum(result);
+        }
+    }, [result, rolling]);
+
+    return (
+        <div className="flex flex-col items-center gap-3">
+            {label && <div className="text-xs uppercase tracking-widest" style={{ color: 'var(--text-dim)' }}>{label}</div>}
+            <div className={`w-20 h-20 sm:w-24 sm:h-24 flex items-center justify-center rounded-lg text-3xl sm:text-4xl font-black ${rolling ? 'dice-rolling' : 'dice-settled'}`}
+                style={{
+                    background: rolling ? 'rgba(0,212,255,0.15)' : (result !== null ? 'rgba(0,245,160,0.15)' : 'var(--bg-card)'),
+                    border: `2px solid ${rolling ? 'var(--accent-cyan)' : (result !== null ? 'var(--accent-green)' : 'var(--border)')}`,
+                    color: rolling ? 'var(--accent-cyan)' : (result !== null ? 'var(--accent-green)' : 'var(--text-dim)'),
+                    fontFamily: "'Orbitron', sans-serif",
+                }}>
+                {result !== null || rolling ? displayNum : '?'}
+            </div>
+            {onRoll && (
+                <button onClick={onRoll} disabled={rolling}
+                    className="heading-font text-sm font-bold px-6 py-2 rounded transition-all hover:scale-105 disabled:opacity-50"
+                    style={{
+                        background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta))',
+                        color: '#fff',
+                        border: 'none',
+                        cursor: rolling ? 'not-allowed' : 'pointer',
+                    }}>
+                    {rolling ? 'ROLLING...' : 'ROLL D6'}
+                </button>
+            )}
+        </div>
+    );
+}
+
+
+// ============================================================
+// SETUP VIEW
+// ============================================================
+function SetupView({ onStartGame, initialWarband }) {
+    const [operatives, setOperatives] = useState(initialWarband || []);
+    const [showAllScenarios, setShowAllScenarios] = useState(false);
+    const pveScenarios = GAME_DATA.scenarios.filter(s => s.category === 'pve');
+    const displayedScenarios = showAllScenarios ? GAME_DATA.scenarios : pveScenarios;
+    const [selectedScenario, setSelectedScenario] = useState((pveScenarios[0] || GAME_DATA.scenarios[0]).id);
+    const [budget] = useState(10);
+
+    // Save warband on change
+    useEffect(() => {
+        saveWarband(operatives);
+    }, [operatives]);
+
+    const cost = calcWarbandCost(operatives);
+    const remaining = budget - cost;
+    const scenario = GAME_DATA.scenarios.find(s => s.id === selectedScenario);
+
+    function addOperative(tierId) {
+        const tier = TIER_MAP[tierId];
+        if (!tier) return;
+        if (tierId === 'leader' && operatives.some(o => o.tier === 'leader')) return;
+        if (remaining < tier.cost && tierId !== 'leader') return;
+        setOperatives(prev => [...prev, {
+            id: generateId(),
+            name: '',
+            tier: tierId,
+            behaviorTag: 'aggressive',
+        }]);
+    }
+
+    function removeOperative(id) {
+        setOperatives(prev => prev.filter(o => o.id !== id));
+    }
+
+    function updateOperative(id, field, value) {
+        setOperatives(prev => prev.map(o => o.id === id ? { ...o, [field]: value } : o));
+    }
+
+    function loadProfile(profileId) {
+        const profile = (GAME_DATA.aiProfiles || []).find(p => p.id === profileId);
+        if (!profile) return;
+        const ops = profile.operatives.map(op => ({
+            id: generateId(),
+            name: op.name,
+            tier: op.tier,
+            behaviorTag: op.behavior,
+        }));
+        setOperatives(ops);
+    }
+
+    function autoAssignTags() {
+        setOperatives(prev => prev.map(o => ({
+            ...o,
+            behaviorTag: getBehaviorTagFromRoll(rollD6()),
+        })));
+    }
+
+    function randomizeWarband() {
+        const ops = [];
+        // Always add a leader
+        ops.push({ id: generateId(), name: 'AI Leader', tier: 'leader', behaviorTag: getBehaviorTagFromRoll(rollD6()) });
+        let remaining = budget; // leader costs 0
+        // Fill with random mix
+        const fillTiers = ['specialist', 'operative', 'recruit'];
+        let safety = 0;
+        while (remaining > 0 && safety < 20) {
+            safety++;
+            const available = fillTiers.filter(t => TIER_MAP[t].cost <= remaining);
+            if (available.length === 0) break;
+            const pick = available[Math.floor(Math.random() * available.length)];
+            const tier = TIER_MAP[pick];
+            const names = {
+                specialist: ['AI Specialist', 'AI Tech', 'AI Gunner', 'AI Hacker', 'AI Medic'],
+                operative: ['AI Operative', 'AI Soldier', 'AI Agent', 'AI Enforcer'],
+                recruit: ['AI Recruit', 'AI Grunt', 'AI Rookie', 'AI Conscript'],
+            };
+            const namePool = names[pick];
+            ops.push({
+                id: generateId(),
+                name: namePool[Math.floor(Math.random() * namePool.length)] + ' ' + (ops.length),
+                tier: pick,
+                behaviorTag: getBehaviorTagFromRoll(rollD6()),
+            });
+            remaining -= tier.cost;
+        }
+        setOperatives(ops);
+    }
+
+    const canStart = operatives.length > 0 && operatives.some(o => o.tier === 'leader');
+
+    return (
+        <div className="max-w-4xl mx-auto p-4 space-y-6">
+            {/* Scenario Selector */}
+            <section className="rounded-lg p-4" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                <div className="flex items-center justify-between mb-3">
+                    <h2 className="text-lg font-bold tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
+                        SCENARIO
+                    </h2>
+                    <label className="flex items-center gap-2 cursor-pointer text-xs" style={{ color: 'var(--text-dim)' }}>
+                        <input type="checkbox" checked={showAllScenarios} onChange={e => setShowAllScenarios(e.target.checked)}
+                            className="accent-cyan-400" />
+                        Show all (incl. PvP)
+                    </label>
+                </div>
+                <select value={selectedScenario} onChange={e => setSelectedScenario(e.target.value)}
+                    className="w-full p-2 rounded text-sm"
+                    style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+                    {displayedScenarios.map(s => (
+                        <option key={s.id} value={s.id}>{s.category === 'pvp' ? '[PvP] ' : '[PvE] '}{s.name}</option>
+                    ))}
+                </select>
+                {scenario && (
+                    <div className="mt-3 p-3 rounded text-sm space-y-2" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                        <p style={{ color: 'var(--text-dim)' }}>{scenario.briefing}</p>
+                        <div className="flex gap-4 text-xs">
+                            <span style={{ color: 'var(--accent-amber)' }}>Rounds: {scenario.rounds}</span>
+                            <span style={{ color: 'var(--text-dim)' }}>Table: {scenario.tableSize}</span>
+                        </div>
+                        {scenario.deployment && (
+                            <div className="pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                                <div className="text-xs font-bold mb-1 tracking-wider" style={{ color: 'var(--accent-magenta)', fontFamily: 'Orbitron, sans-serif', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Deployment</div>
+                                <p className="text-xs" style={{ color: 'var(--text-dim)', lineHeight: 1.5 }}>{scenario.deployment}</p>
+                            </div>
+                        )}
+                        {scenario.objectives && (
+                            <div>
+                                <div className="text-xs font-bold mb-1 tracking-wider" style={{ color: 'var(--accent-magenta)', fontFamily: 'Orbitron, sans-serif', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Objectives</div>
+                                <p className="text-xs" style={{ color: 'var(--text-dim)', lineHeight: 1.5 }}>{scenario.objectives}</p>
+                            </div>
+                        )}
+                        {scenario.specialRules && scenario.specialRules.length > 0 && (
+                            <div className="pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                                <div className="text-xs font-bold mb-1 tracking-wider" style={{ color: 'var(--accent-green)', fontFamily: 'Orbitron, sans-serif', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Special Rules</div>
+                                <ul className="text-xs space-y-1" style={{ paddingLeft: 16, color: 'var(--text-primary)', lineHeight: 1.5 }}>
+                                    {scenario.specialRules.map((r, i) => <li key={i}>{r}</li>)}
+                                </ul>
+                            </div>
+                        )}
+                        {scenario.vpConditions && scenario.vpConditions.length > 0 && (
+                            <div className="pt-2" style={{ borderTop: '1px solid var(--border)' }}>
+                                <div className="text-xs font-bold mb-1 tracking-wider" style={{ color: 'var(--accent-amber)', fontFamily: 'Orbitron, sans-serif', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>VP Conditions</div>
+                                <ul className="text-xs space-y-1" style={{ paddingLeft: 16, color: 'var(--accent-amber)', lineHeight: 1.5 }}>
+                                    {scenario.vpConditions.map((v, i) => <li key={i}>{v}</li>)}
+                                </ul>
+                            </div>
+                        )}
+                    </div>
+                )}
+            </section>
+
+            {/* AI Warband Builder */}
+            <section className="rounded-lg p-4" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                    <h2 className="text-lg font-bold tracking-wider" style={{ color: 'var(--accent-magenta)' }}>
+                        AI WARBAND
+                    </h2>
+                    <div className="flex items-center gap-2 text-sm">
+                        <span style={{ color: 'var(--text-dim)' }}>Budget:</span>
+                        <span className="font-bold" style={{ color: remaining >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                            {cost} / {budget}
+                        </span>
+                        <span className="text-xs px-1.5 py-0.5 rounded"
+                            style={{ background: remaining >= 0 ? 'rgba(0,245,160,0.15)' : 'rgba(255,51,102,0.15)', color: remaining >= 0 ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                            {remaining >= 0 ? `${remaining} remaining` : 'Over budget!'}
+                        </span>
+                    </div>
+                </div>
+
+                {/* Load Premade Profile */}
+                {GAME_DATA.aiProfiles && GAME_DATA.aiProfiles.length > 0 && (
+                    <div className="flex flex-col sm:flex-row gap-2 mb-4 p-3 rounded" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                        <div className="flex-1">
+                            <div className="text-xs font-bold mb-1.5 tracking-wider" style={{ color: 'var(--accent-green)', fontFamily: 'Orbitron, sans-serif', fontSize: 9, textTransform: 'uppercase', letterSpacing: '0.1em' }}>Load Premade Profile</div>
+                            <select id="profileSelect" defaultValue=""
+                                className="w-full p-2 rounded text-sm"
+                                style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+                                <option value="" disabled>Select a profile...</option>
+                                {GAME_DATA.aiProfiles.map(p => (
+                                    <option key={p.id} value={p.id}>{p.name} ({p.style} - {p.operatives.length} models)</option>
+                                ))}
+                            </select>
+                        </div>
+                        <button onClick={() => {
+                                const sel = document.getElementById('profileSelect');
+                                if (sel && sel.value) loadProfile(sel.value);
+                            }}
+                            className="self-end text-xs font-bold px-4 py-2 rounded transition-all hover:scale-105"
+                            style={{ background: 'rgba(0,245,160,0.15)', color: 'var(--accent-green)', border: '1px solid var(--accent-green)44', whiteSpace: 'nowrap' }}>
+                            Load Profile
+                        </button>
+                    </div>
+                )}
+
+                {/* Add Operative Buttons */}
+                <div className="flex flex-wrap gap-2 mb-4">
+                    {GAME_DATA.tiers.map(tier => {
+                        const disabled = (tier.id === 'leader' && operatives.some(o => o.tier === 'leader'))
+                            || (tier.id !== 'leader' && remaining < tier.cost);
+                        return (
+                            <button key={tier.id} onClick={() => addOperative(tier.id)} disabled={disabled}
+                                className="text-xs font-bold px-3 py-1.5 rounded transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
+                                style={{ background: 'var(--bg-card)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+                                + {tier.name} ({tier.cost}pt)
+                            </button>
+                        );
+                    })}
+                </div>
+
+                {/* Operative List */}
+                <div className="space-y-2 mb-4">
+                    {operatives.length === 0 && (
+                        <div className="text-center py-8 text-sm" style={{ color: 'var(--text-dim)' }}>
+                            No operatives added. Add a Leader to begin.
+                        </div>
+                    )}
+                    {operatives.map(op => (
+                        <div key={op.id} className="flex flex-col sm:flex-row sm:items-center gap-2 p-3 rounded"
+                            style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                            <div className="flex items-center gap-2 flex-1">
+                                <input type="text" value={op.name} onChange={e => updateOperative(op.id, 'name', e.target.value)}
+                                    placeholder={`${TIER_MAP[op.tier]?.name || 'Operative'} name...`}
+                                    className="flex-1 px-2 py-1 rounded text-sm bg-transparent"
+                                    style={{ border: '1px solid var(--border)', color: 'var(--text-primary)' }} />
+                                <TierBadge tierId={op.tier} />
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <select value={op.behaviorTag} onChange={e => updateOperative(op.id, 'behaviorTag', e.target.value)}
+                                    className="text-xs px-2 py-1 rounded"
+                                    style={{ background: 'var(--bg-panel)', color: 'var(--text-primary)', border: '1px solid var(--border)' }}>
+                                    {GAME_DATA.behaviorTags.map(bt => (
+                                        <option key={bt.id} value={bt.id}>{bt.name}</option>
+                                    ))}
+                                </select>
+                                <TagBadge tagId={op.behaviorTag} />
+                                <button onClick={() => removeOperative(op.id)}
+                                    className="text-xs px-2 py-1 rounded hover:scale-110 transition-all"
+                                    style={{ color: 'var(--accent-red)', border: '1px solid var(--accent-red)33' }}>
+                                    X
+                                </button>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex flex-wrap gap-2">
+                    <button onClick={autoAssignTags} disabled={operatives.length === 0}
+                        className="text-xs font-bold px-4 py-2 rounded transition-all hover:scale-105 disabled:opacity-30"
+                        style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                        Auto-assign Tags
+                    </button>
+                    <button onClick={randomizeWarband}
+                        className="text-xs font-bold px-4 py-2 rounded transition-all hover:scale-105"
+                        style={{ background: 'rgba(255,0,110,0.15)', color: 'var(--accent-magenta)', border: '1px solid var(--accent-magenta)44' }}>
+                        Randomize Warband
+                    </button>
+                </div>
+            </section>
+
+            {/* Start Button */}
+            <button onClick={() => canStart && onStartGame(operatives, selectedScenario)} disabled={!canStart}
+                className="heading-font w-full text-lg font-bold py-4 rounded-lg transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
+                style={{
+                    background: canStart ? 'linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta))' : 'var(--bg-panel)',
+                    color: '#fff',
+                    border: 'none',
+                    cursor: canStart ? 'pointer' : 'not-allowed',
+                }}>
+                START GAME
+            </button>
+        </div>
+    );
+}
+
+
+// ============================================================
+// PLAY VIEW
+// ============================================================
+function PlayView({ initialState, onNewGame }) {
+    const [gameState, setGameState] = useState(initialState);
+    const [activeOpId, setActiveOpId] = useState(null);
+    const [rolling, setRolling] = useState(false);
+    const [rollResult, setRollResult] = useState(null);
+    const [showEndPhase, setShowEndPhase] = useState(false);
+    const [endPhaseChecks, setEndPhaseChecks] = useState({ recovery: false, vp: false, conditions: false, advance: false });
+    const [targetPriorityOpen, setTargetPriorityOpen] = useState(false);
+    const [defenderChoiceOpen, setDefenderChoiceOpen] = useState(false);
+    const [recoveryRolling, setRecoveryRolling] = useState(null);
+    const [recoveryResult, setRecoveryResult] = useState(null);
+    const [rollAllResults, setRollAllResults] = useState(null);
+    const [rollAllAnimating, setRollAllAnimating] = useState(false);
+    const [endPhaseRecoveryDone, setEndPhaseRecoveryDone] = useState({});
+
+    // Persist game state
+    useEffect(() => {
+        saveGameState(gameState);
+    }, [gameState]);
+
+    const scenario = GAME_DATA.scenarios.find(s => s.id === gameState.scenarioId);
+    const totalRounds = scenario?.rounds || 6;
+
+    const activeOp = gameState.operatives.find(o => o.id === activeOpId);
+    const activeBehavior = activeOp ? BEHAVIOR_MAP[activeOp.behaviorTag] : null;
+
+    // Activation tracker counts
+    const TIER_ORDER = { leader: 0, specialist: 1, operative: 2, recruit: 3 };
+    const activeOps = gameState.operatives.filter(o => o.health !== 'OUT');
+    const activatedCount = activeOps.filter(o =>
+        gameState.activatedThisRound.includes(o.id) || o.health === 'DOWN'
+    ).length;
+    const totalActiveCount = activeOps.length;
+
+    // End phase: all checklist items checked?
+    const endPhaseDownOps = gameState.operatives.filter(o => o.health === 'DOWN');
+    const endPhaseAllRecoveryDone = endPhaseDownOps.length === 0 || endPhaseDownOps.every(o => endPhaseRecoveryDone[o.id]);
+    const allEndPhaseChecked = endPhaseChecks.recovery && endPhaseChecks.vp && endPhaseChecks.conditions && endPhaseChecks.advance && endPhaseAllRecoveryDone;
+
+    const allActivated = gameState.operatives
+        .filter(o => o.health !== 'OUT' && o.health !== 'DOWN')
+        .every(o => gameState.activatedThisRound.includes(o.id));
+
+    function updateOp(id, updates) {
+        setGameState(prev => ({
+            ...prev,
+            operatives: prev.operatives.map(o => o.id === id ? { ...o, ...updates } : o),
+        }));
+    }
+
+    function degradeHealth(id) {
+        const op = gameState.operatives.find(o => o.id === id);
+        if (!op) return;
+        const next = getNextHealth(op.health);
+        updateOp(id, { health: next });
+    }
+
+    function selectOperative(id) {
+        const op = gameState.operatives.find(o => o.id === id);
+        if (!op || op.health === 'OUT') return;
+        setActiveOpId(id);
+        setRollResult(null);
+    }
+
+    function performRoll() {
+        if (rolling || !activeOp) return;
+        setRolling(true);
+        setRollResult(null);
+
+        setTimeout(() => {
+            const result = rollD6();
+            setRollResult(result);
+            setRolling(false);
+            // Auto-mark as activated when rolling
+            if (activeOpId && !gameState.activatedThisRound.includes(activeOpId)) {
+                setGameState(prev => ({
+                    ...prev,
+                    activatedThisRound: [...prev.activatedThisRound, activeOpId],
+                }));
+            }
+        }, 850);
+    }
+
+    function markActivated() {
+        if (!activeOpId) return;
+        setGameState(prev => ({
+            ...prev,
+            activatedThisRound: [...prev.activatedThisRound, activeOpId],
+        }));
+        setActiveOpId(null);
+        setRollResult(null);
+    }
+
+    function nextRound() {
+        setGameState(prev => ({
+            ...prev,
+            currentRound: Math.min(prev.currentRound + 1, totalRounds),
+            activatedThisRound: [],
+        }));
+        setShowEndPhase(false);
+        setEndPhaseChecks({ recovery: false, vp: false, conditions: false, advance: false });
+        setEndPhaseRecoveryDone({});
+        setActiveOpId(null);
+        setRollResult(null);
+        setRollAllResults(null);
+    }
+
+    function openEndPhase() {
+        setShowEndPhase(true);
+        setActiveOpId(null);
+        setRollResult(null);
+    }
+
+    function performRollAll() {
+        if (rollAllAnimating) return;
+        setRollAllAnimating(true);
+        setRollAllResults(null);
+        setActiveOpId(null);
+        setRollResult(null);
+
+        setTimeout(() => {
+            const eligibleOps = gameState.operatives.filter(o =>
+                o.health !== 'OUT' && o.health !== 'DOWN' && !gameState.activatedThisRound.includes(o.id)
+            );
+
+            const results = eligibleOps.map(op => {
+                const roll = rollD6();
+                const behavior = BEHAVIOR_MAP[op.behaviorTag];
+                const actionEntry = getActionFromRoll(op.behaviorTag, roll);
+                return {
+                    id: op.id,
+                    name: op.name || TIER_MAP[op.tier]?.name || 'Unnamed',
+                    tier: op.tier,
+                    behaviorTag: op.behaviorTag,
+                    behaviorName: behavior?.name || op.behaviorTag,
+                    roll,
+                    action: actionEntry?.action || '',
+                };
+            });
+
+            // Sort: Leaders first, then Specialists, then Operatives, then Recruits
+            results.sort((a, b) => (TIER_ORDER[a.tier] || 99) - (TIER_ORDER[b.tier] || 99));
+
+            // Mark all rolled operatives as activated
+            const rolledIds = results.map(r => r.id);
+            setGameState(prev => ({
+                ...prev,
+                activatedThisRound: [...prev.activatedThisRound, ...rolledIds],
+            }));
+
+            setRollAllResults(results);
+            setRollAllAnimating(false);
+        }, 900);
+    }
+
+    function performRecovery(opId) {
+        if (recoveryRolling) return;
+        setRecoveryRolling(opId);
+        setRecoveryResult(null);
+        setTimeout(() => {
+            const result = rollD6();
+            setRecoveryResult({ opId, roll: result, success: result >= 4 });
+            if (result >= 4) {
+                updateOp(opId, { health: 'd6' });
+            }
+            setRecoveryRolling(null);
+        }, 850);
+    }
+
+    function handleNewGame() {
+        clearGameState();
+        onNewGame();
+    }
+
+    const roundProgress = ((gameState.currentRound) / totalRounds) * 100;
+
+    return (
+        <div className="flex flex-col h-full">
+            {/* Turn Tracker Top Bar */}
+            <div className="px-4 py-3 flex flex-col sm:flex-row items-center justify-between gap-2"
+                style={{ background: 'var(--bg-dark)', borderBottom: '1px solid var(--border)' }}>
+                <div className="flex items-center gap-4">
+                    <h2 className="heading-font text-lg font-bold tracking-wider" style={{ color: 'var(--accent-amber)' }}>
+                        ROUND {gameState.currentRound} / {totalRounds}
+                    </h2>
+                    {scenario && (
+                        <span className="text-xs px-2 py-0.5 rounded" style={{ background: 'var(--bg-card)', color: 'var(--text-dim)' }}>
+                            {scenario.name}
+                        </span>
+                    )}
+                </div>
+                <div className="flex items-center gap-2">
+                    <button onClick={performRollAll}
+                        disabled={rollAllAnimating || activatedCount >= totalActiveCount}
+                        className="heading-font text-xs font-bold px-3 py-1.5 rounded transition-all hover:scale-105 disabled:opacity-30 disabled:cursor-not-allowed"
+                        style={{ background: 'linear-gradient(135deg, var(--accent-cyan), var(--accent-magenta))', color: '#fff', border: 'none' }}>
+                        {rollAllAnimating ? 'ROLLING...' : 'ROLL ALL AI'}
+                    </button>
+                    <button onClick={openEndPhase}
+                        className="text-xs font-bold px-3 py-1.5 rounded transition-all hover:scale-105"
+                        style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                        End Phase
+                    </button>
+                    <button onClick={handleNewGame}
+                        className="text-xs font-bold px-3 py-1.5 rounded transition-all hover:scale-105"
+                        style={{ background: 'rgba(255,51,102,0.15)', color: 'var(--accent-red)', border: '1px solid var(--accent-red)44' }}>
+                        New Game
+                    </button>
+                </div>
+            </div>
+
+            {/* Round Progress Bar */}
+            <div className="w-full h-1" style={{ background: 'var(--bg-panel)' }}>
+                <div className="h-full transition-all duration-500" style={{ width: `${roundProgress}%`, background: 'linear-gradient(90deg, var(--accent-cyan), var(--accent-magenta))' }} />
+            </div>
+
+            {/* Main Content */}
+            <div className="flex-1 flex flex-col lg:flex-row gap-0 overflow-hidden" style={{ minHeight: 0 }}>
+
+                {/* Left Panel - Operative List */}
+                <div className="lg:w-80 xl:w-96 overflow-y-auto p-4 space-y-2" style={{ background: 'var(--bg-dark)', borderRight: '1px solid var(--border)' }}>
+                    <div className="flex items-center justify-between mb-2">
+                        <h3 className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
+                            AI OPERATIVES
+                        </h3>
+                        <span className="text-xs font-bold px-2 py-1 rounded"
+                            style={{
+                                background: activatedCount >= totalActiveCount ? 'rgba(0,245,160,0.15)' : 'rgba(0,212,255,0.1)',
+                                color: activatedCount >= totalActiveCount ? 'var(--accent-green)' : 'var(--accent-cyan)',
+                                border: `1px solid ${activatedCount >= totalActiveCount ? 'var(--accent-green)' : 'var(--accent-cyan)'}44`,
+                            }}>
+                            Activated: {activatedCount}/{totalActiveCount} this round
+                        </span>
+                    </div>
+                    {gameState.operatives.map(op => {
+                        const isOut = op.health === 'OUT';
+                        const isDown = op.health === 'DOWN';
+                        const isActivated = gameState.activatedThisRound.includes(op.id);
+                        const isSelected = activeOpId === op.id;
+
+                        // Determine row class for activation tracker
+                        let rowClass = 'op-row-pending';
+                        if (isOut) rowClass = 'op-row-out';
+                        else if (isDown) rowClass = 'op-row-down';
+                        else if (isActivated) rowClass = 'op-row-activated';
+
+                        return (
+                            <div key={op.id}
+                                className={`p-3 rounded-lg transition-all cursor-pointer ${rowClass} ${isSelected ? 'glow-cyan' : ''}`}
+                                onClick={() => !isOut && selectOperative(op.id)}
+                                style={{
+                                    background: isSelected ? 'rgba(0,212,255,0.08)' : 'var(--bg-panel)',
+                                    border: `1px solid ${isSelected ? 'var(--accent-cyan)' : 'var(--border)'}`,
+                                }}>
+                                <div className="flex items-center justify-between gap-2 mb-1">
+                                    <div className="flex items-center gap-2 flex-1 min-w-0">
+                                        {/* Activation checkbox indicator */}
+                                        <span className="text-sm shrink-0" style={{ color: isOut ? 'var(--text-dim)' : (isActivated || isDown) ? 'var(--accent-green)' : 'var(--accent-cyan)' }}>
+                                            {isOut ? '\u2716' : (isActivated || isDown) ? '\u2713' : '\u25CB'}
+                                        </span>
+                                        <span className="text-sm font-bold truncate" style={{
+                                            color: isOut ? 'var(--text-dim)' : 'var(--text-bright)',
+                                            textDecoration: isOut ? 'line-through' : 'none',
+                                        }}>
+                                            {op.name || TIER_MAP[op.tier]?.name || 'Unnamed'}
+                                        </span>
+                                    </div>
+                                    <HealthBadge health={op.health} onClick={(e) => { e.stopPropagation(); degradeHealth(op.id); }} />
+                                </div>
+                                <div className="flex items-center gap-2 flex-wrap">
+                                    <TierBadge tierId={op.tier} />
+                                    <TagBadge tagId={op.behaviorTag} />
+                                    {isActivated && !isOut && !isDown && (
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                            style={{ background: 'rgba(0,245,160,0.2)', color: 'var(--accent-green)', border: '1px solid var(--accent-green)44' }}>
+                                            DONE
+                                        </span>
+                                    )}
+                                    {isDown && !isOut && (
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                            style={{ background: 'rgba(255,190,11,0.2)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                                            DOWN
+                                        </span>
+                                    )}
+                                    {isOut && (
+                                        <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                            style={{ background: 'rgba(102,20,41,0.3)', color: '#661429', border: '1px solid #66142944' }}>
+                                            OUT
+                                        </span>
+                                    )}
+                                    {isDown && !isOut && (
+                                        <button onClick={(e) => { e.stopPropagation(); performRecovery(op.id); }}
+                                            disabled={recoveryRolling === op.id}
+                                            className="text-xs px-2 py-0.5 rounded transition-all hover:scale-105"
+                                            style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                                            {recoveryRolling === op.id ? 'Rolling...' : 'Recovery'}
+                                        </button>
+                                    )}
+                                </div>
+                                {recoveryResult && recoveryResult.opId === op.id && (
+                                    <div className="mt-2 text-xs p-2 rounded fade-in-up"
+                                        style={{
+                                            background: recoveryResult.success ? 'rgba(0,245,160,0.1)' : 'rgba(255,51,102,0.1)',
+                                            color: recoveryResult.success ? 'var(--accent-green)' : 'var(--accent-red)',
+                                            border: `1px solid ${recoveryResult.success ? 'var(--accent-green)' : 'var(--accent-red)'}33`,
+                                        }}>
+                                        Rolled {recoveryResult.roll} - {recoveryResult.success ? 'RECOVERED! Back to d6.' : 'FAILED. Still DOWN.'}
+                                    </div>
+                                )}
+                            </div>
+                        );
+                    })}
+                </div>
+
+                {/* Right Panel - Behavior Roller + Helpers */}
+                <div className="flex-1 overflow-y-auto p-4 space-y-4">
+
+                    {/* End Phase Overlay */}
+                    {showEndPhase && (
+                        <div className="rounded-lg p-6 fade-in-up" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-amber)44' }}>
+                            <h3 className="heading-font text-lg font-bold tracking-wider mb-4" style={{ color: 'var(--accent-amber)' }}>
+                                END PHASE CHECKLIST
+                            </h3>
+                            <div className="space-y-3">
+                                {/* Recovery checklist item with inline DOWN operative list */}
+                                <div className="p-2 rounded transition-all hover:bg-white/5">
+                                    <label className="flex items-center gap-3 cursor-pointer text-sm">
+                                        <input type="checkbox" checked={endPhaseChecks.recovery}
+                                            onChange={e => setEndPhaseChecks(prev => ({ ...prev, recovery: e.target.checked }))}
+                                            className="w-4 h-4 accent-cyan-400" />
+                                        <span style={{ color: endPhaseChecks.recovery ? 'var(--accent-green)' : 'var(--text-primary)', textDecoration: endPhaseChecks.recovery ? 'line-through' : 'none' }}>
+                                            Recovery rolls for DOWN operatives
+                                        </span>
+                                    </label>
+                                    {endPhaseDownOps.length > 0 && (
+                                        <div className="mt-2 ml-7 p-3 rounded space-y-2" style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                            <div className="text-xs mb-1" style={{ color: 'var(--accent-amber)' }}>
+                                                Roll recovery for each DOWN operative:
+                                            </div>
+                                            {endPhaseDownOps.map(op => (
+                                                <div key={op.id} className="flex items-center justify-between py-1.5 px-2 rounded"
+                                                    style={{ background: endPhaseRecoveryDone[op.id] ? 'rgba(0,245,160,0.05)' : 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                                                    <div className="flex items-center gap-2">
+                                                        <span className="text-xs" style={{ color: endPhaseRecoveryDone[op.id] ? 'var(--accent-green)' : 'var(--accent-amber)' }}>
+                                                            {endPhaseRecoveryDone[op.id] ? '\u2713' : '\u25CB'}
+                                                        </span>
+                                                        <span className="text-sm" style={{ color: endPhaseRecoveryDone[op.id] ? 'var(--accent-green)' : 'var(--text-primary)' }}>
+                                                            {op.name || TIER_MAP[op.tier]?.name}
+                                                        </span>
+                                                        {endPhaseRecoveryDone[op.id] && (
+                                                            <span className="text-xs" style={{ color: endPhaseRecoveryDone[op.id].success ? 'var(--accent-green)' : 'var(--accent-red)' }}>
+                                                                (Rolled {endPhaseRecoveryDone[op.id].roll} - {endPhaseRecoveryDone[op.id].success ? 'Recovered!' : 'Failed'})
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <button onClick={() => {
+                                                            if (recoveryRolling || endPhaseRecoveryDone[op.id]) return;
+                                                            setRecoveryRolling(op.id);
+                                                            setTimeout(() => {
+                                                                const result = rollD6();
+                                                                const success = result >= 4;
+                                                                if (success) updateOp(op.id, { health: 'd6' });
+                                                                setEndPhaseRecoveryDone(prev => ({ ...prev, [op.id]: { roll: result, success } }));
+                                                                setRecoveryResult({ opId: op.id, roll: result, success });
+                                                                setRecoveryRolling(null);
+                                                            }, 850);
+                                                        }}
+                                                        disabled={recoveryRolling === op.id || !!endPhaseRecoveryDone[op.id]}
+                                                        className="text-xs font-bold px-3 py-1 rounded transition-all hover:scale-105 disabled:opacity-40 disabled:cursor-not-allowed"
+                                                        style={{ background: 'rgba(255,190,11,0.15)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)44' }}>
+                                                        {recoveryRolling === op.id ? 'Rolling...' : endPhaseRecoveryDone[op.id] ? 'Done' : 'Roll Recovery'}
+                                                    </button>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* Other checklist items */}
+                                {[
+                                    { key: 'vp', label: 'Score VP for held objectives' },
+                                    { key: 'conditions', label: 'Check scenario conditions' },
+                                    { key: 'advance', label: 'Advance round' },
+                                ].map(item => (
+                                    <label key={item.key} className="flex items-center gap-3 cursor-pointer text-sm p-2 rounded transition-all hover:bg-white/5">
+                                        <input type="checkbox" checked={endPhaseChecks[item.key]}
+                                            onChange={e => setEndPhaseChecks(prev => ({ ...prev, [item.key]: e.target.checked }))}
+                                            className="w-4 h-4 accent-cyan-400" />
+                                        <span style={{ color: endPhaseChecks[item.key] ? 'var(--accent-green)' : 'var(--text-primary)', textDecoration: endPhaseChecks[item.key] ? 'line-through' : 'none' }}>
+                                            {item.label}
+                                        </span>
+                                    </label>
+                                ))}
+
+                                {/* Completion status hint */}
+                                {!allEndPhaseChecked && (
+                                    <div className="text-xs p-2 rounded" style={{ background: 'rgba(255,190,11,0.08)', color: 'var(--accent-amber)', border: '1px solid var(--accent-amber)22' }}>
+                                        Check off all items{endPhaseDownOps.length > 0 ? ' and roll recovery for all DOWN operatives' : ''} to unlock the advance button.
+                                    </div>
+                                )}
+
+                                <button onClick={nextRound} disabled={gameState.currentRound >= totalRounds || !allEndPhaseChecked}
+                                    className="heading-font w-full text-sm font-bold py-3 mt-4 rounded transition-all hover:scale-[1.01] disabled:opacity-30 disabled:cursor-not-allowed"
+                                    style={{
+                                        background: allEndPhaseChecked ? 'linear-gradient(135deg, var(--accent-amber), var(--accent-magenta))' : 'var(--bg-card)',
+                                        color: allEndPhaseChecked ? '#fff' : 'var(--text-dim)',
+                                        border: 'none',
+                                    }}>
+                                    {gameState.currentRound >= totalRounds ? 'GAME OVER' : `COMPLETE END PHASE \u2014 ADVANCE TO ROUND ${gameState.currentRound + 1}`}
+                                </button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Roll All Summary Panel */}
+                    {!showEndPhase && rollAllResults && rollAllResults.length > 0 && (
+                        <div className="rounded-lg p-4 fade-in-up roll-all-summary" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-magenta)44' }}>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="heading-font text-lg font-bold tracking-wider" style={{ color: 'var(--accent-magenta)' }}>
+                                    ROLL ALL RESULTS
+                                </h3>
+                                <button onClick={() => setRollAllResults(null)}
+                                    className="text-xs font-bold px-3 py-1 rounded transition-all hover:scale-105"
+                                    style={{ background: 'rgba(255,51,102,0.15)', color: 'var(--accent-red)', border: '1px solid var(--accent-red)44' }}>
+                                    DISMISS
+                                </button>
+                            </div>
+                            <div className="space-y-2">
+                                {rollAllResults.map((r, idx) => {
+                                    const tc = TAG_COLORS[r.behaviorTag] || {};
+                                    return (
+                                        <div key={r.id} className="p-3 rounded-lg roll-all-flash"
+                                            style={{
+                                                background: 'var(--bg-card)',
+                                                border: `1px solid ${tc.border || 'var(--border)'}44`,
+                                                animationDelay: `${idx * 0.08}s`,
+                                                animationFillMode: 'backwards',
+                                            }}>
+                                            <div className="flex items-center justify-between gap-2 mb-1">
+                                                <div className="flex items-center gap-2">
+                                                    <span className="text-sm font-bold" style={{ color: 'var(--text-bright)' }}>
+                                                        {r.name}
+                                                    </span>
+                                                    <TierBadge tierId={r.tier} />
+                                                    <span className="text-xs font-bold px-1.5 py-0.5 rounded"
+                                                        style={{ background: tc.bg || 'var(--bg-panel)', color: tc.text || 'var(--text-dim)', border: `1px solid ${tc.border || 'var(--border)'}44` }}>
+                                                        {r.behaviorName}
+                                                    </span>
+                                                </div>
+                                                <span className="heading-font text-lg font-black px-2 py-0.5 rounded"
+                                                    style={{ background: 'rgba(0,245,160,0.15)', color: 'var(--accent-green)', border: '1px solid var(--accent-green)44', minWidth: '2rem', textAlign: 'center' }}>
+                                                    {r.roll}
+                                                </span>
+                                            </div>
+                                            <div className="text-sm mt-1" style={{ color: 'var(--text-primary)' }}>
+                                                {r.action}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="text-xs mt-3 text-center" style={{ color: 'var(--text-dim)' }}>
+                                {rollAllResults.length} operative{rollAllResults.length !== 1 ? 's' : ''} rolled and marked activated
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Roll All Animating Indicator */}
+                    {!showEndPhase && rollAllAnimating && (
+                        <div className="rounded-lg p-8 text-center fade-in-up" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-cyan)44' }}>
+                            <div className="text-4xl mb-3 dice-rolling" style={{ color: 'var(--accent-cyan)', fontFamily: "'Orbitron', sans-serif", display: 'inline-block' }}>&#x2731;</div>
+                            <p className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
+                                ROLLING ALL AI OPERATIVES...
+                            </p>
+                        </div>
+                    )}
+
+                    {/* Behavior Roller */}
+                    {!showEndPhase && activeOp && (
+                        <div className="rounded-lg p-6 fade-in-up" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                            <div className="flex items-center gap-3 mb-4">
+                                <h3 className="heading-font text-lg font-bold tracking-wider" style={{ color: 'var(--text-bright)' }}>
+                                    {activeOp.name || TIER_MAP[activeOp.tier]?.name || 'Operative'}
+                                </h3>
+                                <TierBadge tierId={activeOp.tier} />
+                                <TagBadge tagId={activeOp.behaviorTag} />
+                            </div>
+
+                            {activeBehavior && (
+                                <p className="text-xs mb-4 italic" style={{ color: 'var(--text-dim)' }}>
+                                    {activeBehavior.personality}
+                                </p>
+                            )}
+
+                            <div className="flex flex-col items-center py-4">
+                                <DiceRollerVisual
+                                    rolling={rolling}
+                                    result={rollResult}
+                                    onRoll={performRoll}
+                                    label="Behavior Roll"
+                                />
+                            </div>
+
+                            {/* Roll Result Action */}
+                            {rollResult !== null && !rolling && activeBehavior && (
+                                <div className="mt-4 p-4 rounded-lg fade-in-up"
+                                    style={{ background: 'rgba(0,245,160,0.08)', border: '1px solid var(--accent-green)33' }}>
+                                    <div className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--accent-green)' }}>
+                                        Result: {rollResult}
+                                    </div>
+                                    <div className="text-sm font-bold" style={{ color: 'var(--text-bright)' }}>
+                                        {getActionFromRoll(activeOp.behaviorTag, rollResult)?.action || ''}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Full Behavior Table */}
+                            {activeBehavior && (
+                                <div className="mt-4">
+                                    <div className="text-xs uppercase tracking-wider mb-2" style={{ color: 'var(--text-dim)' }}>
+                                        {activeBehavior.name} Behavior Table
+                                    </div>
+                                    <div className="space-y-1">
+                                        {activeBehavior.table.map((entry, i) => {
+                                            const isHighlighted = rollResult !== null && !rolling && (
+                                                (rollResult <= 2 && i === 0) ||
+                                                (rollResult >= 3 && rollResult <= 4 && i === 1) ||
+                                                (rollResult >= 5 && i === 2)
+                                            );
+                                            return (
+                                                <div key={i} className="flex gap-3 p-2 rounded text-sm"
+                                                    style={{
+                                                        background: isHighlighted ? 'rgba(0,212,255,0.1)' : 'var(--bg-card)',
+                                                        border: `1px solid ${isHighlighted ? 'var(--accent-cyan)' : 'var(--border)'}`,
+                                                    }}>
+                                                    <span className="font-bold shrink-0 w-8" style={{ color: isHighlighted ? 'var(--accent-cyan)' : 'var(--accent-amber)' }}>
+                                                        {entry.roll}
+                                                    </span>
+                                                    <span style={{ color: isHighlighted ? 'var(--text-bright)' : 'var(--text-primary)' }}>
+                                                        {entry.action}
+                                                    </span>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* Done Button */}
+                            {rollResult !== null && !rolling && (
+                                <button onClick={markActivated}
+                                    className="heading-font w-full text-sm font-bold py-3 mt-4 rounded transition-all hover:scale-[1.01]"
+                                    style={{
+                                        background: 'linear-gradient(135deg, var(--accent-green), var(--accent-cyan))',
+                                        color: '#fff',
+                                        border: 'none',
+                                    }}>
+                                    DONE — MARK ACTIVATED
+                                </button>
+                            )}
+                        </div>
+                    )}
+
+                    {/* No Operative Selected */}
+                    {!showEndPhase && !activeOp && (
+                        <div className="rounded-lg p-8 text-center" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                            <div className="text-4xl mb-3" style={{ color: 'var(--text-dim)', fontFamily: "'Orbitron', sans-serif" }}>&#x25C7;</div>
+                            <p className="text-sm" style={{ color: 'var(--text-dim)' }}>
+                                Select an AI operative from the left panel to roll their behavior.
+                            </p>
+                            {allActivated && (
+                                <p className="text-sm mt-3" style={{ color: 'var(--accent-amber)' }}>
+                                    All operatives activated this round. Open the End Phase.
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {/* Target Priority Helper */}
+                    <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                        <button onClick={() => setTargetPriorityOpen(prev => !prev)}
+                            className="w-full flex items-center justify-between p-3 text-left transition-all hover:bg-white/5"
+                            style={{ color: 'var(--text-primary)' }}>
+                            <span className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-cyan)' }}>
+                                TARGET PRIORITY
+                            </span>
+                            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                {targetPriorityOpen ? '[ - ]' : '[ + ]'}
+                            </span>
+                        </button>
+                        {targetPriorityOpen && (
+                            <div className="px-4 pb-4 space-y-2 fade-in-up">
+                                {[
+                                    'Nearest visible enemy',
+                                    'If tied: lowest health enemy',
+                                    'If tied: enemy holding an objective',
+                                ].map((rule, i) => (
+                                    <div key={i} className="flex items-start gap-3 text-sm">
+                                        <span className="heading-font font-bold shrink-0 w-6 text-center" style={{ color: 'var(--accent-amber)' }}>
+                                            {i + 1}.
+                                        </span>
+                                        <span style={{ color: 'var(--text-primary)' }}>{rule}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* AI Defender Choice (Firefights) */}
+                    <div className="rounded-lg overflow-hidden" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                        <button onClick={() => setDefenderChoiceOpen(prev => !prev)}
+                            className="w-full flex items-center justify-between p-3 text-left transition-all hover:bg-white/5"
+                            style={{ color: 'var(--text-primary)' }}>
+                            <span className="heading-font text-sm font-bold tracking-wider" style={{ color: 'var(--accent-amber)' }}>
+                                AI DEFENDER CHOICE
+                            </span>
+                            <span className="text-xs" style={{ color: 'var(--text-dim)' }}>
+                                {defenderChoiceOpen ? '[ - ]' : '[ + ]'}
+                            </span>
+                        </button>
+                        {defenderChoiceOpen && (
+                            <div className="px-4 pb-4 space-y-2 fade-in-up">
+                                <p className="text-xs mb-2" style={{ color: 'var(--text-dim)' }}>
+                                    When an AI operative is targeted by a firefight:
+                                </p>
+                                {[
+                                    { tags: 'Aggressive / Flanker', action: 'Always Return Fire (roll CMB)' },
+                                    { tags: 'Defensive / Cautious', action: 'Take Cover (roll REF) if health is d6; otherwise Return Fire' },
+                                ].map((rule, i) => (
+                                    <div key={i} className="flex items-start gap-3 text-sm p-2 rounded"
+                                        style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                        <span className="heading-font font-bold shrink-0" style={{ color: 'var(--accent-cyan)' }}>
+                                            {rule.tags}:
+                                        </span>
+                                        <span style={{ color: 'var(--text-primary)' }}>{rule.action}</span>
+                                    </div>
+                                ))}
+                            </div>
+                        )}
+                    </div>
+
+                    {/* AI Engagement Behavior */}
+                    <div className="rounded-lg p-4" style={{ background: 'var(--bg-panel)', border: '1px solid var(--accent-magenta)22' }}>
+                        <h3 className="heading-font text-sm font-bold tracking-wider mb-3" style={{ color: 'var(--accent-magenta)' }}>
+                            AI ENGAGEMENT RULES
+                        </h3>
+                        <div className="space-y-2">
+                            <div className="flex items-start gap-3 text-sm p-2 rounded"
+                                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                <span className="heading-font font-bold shrink-0" style={{ color: 'var(--accent-cyan)' }}>
+                                    Default:
+                                </span>
+                                <span style={{ color: 'var(--text-primary)' }}>If engaged at start of activation, AI always <strong style={{ color: 'var(--accent-magenta)' }}>Fights</strong> (never attempts to disengage).</span>
+                            </div>
+                            <div className="flex items-start gap-3 text-sm p-2 rounded"
+                                style={{ background: 'var(--bg-card)', border: '1px solid var(--border)' }}>
+                                <span className="heading-font font-bold shrink-0" style={{ color: 'var(--accent-amber)' }}>
+                                    Exception:
+                                </span>
+                                <span style={{ color: 'var(--text-primary)' }}><strong style={{ color: 'var(--accent-amber)' }}>Cautious</strong> AI operatives attempt to <strong style={{ color: 'var(--accent-green)' }}>disengage first</strong> (2 REF dice, 1+ success = break free, move 3").</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Health Tracker Legend */}
+                    <div className="rounded-lg p-4" style={{ background: 'var(--bg-panel)', border: '1px solid var(--border)' }}>
+                        <h3 className="heading-font text-sm font-bold tracking-wider mb-3" style={{ color: 'var(--text-dim)' }}>
+                            HEALTH TRACK
+                        </h3>
+                        <div className="flex flex-wrap gap-2">
+                            {HEALTH_TRACK.map(h => (
+                                <span key={h} className="text-xs font-bold px-2 py-1 rounded"
+                                    style={{ background: `${HEALTH_COLORS[h]}22`, color: HEALTH_COLORS[h], border: `1px solid ${HEALTH_COLORS[h]}44` }}>
+                                    {h}
+                                </span>
+                            ))}
+                            <span className="text-xs self-center ml-2" style={{ color: 'var(--text-dim)' }}>
+                                Click an operative's health badge to degrade
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+}
+
+
+// ============================================================
+// APP
+// ============================================================
+function App() {
+    const [view, setView] = useState('setup'); // 'setup' | 'play'
+    const [gameState, setGameState] = useState(null);
+
+    // Check for saved game on mount
+    useEffect(() => {
+        const saved = loadGameState();
+        if (saved && saved.operatives && saved.operatives.length > 0) {
+            setGameState(saved);
+            setView('play');
+        }
+    }, []);
+
+    function handleStartGame(operatives, scenarioId) {
+        const scenario = GAME_DATA.scenarios.find(s => s.id === scenarioId);
+        const state = {
+            scenarioId,
+            currentRound: 1,
+            operatives: operatives.map(op => ({
+                ...op,
+                health: TIER_MAP[op.tier]?.health || 'd8',
+            })),
+            activatedThisRound: [],
+        };
+        setGameState(state);
+        saveGameState(state);
+        setView('play');
+    }
+
+    function handleNewGame() {
+        setGameState(null);
+        setView('setup');
+    }
+
+    const savedWarband = loadWarband();
+
+    return (
+        <div className="min-h-screen flex flex-col" style={{ background: 'var(--bg-black)' }}>
+            <Header view={view} />
+            {view === 'setup' && (
+                <SetupView onStartGame={handleStartGame} initialWarband={savedWarband} />
+            )}
+            {view === 'play' && gameState && (
+                <PlayView initialState={gameState} onNewGame={handleNewGame} />
+            )}
+        </div>
+    );
+}
+
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(<App />);
+    </script>
+</body>
+</html>

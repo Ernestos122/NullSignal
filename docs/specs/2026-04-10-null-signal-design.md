@@ -18,7 +18,7 @@ Five attributes, each represented by a **die type** (d6 / d8 / d10 / d12). Highe
 | Stat | Abbr | Governs |
 |------|------|---------|
 | Combat | CMB | All attacks — melee and ranged. Weapon determines range/effects, CMB determines dice. |
-| Reflexes | REF | Ranged defense (evasion under fire), reactive checks, overwatch triggers. Defenders roll REF to cancel incoming ranged hits. |
+| Reflexes | REF | Defensive reaction when under fire. Defender chooses to Take Cover (roll REF to cancel hits) instead of Returning Fire. Also governs disengaging from melee. |
 | Grit | GRT | Physical/mental toughness. Resisting suppression, morale, enduring hazards. |
 | Tech | TEC | Hacking terminals, disarming traps, using specialist gear, operating devices. |
 | Awareness | AWR | Spotting hidden enemies, overwatch reactions, detecting ambushes. |
@@ -56,7 +56,7 @@ d10 → d8 → d6 (floor) → DOWN → OUT
 4. Fail at any step = operative goes **Down** (incapacitated, on the ground)
 5. A Down operative that takes another hit = **Out** (removed from play)
 
-**Combat is simultaneous.** Both sides resolve their attacks fully before applying health consequences. If an operative goes Down from incoming hits, their simultaneously-resolved attacks still count.
+**When both sides deal hits (Return Fire in firefights, or brawls), combat is simultaneous.** Both sides resolve their attacks fully before applying health consequences. If an operative goes Down from incoming hits, their simultaneously-resolved attacks still count.
 
 ### Key Rules
 
@@ -69,16 +69,27 @@ d10 → d8 → d6 (floor) → DOWN → OUT
 
 ## 3. Combat — Simultaneous Resolution
 
-All combat is resolved simultaneously — both sides roll at the same time. No free attacks.
+Brawls are always simultaneous. Firefights give the defender a choice: Return Fire (mutual exchange) or Take Cover (defensive). No free attacks.
+
+### 3.0 Line of Sight (LOS)
+
+- An operative can see a target if you can draw an unobstructed straight line from any part of the operative's base to any part of the target's base.
+- Terrain features (walls, buildings, large containers) block LOS entirely if the line passes through them.
+- Other operatives (friendly or enemy) do NOT block LOS — you can shoot past them.
+- If in doubt, get down to model-eye-level and check. If you can see any part of the target, you have LOS.
+- **Partial LOS** = the target is partially obscured by terrain. This counts as Cover (attacker's CMB shifts down one step).
 
 ### 3.1 Firefights (Ranged Combat)
 
 1. Active operative declares Shoot action and chooses a target in **line of sight**
 2. **Attacker rolls CMB pool** (number of dice = weapon's Attack value, die type = CMB stat)
-3. **Defender rolls REF pool** (number of dice = 2, die type = REF stat) — representing evasion, diving for cover, return fire
-4. Each attacker success (4+) = one hit. Each defender success (4+) = one hit **cancelled**.
-5. Remaining hits trigger health checks on the target
-6. **Simultaneously**, the target fires back if they have line of sight — resolve their attack using the same process (they roll CMB, original attacker rolls REF)
+3. **Defender chooses one response:**
+   - **Return Fire (CMB):** Roll their weapon's attack dice at their CMB die type. Both sides' successes (4+) count as hits. Resolve hits against BOTH operatives simultaneously.
+   - **Take Cover (REF):** Roll 2 dice at their REF die type. Each success (4+) cancels one incoming hit. The defender does NOT fire back.
+4. Remaining uncancelled hits trigger health checks on the target
+5. If the defender chose Return Fire, the attacker's uncancelled hits also trigger health checks
+
+**The choice matters:** A well-armed operative may prefer to Return Fire and trade blows. A fragile operative (low CMB or low health) may prefer Take Cover to survive. This creates a meaningful tactical decision on every firefight.
 
 **Range Rules:**
 - **Line of sight = can shoot.** If you can see them, you can shoot them.
@@ -88,7 +99,7 @@ All combat is resolved simultaneously — both sides roll at the same time. No f
 
 **Modifiers:**
 - Cover: shift attacker's CMB die down one additional step (stacks with range penalty)
-- Engaged in melee: -1 die from shooting pool (distracted by close combat)
+- Engaged in melee: An operative in base contact with an enemy cannot Shoot. They must use the Fight action or disengage first.
 
 ### 3.2 Brawls (Melee Combat)
 
@@ -100,11 +111,31 @@ All combat is resolved simultaneously — both sides roll at the same time. No f
 
 **Unarmed:** All operatives can fight in melee with **1 die** at their CMB type (fists, rifle butt, etc.). This is the default melee attack. Operatives with dedicated melee weapons (Blade, Power Weapon) use the weapon's Attack Dice value instead.
 
-Note: In brawls, REF is not used for defense — both fighters are committed. The mutual exchange IS the defense. REF governs ranged evasion and reactive situations.
+Note: In brawls, there is no Take Cover option — both fighters are committed. The mutual exchange IS the defense. REF governs the Take Cover response in firefights and disengaging from melee.
 
-### 3.3 Opposed Checks
+### 3.3 Engagement & Disengagement
+
+**Engagement:** An operative in base contact with an enemy is **engaged**. Engaged operatives cannot Shoot or move away — they must Fight, Use Gear, or Interact on their activation.
+
+**Disengagement:** An engaged operative may attempt to disengage instead of fighting. Roll 2 REF dice — on 1+ success, the operative breaks free and may move up to 3" away (not their full movement). On failure, the operative stays engaged and loses their action for this activation. The enemy does NOT get a free attack.
+
+### 3.4 Opposed Checks
 
 For non-combat contested actions (e.g., hacking vs. firewall, spotting vs. stealth), both sides roll 2 dice of the relevant stat type. More successes wins. Ties go to the defender/status quo.
+
+### 3.5 Terrain & Cover
+
+Players assign terrain types when setting up the table before the game starts.
+
+**Open Ground:** No effect. Full movement, no cover.
+
+**Light Cover** (low walls, crates, vehicles): Operatives behind it gain Cover (attacker's CMB shifts down one step). Blocks LOS to models fully behind it. Does not slow movement.
+
+**Heavy Cover** (thick walls, buildings, reinforced positions): Operatives behind it gain Heavy Cover (attacker's CMB shifts down TWO steps). Blocks LOS completely. Does not slow movement.
+
+**Difficult Terrain** (rubble, debris, dense vegetation, barricades): Costs double movement to cross (1" of movement = 0.5" actual distance, effectively halving move speed through it). Does not provide cover by itself.
+
+**Height:** An operative on elevated terrain (rooftops, upper floors) has LOS over models and low terrain below them. They gain Light Cover against attackers below them (+1 height advantage).
 
 ---
 
@@ -148,12 +179,14 @@ No restrictions on tier composition — build whatever crew fits your minis and 
 
 | Tier | Cost | Health | Stat Spread | Gear Slots | Abilities |
 |------|------|--------|-------------|------------|-----------|
-| **Leader** | Free | d10 | 3×d8, 2×d6 | 2 | 2 |
+| **Leader** | Free | d10 | 2×d10, 3×d8 | 2 | 2 |
 | **Specialist** | 3 pts | d8 | 2×d8, 3×d6 | 1 | 1 |
 | **Operative** | 2 pts | d8 | 1×d8, 4×d6 | 0 | 0 |
 | **Recruit** | 1 pt | d6 | 5×d6 | 0 | 0 |
 
-**Stat assignment is free** — the player chooses which of the 5 stats (CMB, REF, GRT, TEC, AWR) receive the d8 slots. This lets the same tier produce very different operatives (a combat-focused Specialist vs. a tech-focused Specialist).
+**Stat assignment is free** — the player chooses which of the 5 stats (CMB, REF, GRT, TEC, AWR) receive the higher-die slots. Leaders assign 2 stats to d10 and 3 to d8; other tiers assign their d8 and d6 slots freely. This lets the same tier produce very different operatives (a combat-focused Specialist vs. a tech-focused Specialist).
+
+**Gear slots** can be spent on premium weapons or premium gear items. Each costs 1 gear slot. Every operative may also carry one **free gear item** (Frag Grenade, Smoke Grenade, or First Aid Kit) regardless of gear slots.
 
 ### Example Crews (10 points)
 
@@ -203,11 +236,40 @@ Each operative carries one weapon. Standard weapons are free; premium weapons co
 - Every operative picks one free standard weapon OR pays gear slots for a premium weapon.
 - All operatives can fight unarmed in melee (1 die at CMB type) regardless of equipped weapon.
 - Leaders get 2 gear slots, Specialists get 1. These can be spent on premium weapons or gear items.
-- Gear slots not spent on weapons can be spent on equipment (medkits, scanners, hacking decks — see Abilities/Gear).
+- Gear slots not spent on weapons can be spent on premium gear (Armor Vest, Tactical Drone, Comms Relay, etc. — see Section 6.5).
+- Every operative may carry one free gear item (Frag Grenade, Smoke Grenade, or First Aid Kit) regardless of gear slots.
 - Range band = no-penalty distance. Beyond it, shift CMB die down one step. Hard cap = absolute maximum range.
 - In line of sight and within range band = roll CMB as normal.
 - In line of sight but beyond range band (no hard cap) = shift CMB down one step.
 - Beyond hard cap = cannot shoot.
+
+### 6.5 Gear Items
+
+Gear is split into **free gear** (available to every operative) and **premium gear** (costs gear slots). Every operative may carry one free gear item regardless of tier or gear slots. Premium gear costs 1 gear slot each, shared with premium weapons.
+
+**Gear types:**
+- **One-use:** Powerful single-activation effects. Discarded after use.
+- **Reusable:** Can be used once per activation, every activation.
+- **Passive:** Always active. No action required.
+
+#### Free Gear (any operative can carry ONE)
+
+| Gear | Type | Cost | Effect | Pro | Con |
+|------|------|------|--------|-----|-----|
+| **Frag Grenade** | one-use | Free | Shoot action: 2" blast within 8". All models in radius take 1 hit. | Area damage, ignores cover | One-use, short range, can hit friendlies in blast |
+| **Smoke Grenade** | one-use | Free | Action: place 3" smoke cloud within 8". Blocks all line of sight through it until end of next round. | Blocks LOS, enables safe repositioning | One-use, blocks YOUR line of sight too |
+| **First Aid Kit** | reusable | Free | Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll. | Can stabilize downed allies without Medic ability | Requires base contact and uses your action, TEC check can fail |
+
+#### Premium Gear (1 gear slot each)
+
+| Gear | Type | Cost | Effect | Pro | Con |
+|------|------|------|--------|-----|-----|
+| **Armor Vest** | passive | 1 slot | Passive: the first hit each game that would trigger a health check is ignored entirely (no roll, no degradation). Does not apply to subsequent hits. | Fully absorbs one hit — no roll, no degradation | One-use protection, useless after first hit absorbed |
+| **Tactical Drone** | reusable | 1 slot | Use Gear action: reveal all hidden/stealthy enemies within 12". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed. | Guaranteed intel, counters stealth | Can be destroyed on use, uses your action |
+| **Comms Relay** | passive | 1 slot | Friendly ability auras (Commander, Networked, Spotter) extend to 12" instead of 6" while this operative is active. | Doubles the effective range of support abilities | No direct combat benefit, useless if no aura abilities in warband |
+| **Combat Stims** | one-use | 1 slot | At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use. | Clutch stat boost when you need it most | One-use, must declare at start of activation before rolling |
+| **Hacking Deck** | passive | 1 slot | +1 die on all TEC checks. Required for some advanced scenario interactions. | Makes TEC checks much more reliable | Only useful in scenarios with TEC interactions |
+| **Suppressor** | passive | 1 slot | Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target. | Stay hidden while shooting, powerful with Stealthy/Ghost abilities | No combat bonus, useless without stealth abilities or scenarios |
 
 ---
 
@@ -221,7 +283,7 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 - Abilities are **not tiered by level** — any available ability can be taken by Leaders or Specialists
 - Abilities should complement weapons and stats, not replace them
 
-### Ability List (Draft — 17 abilities)
+### Ability List (Draft — 16 abilities)
 
 | Ability | Effect |
 |---------|--------|
@@ -236,12 +298,20 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 | **Resilient** | First failed health check each game is treated as a pass (health still degrades) |
 | **Tactician** | Once per round, swap activation order with one friendly operative |
 | **Rapid Assault** | After a successful Fight action, may move 3" (no additional action) |
-| **Pinning Fire** | Shoot action: instead of dealing damage, force target to pass a GRT check or lose their next action (distinct from LMG's Suppressive trait which reduces movement) |
 | **Breacher** | Ignores cover penalty when shooting |
 | **Field Repair** | Use Gear action: roll TEC to restore one health step to a friendly operative in contact |
 | **Ghost** | When this operative is hidden, enemies must pass AWR check at -1 to spot them |
 | **Heavy Weapons** | May carry one premium weapon without spending a gear slot |
 | **Commander** | All friendly operatives within 6" gain +1 to GRT for morale checks |
+
+### Hidden Status (Stealthy & Ghost Clarification)
+
+An operative with the Stealthy or Ghost ability starts the game Hidden. While Hidden:
+
+- Enemies beyond 12" must pass an AWR check (roll 2 AWR dice, 1+ success) before they can target this operative with a Shoot action. Failure means they cannot shoot this target this activation (they may choose a different target or action).
+- Ghost makes this check harder: enemies roll at -1 die (so 1 AWR die instead of 2).
+- An operative loses Hidden status when they: Shoot (unless they have a Suppressor), Fight, or are successfully targeted by an enemy. They remain Hidden if they only Move, Interact, or Use Gear.
+- Hidden status is not regained once lost (for simplicity).
 
 ---
 
@@ -301,14 +371,21 @@ On each AI operative's activation:
 | 3–4 | If behind cover with line of sight to enemy rear: Shoot. Otherwise: reposition |
 | 5–6 | Move to closest enemy not currently engaged by a friendly, Shoot or Fight |
 
-### 8.4 AI Target Priority
+### 8.4 AI Defender Choice (Firefights)
+
+When an AI operative is targeted by a firefight, the behavior tag determines whether it Returns Fire or Takes Cover:
+
+- **Aggressive** or **Flanker:** Always Return Fire
+- **Defensive** or **Cautious:** Take Cover if current health die is d6 (floor); otherwise Return Fire
+
+### 8.5 AI Target Priority
 
 When multiple targets are valid, AI selects by:
 1. Nearest visible enemy
 2. If tied: lowest health enemy
 3. If tied: enemy holding an objective
 
-### 8.5 Solo/Co-op Setup
+### 8.6 Solo/Co-op Setup
 
 - **Solo:** Player controls one warband, AI controls the opposing warband(s)
 - **Co-op:** Multiple players each control a warband (or split one warband), AI controls the enemy
@@ -354,12 +431,17 @@ Each scenario defines:
 
 ### 9.4 Starter Scenarios (to be designed)
 
-1. **Blackout** — Seize and hold data relay points in a blacked-out district
-2. **Extraction** — Locate and extract a VIP from a hostile zone
-3. **Scorched Data** — Race to hack/destroy terminals before the enemy does
-4. **Dead Drop** — Retrieve intel packages scattered across the map, exfil to your deployment zone
-5. **Signal Jam** — Hold the central transmitter for 3 consecutive rounds to win
-6. **Sweep & Clear** — Eliminate all hostiles in a building complex (solo/co-op focused)
+1. **Lockdown** — Seize and hold critical locations (flexible: 1, 3, or 5 objective layouts)
+2. **Scorched Data** — Race to hack/destroy terminals before the enemy does
+3. **Dead Drop** — Retrieve intel packages scattered across the map, exfil to your deployment zone
+4. **Headhunter** — Eliminate high-value enemy targets
+5. **Crash Site** — Recover cargo from a downed drone and deliver it home
+6. **Extraction** — Locate and extract a VIP from a hostile zone (PvE)
+7. **Sweep & Clear** — Eliminate all hostiles in a building complex (PvE)
+8. **Holdout** — Survive waves of enemies until extraction arrives (PvE)
+9. **Data Heist** — Hack corporate servers and exfiltrate (PvE)
+10. **Ambush** — Fight through a trap to the extraction point (PvE)
+11. **Bug Hunt** — Room-by-room sweep of a hostile building (PvE)
 
 ---
 
@@ -412,6 +494,6 @@ All apps follow the established pattern from the Pulp Alley Forge and Voidbreak 
 3. **Metal pack friendly.** A set of 4–6 minis should form a viable crew out of the box.
 4. **No cards.** Tables, dice, and reference sheets only.
 5. **Flat power curve.** A Recruit can contribute meaningfully. A Leader is better, not invincible.
-6. **Simultaneous combat.** Every engagement is a mutual risk. No safe attacks.
+6. **Meaningful combat choices.** Firefights force a decision: trade fire or take cover. Brawls are always mutual. No safe attacks.
 7. **Solo-first design.** The AI system isn't an afterthought — it's a core feature.
 8. **Free forever.** Rules, apps, and tools are free. No paywalled content.

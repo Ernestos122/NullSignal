@@ -1,0 +1,762 @@
+{
+  "stats": ["CMB", "REF", "GRT", "TEC", "AWR"],
+
+  "statLabels": {
+    "CMB": "Combat",
+    "REF": "Reflexes",
+    "GRT": "Grit",
+    "TEC": "Tech",
+    "AWR": "Awareness"
+  },
+
+  "diceTypes": ["d6", "d8", "d10", "d12"],
+
+  "healthTrack": ["d10", "d8", "d6", "DOWN", "OUT"],
+
+  "tiers": [
+    {
+      "id": "leader",
+      "name": "Leader",
+      "cost": 0,
+      "health": "d10",
+      "statSpread": { "d10Count": 2, "d8Count": 3 },
+      "gearSlots": 2,
+      "abilitySlots": 2
+    },
+    {
+      "id": "specialist",
+      "name": "Specialist",
+      "cost": 3,
+      "health": "d8",
+      "statSpread": { "d8Count": 2, "d6Count": 3 },
+      "gearSlots": 1,
+      "abilitySlots": 1
+    },
+    {
+      "id": "operative",
+      "name": "Operative",
+      "cost": 2,
+      "health": "d8",
+      "statSpread": { "d8Count": 1, "d6Count": 4 },
+      "gearSlots": 0,
+      "abilitySlots": 0
+    },
+    {
+      "id": "recruit",
+      "name": "Recruit",
+      "cost": 1,
+      "health": "d6",
+      "statSpread": { "d8Count": 0, "d6Count": 5 },
+      "gearSlots": 0,
+      "abilitySlots": 0
+    }
+  ],
+
+  "weapons": [
+    {
+      "id": "pistol",
+      "name": "Pistol",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 2,
+      "rangeBand": "8\"",
+      "hardCap": "16\"",
+      "meleeOnly": false,
+      "trait": "Compact",
+      "traitEffect": "Easy to conceal, common backup weapon."
+    },
+    {
+      "id": "smg",
+      "name": "SMG",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 3,
+      "rangeBand": "12\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Rapid",
+      "traitEffect": "+1 attack die within 6\"."
+    },
+    {
+      "id": "rifle",
+      "name": "Rifle",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 3,
+      "rangeBand": "20\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Reliable",
+      "traitEffect": "No special trait — consistent and dependable."
+    },
+    {
+      "id": "shotgun",
+      "name": "Shotgun",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 3,
+      "rangeBand": "8\"",
+      "hardCap": "16\"",
+      "meleeOnly": false,
+      "trait": "Spread",
+      "traitEffect": "+1 attack die within 6\"."
+    },
+    {
+      "id": "blade",
+      "name": "Blade",
+      "premium": false,
+      "gearSlotCost": 0,
+      "attackDice": 2,
+      "rangeBand": "Melee",
+      "hardCap": "Melee",
+      "meleeOnly": true,
+      "trait": "Melee-only",
+      "traitEffect": "Can only be used in base contact."
+    },
+    {
+      "id": "sniper_rifle",
+      "name": "Sniper Rifle",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 2,
+      "rangeBand": "30\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Precise",
+      "traitEffect": "+1 attack die when shooting beyond range band, instead of the usual penalty."
+    },
+    {
+      "id": "lmg",
+      "name": "LMG",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 4,
+      "rangeBand": "20\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Suppressive",
+      "traitEffect": "Target suffers -2\" movement on their next activation."
+    },
+    {
+      "id": "launcher",
+      "name": "Launcher",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 2,
+      "rangeBand": "20\"",
+      "hardCap": null,
+      "meleeOnly": false,
+      "trait": "Blast",
+      "traitEffect": "All models within 2\" of the target point take hits."
+    },
+    {
+      "id": "tactical_knife",
+      "name": "Tactical Knife",
+      "premium": true,
+      "gearSlotCost": 1,
+      "attackDice": 3,
+      "rangeBand": "Melee",
+      "hardCap": "Melee",
+      "meleeOnly": true,
+      "trait": "Piercing",
+      "traitEffect": "A heavy combat blade that finds gaps in armor. Target's health die shifts an extra step on failed check."
+    }
+  ],
+
+  "abilities": [
+    {
+      "id": "hardened",
+      "name": "Hardened",
+      "effect": "+1 step to GRT die for recovery and morale checks."
+    },
+    {
+      "id": "cqb_expert",
+      "name": "CQB Expert",
+      "effect": "Gains a bonus attack die in brawls."
+    },
+    {
+      "id": "marksman",
+      "name": "Marksman",
+      "effect": "Gains a bonus attack die when shooting a target within range band."
+    },
+    {
+      "id": "medic",
+      "name": "Medic",
+      "effect": "Use Gear action: roll TEC — on success, attempt recovery on a Down ally in base contact."
+    },
+    {
+      "id": "hacker",
+      "name": "Hacker",
+      "effect": "Gains a bonus die on TEC checks made for scenario interactions."
+    },
+    {
+      "id": "networked",
+      "name": "Networked",
+      "effect": "Once per round, one ally within 6\" may re-roll a single failed AWR check."
+    },
+    {
+      "id": "stealthy",
+      "name": "Stealthy",
+      "effect": "Enemies beyond 12\" must pass an AWR check before targeting this operative."
+    },
+    {
+      "id": "spotter",
+      "name": "Spotter",
+      "effect": "Once per round, designate a target: all friendly shooters gain +1 attack die vs. that target this round."
+    },
+    {
+      "id": "resilient",
+      "name": "Resilient",
+      "effect": "The first failed health check each game is treated as a pass (health die still degrades one step)."
+    },
+    {
+      "id": "tactician",
+      "name": "Tactician",
+      "effect": "Once per round, swap activation order with one friendly operative."
+    },
+    {
+      "id": "rapid_assault",
+      "name": "Rapid Assault",
+      "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)."
+    },
+    {
+      "id": "breacher",
+      "name": "Breacher",
+      "effect": "Ignores the cover penalty when shooting."
+    },
+    {
+      "id": "field_repair",
+      "name": "Field Repair",
+      "effect": "Use Gear action: roll TEC — on success, restore one health step to a friendly operative in base contact."
+    },
+    {
+      "id": "ghost",
+      "name": "Ghost",
+      "effect": "When hidden, enemies must pass an AWR check at -1 die to spot this operative."
+    },
+    {
+      "id": "heavy_weapons",
+      "name": "Heavy Weapons",
+      "effect": "May carry one premium weapon without spending a gear slot."
+    },
+    {
+      "id": "commander",
+      "name": "Commander",
+      "effect": "All friendly operatives within 6\" gain +1 to GRT for morale checks."
+    }
+  ],
+
+  "gear": [
+    {
+      "id": "frag_grenade",
+      "name": "Frag Grenade",
+      "gearCost": 0,
+      "type": "one-use",
+      "effect": "Shoot action: 2\" blast within 8\". All models in radius take 1 hit.",
+      "pro": "Area damage, ignores cover",
+      "con": "One-use, short range, can hit friendlies in blast"
+    },
+    {
+      "id": "smoke_grenade",
+      "name": "Smoke Grenade",
+      "gearCost": 0,
+      "type": "one-use",
+      "effect": "Action: place 3\" smoke cloud within 8\". Blocks all line of sight through it until end of next round.",
+      "pro": "Blocks LOS, enables safe repositioning",
+      "con": "One-use, blocks YOUR line of sight too"
+    },
+    {
+      "id": "first_aid_kit",
+      "name": "First Aid Kit",
+      "gearCost": 0,
+      "type": "reusable",
+      "effect": "Use Gear action on a Down ally in base contact: roll TEC. On 1+ success, ally may attempt an immediate recovery roll.",
+      "pro": "Can stabilize downed allies without Medic ability",
+      "con": "Requires base contact and uses your action, TEC check can fail"
+    },
+    {
+      "id": "armor_vest",
+      "name": "Armor Vest",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "Passive: the first hit each game that would trigger a health check is ignored entirely (no roll, no degradation). Does not apply to subsequent hits.",
+      "pro": "Fully absorbs one hit — no roll, no degradation",
+      "con": "One-use protection, useless after first hit absorbed"
+    },
+    {
+      "id": "tactical_drone",
+      "name": "Tactical Drone",
+      "gearCost": 1,
+      "type": "reusable",
+      "effect": "Use Gear action: reveal all hidden/stealthy enemies within 12\". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed.",
+      "pro": "Guaranteed intel, counters stealth",
+      "con": "Can be destroyed on use, uses your action"
+    },
+    {
+      "id": "comms_relay",
+      "name": "Comms Relay",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "Friendly ability auras (Commander, Networked, Spotter) extend to 12\" instead of 6\" while this operative is active.",
+      "pro": "Doubles the effective range of support abilities",
+      "con": "No direct combat benefit, useless if no aura abilities in warband"
+    },
+    {
+      "id": "combat_stims",
+      "name": "Combat Stims",
+      "gearCost": 1,
+      "type": "one-use",
+      "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6→d8) for this activation only. Discard after use.",
+      "pro": "Clutch stat boost when you need it most",
+      "con": "One-use, must declare at start of activation before rolling"
+    },
+    {
+      "id": "hacking_deck",
+      "name": "Hacking Deck",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "+1 die on all TEC checks. Required for some advanced scenario interactions.",
+      "pro": "Makes TEC checks much more reliable",
+      "con": "Only useful in scenarios with TEC interactions"
+    },
+    {
+      "id": "suppressor",
+      "name": "Suppressor",
+      "gearCost": 1,
+      "type": "passive",
+      "effect": "Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target.",
+      "pro": "Stay hidden while shooting, powerful with Stealthy/Ghost abilities",
+      "con": "No combat bonus, useless without stealth abilities or scenarios"
+    }
+  ],
+
+  "behaviorTags": [
+    {
+      "id": "aggressive",
+      "name": "Aggressive",
+      "personality": "Closes distance aggressively, prefers melee over shooting. Gets into combat as fast as possible.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "Move toward nearest visible enemy. Fight if in base contact."
+        },
+        {
+          "roll": "3-4",
+          "action": "Move toward nearest enemy. Shoot if in line of sight."
+        },
+        {
+          "roll": "5-6",
+          "action": "Full move toward nearest enemy. Fight if in contact; otherwise Shoot."
+        }
+      ]
+    },
+    {
+      "id": "defensive",
+      "name": "Defensive",
+      "personality": "Holds position, shoots from cover. Prioritizes staying behind cover and engaging enemies at range.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "If in cover: Shoot nearest visible enemy. If not in cover: move to nearest available cover."
+        },
+        {
+          "roll": "3-4",
+          "action": "Hold position. Shoot nearest visible enemy."
+        },
+        {
+          "roll": "5-6",
+          "action": "Move to better cover within 6\". Shoot nearest visible enemy if possible."
+        }
+      ]
+    },
+    {
+      "id": "cautious",
+      "name": "Cautious",
+      "personality": "Avoids risk and repositions frequently. Maintains maximum range and uses cover to survive.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "Move away from nearest enemy to maintain range. Shoot if able."
+        },
+        {
+          "roll": "3-4",
+          "action": "Move toward nearest objective. Interact if in contact."
+        },
+        {
+          "roll": "5-6",
+          "action": "Move to cover with best sight lines. Shoot nearest visible enemy."
+        }
+      ]
+    },
+    {
+      "id": "flanker",
+      "name": "Flanker",
+      "personality": "Seeks angles and avoids the frontline. Moves to the sides or rear of enemies to attack from unexpected angles.",
+      "table": [
+        {
+          "roll": "1-2",
+          "action": "Move toward the flank or rear of the nearest enemy. Shoot if in line of sight."
+        },
+        {
+          "roll": "3-4",
+          "action": "If behind cover with line of sight to enemy rear: Shoot. Otherwise reposition to a better angle."
+        },
+        {
+          "roll": "5-6",
+          "action": "Move to the closest enemy not currently engaged by a friendly. Shoot or Fight as appropriate."
+        }
+      ]
+    }
+  ],
+
+  "scenarios": [
+    {
+      "id": "lockdown",
+      "name": "Lockdown",
+      "category": "pvp",
+      "briefing": "Seize and hold critical locations. The more you control, the faster you win. Choose your objectives: a single high-value point, a contested center zone, or a network of relay nodes spread across the district.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Before the game, players agree on one objective layout: (A) Single Point — 1 objective in the center. Control for 3 consecutive rounds = immediate win. Worth 2 VP/round. (B) Three Points — 3 objectives along the center line (center, 8\" left, 8\" right). Each worth 1 VP/round. Control all 3 simultaneously = bonus 2 VP. (C) Five Zones — Divide the table into 4 quarters plus a central zone. Quarters worth 1 VP/round, center worth 2 VP/round.",
+      "specialRules": [
+        "Control = more operatives within 3\" than the enemy at end of round.",
+        "For Single Point layout: consecutive control counter resets if control is lost.",
+        "Players agree on layout during setup. If they can't agree, roll d6: 1-2 = Single Point, 3-4 = Three Points, 5-6 = Five Zones."
+      ],
+      "vpConditions": [
+        "Control objective(s) at end of round = VP as defined by layout",
+        "Control all objectives simultaneously (Three Points layout) = bonus 2 VP",
+        "3 consecutive rounds of control (Single Point layout) = Immediate Victory",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "opposite_edges"
+    },
+    {
+      "id": "scorched_data",
+      "name": "Scorched Data",
+      "category": "pvp",
+      "briefing": "Race to hack or destroy enemy terminals before they do the same to yours. Every second counts.",
+      "rounds": 5,
+      "tableSize": "3'×3'",
+      "deployment": "Players deploy in diagonally opposite corners, within a 8\" triangle measured from the corner point.",
+      "objectives": "Place 4 Data Terminal markers, one in the center of each table quarter.",
+      "specialRules": [
+        "Hack Terminal: Interact action using TEC. Roll 2 TEC dice — 1+ success = hacked.",
+        "Once hacked, a terminal is locked and cannot be re-hacked by the opponent.",
+        "If an enemy is within 3\" of your hacked terminal at end of round, it becomes contested (no VP that round)."
+      ],
+      "vpConditions": [
+        "Hack a terminal = 2 VP (one-time)",
+        "Control a hacked terminal at end of round (no enemies within 3\") = 1 VP",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "diagonal_corners"
+    },
+    {
+      "id": "dead_drop",
+      "name": "Dead Drop",
+      "category": "pvp",
+      "briefing": "Retrieve intel packages scattered across the map and exfil them to your deployment zone. The enemy wants the same packages.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Place 4 Intel Package markers in the center band of the table — each at least 6\" from any table edge and at least 6\" from each other.",
+      "specialRules": [
+        "Pick Up: Interact action (no roll needed) while in base contact with an unclaimed package.",
+        "Carrying: An operative carrying a package has -2\" movement. They can only carry 1 package at a time.",
+        "Drop: If the carrier goes Down, the package drops at their location. Any operative can pick it up.",
+        "Reveal: When a package is picked up, roll d6 to reveal its value: 1-3 = Standard Intel (2 VP on delivery), 4-5 = Priority Intel (3 VP on delivery), 6 = Decoy (0 VP on delivery).",
+        "Deliver: Move the carrying operative into your deployment zone to score."
+      ],
+      "vpConditions": [
+        "Deliver Standard Intel = 2 VP",
+        "Deliver Priority Intel = 3 VP",
+        "Deliver Decoy = 0 VP",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "opposite_edges"
+    },
+    {
+      "id": "headhunter",
+      "name": "Headhunter",
+      "category": "pvp",
+      "briefing": "Intel says they have high-value targets. Find them, eliminate them, and send a message.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Place 2 objective markers on the center line, each 8\" from center (left and right). These are intel caches.",
+      "specialRules": [
+        "Priority Targets: Eliminating the enemy Leader = 3 VP (instead of the usual 2). Eliminating a Specialist = 2 VP (instead of 1).",
+        "Intel Cache: Interact action at a cache marker. Roll AWR — on success, you learn the positions of all hidden/stealthy enemies (negates Stealthy and Ghost for the rest of the round).",
+        "First Blood: The first player to eliminate an enemy operative gains +1 bonus VP."
+      ],
+      "vpConditions": [
+        "Eliminate enemy Leader = 3 VP",
+        "Eliminate enemy Specialist = 2 VP",
+        "Eliminate other enemy = 1 VP",
+        "First Blood = 1 bonus VP",
+        "Control intel cache at end of game = 1 VP"
+      ],
+      "deploymentType": "opposite_edges"
+    },
+    {
+      "id": "crash_site",
+      "name": "Crash Site",
+      "category": "pvp",
+      "briefing": "A cargo drone just went down in the middle of the district. Both teams want what's inside. Grab the cargo and get it home.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
+      "objectives": "Place 1 Crash Site marker in the exact center. Place 3 Cargo tokens on the crash site.",
+      "specialRules": [
+        "Recover Cargo: Interact action at the crash site to pick up 1 cargo token. One per activation.",
+        "Carrying: An operative carrying cargo has -2\" movement. Can only carry 1 token.",
+        "Drop: Cargo drops if carrier goes Down.",
+        "Deliver: Move carrying operative into your deployment zone to score. Cargo is removed from play once delivered.",
+        "The crash site is dangerous terrain — any operative ending activation within 2\" of it rolls 1d6: on a 1, take 1 hit (fuel leak)."
+      ],
+      "vpConditions": [
+        "Deliver cargo to your deployment zone = 2 VP per token",
+        "Eliminate enemy operative = 1 VP",
+        "All 3 cargo delivered by one side = bonus 2 VP"
+      ],
+      "deploymentType": "opposite_edges"
+    },
+    {
+      "id": "extraction",
+      "name": "Extraction",
+      "category": "pve",
+      "briefing": "Locate and extract a VIP from a hostile zone before the enemy closes in. Time is against you.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 6\" of one table edge. Enemy/AI operatives deploy scattered across the opposite half of the table (at least 12\" from the player's deployment edge).",
+      "objectives": "Place 1 VIP marker in the exact center of the table.",
+      "specialRules": [
+        "The VIP is a neutral figure (d6 health, no attacks). Any operative in base contact can move the VIP with them (uses the operative's full movement).",
+        "If the VIP goes Down, they remain in place. Any operative can attempt to revive (Interact action, TEC check).",
+        "The VIP exits the table at the player's deployment edge for victory points."
+      ],
+      "vpConditions": [
+        "Extract VIP off player's deployment edge = 5 VP",
+        "VIP goes Down = -2 VP (still recoverable)",
+        "VIP goes Out = -3 VP",
+        "Eliminate enemy operative = 1 VP"
+      ],
+      "deploymentType": "asymmetric"
+    },
+    {
+      "id": "sweep_and_clear",
+      "name": "Sweep & Clear",
+      "category": "pve",
+      "briefing": "Eliminate all hostiles in a building complex. Designed for solo and co-op play against the AI.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 6\" of one table edge. AI operatives are divided evenly among the 4 table zones and placed by the player (representing hidden positions — at least 6\" from the player's deployment edge).",
+      "objectives": "The table is divided into 4 equal zones (2x2 grid). Clear each zone of all hostiles.",
+      "specialRules": [
+        "A zone is cleared when no active (non-Down, non-Out) enemy operatives remain in it.",
+        "Reinforcements: At the end of rounds 2 and 4, roll d6. On a 4+, one AI Recruit (Aggressive) enters from a random non-player table edge (roll d6: 1-2 left, 3-4 right, 5-6 opposite).",
+        "Solo/Co-op Focus: This scenario is designed for solo play or co-op against the AI. For PvP, one player controls the defenders."
+      ],
+      "vpConditions": [
+        "Clear a zone = 2 VP per zone",
+        "All 4 zones cleared = bonus 3 VP (total victory)",
+        "Eliminate enemy operative = 1 VP",
+        "Player operative goes Out = -1 VP"
+      ],
+      "deploymentType": "sweep"
+    },
+    {
+      "id": "holdout",
+      "name": "Holdout",
+      "category": "pve",
+      "briefing": "They know where you are and they're coming. Dig in, hold your ground, and survive until extraction arrives.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 6\" of the table center. AI operatives deploy along all four table edges (within 3\" of edge).",
+      "objectives": "Place 1 Holdout Point marker in the exact center. The player must maintain control at the end of round 6.",
+      "specialRules": [
+        "Wave System: The AI warband starts with a basic force. At the end of rounds 2, 4, and 6, reinforcements arrive — roll d6 per reinforcement wave: 1-2 = 2 Recruits (Aggressive), 3-4 = 1 Operative + 1 Recruit (Aggressive), 5-6 = 1 Specialist + 1 Recruit (mixed).",
+        "Reinforcement entry: Roll d6 for each new operative: 1=North, 2=East, 3=South, 4=West, 5-6=closest edge to the Holdout Point.",
+        "Surrounded: AI operatives always count as having line of sight for target priority (they know where you are)."
+      ],
+      "vpConditions": [
+        "Survive to end of round 6 with at least 1 operative standing = 5 VP",
+        "Control Holdout Point at end of round 6 = 3 VP",
+        "Eliminate enemy operative = 1 VP",
+        "Player operative goes Out = -1 VP"
+      ],
+      "deploymentType": "center_holdout"
+    },
+    {
+      "id": "data_heist",
+      "name": "Data Heist",
+      "category": "pve",
+      "briefing": "A corporate server farm sits in the heart of enemy territory. Get in, hack the data, and get out before they lock you down.",
+      "rounds": 6,
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 6\" of one table edge. AI operatives deploy in the opposite half, concentrated around 2 Server Terminal markers.",
+      "objectives": "Place 2 Server Terminal markers in the opposite half of the table, each at least 8\" from the player's deployment edge and 6\" apart.",
+      "specialRules": [
+        "Hack Server: Interact action at a terminal. Roll TEC — 2+ successes = hacked. 1 success = partial (need another Interact action to finish). 0 = security alert triggered.",
+        "Security Alert: If triggered (0 successes on hack, or an AI operative spots a player within 6\" of a terminal), all AI operatives gain +1 die to CMB for the rest of the game (heightened security).",
+        "Exfiltration: After hacking both servers, player operatives must exit via their deployment edge to secure the data.",
+        "Stealth Phase: AI operatives do not activate until a player operative is spotted (within line of sight and 12\" of an AI operative, or a failed hack triggers alert). Until then, AI operatives remain stationary."
+      ],
+      "vpConditions": [
+        "Hack server terminal = 2 VP each",
+        "Both servers hacked = bonus 2 VP",
+        "Exfil at least 1 operative after both hacks = 3 VP",
+        "No security alert triggered = bonus 2 VP",
+        "Player operative goes Out = -1 VP"
+      ],
+      "deploymentType": "asymmetric"
+    },
+    {
+      "id": "ambush",
+      "name": "Ambush",
+      "category": "pve",
+      "briefing": "Your patrol walked right into a trap. Hostiles on all sides. Fight your way to the extraction point before they close the net.",
+      "rounds": 5,
+      "tableSize": "3'×3'",
+      "deployment": "Player deploys within 4\" of the table center (patrol starting position). AI operatives deploy along all four table edges, within 4\" of edges.",
+      "objectives": "Place 1 Extraction Point marker on a randomly determined table edge (roll d6: 1-2 North, 3-4 East, 5 South, 6 West).",
+      "specialRules": [
+        "Ambush: AI has initiative automatically on round 1 (no roll).",
+        "Closing Net: From round 3 onward, at the end of each round, all AI operatives that didn't activate this round may move 3\" toward the nearest player operative (the net tightens).",
+        "Extraction: A player operative in contact with the Extraction Point may exit the table as their action. Exited operatives are safe.",
+        "Urgency: If no player operative has exited by end of round 4, the extraction point moves 6\" toward center (extraction window shrinking)."
+      ],
+      "vpConditions": [
+        "Extract operative (exit at extraction point) = 2 VP each",
+        "Extract Leader = 3 VP",
+        "Extract more than half your warband = bonus 3 VP",
+        "Eliminate enemy operative = 1 VP",
+        "Player operative goes Out before extraction = -1 VP"
+      ],
+      "deploymentType": "center_ambush"
+    },
+    {
+      "id": "bug_hunt",
+      "name": "Bug Hunt",
+      "category": "pve",
+      "briefing": "Something's in the building complex. Room by room, floor by floor — find them before they find you.",
+      "rounds": 6,
+      "tableSize": "2'×2'",
+      "deployment": "Player deploys within 6\" of one table edge. AI operatives are placed face-down (hidden) by the player across the rest of the table — at least one per zone.",
+      "objectives": "Divide the table into 6 zones (3x2 grid). AI operatives are hidden in each zone.",
+      "specialRules": [
+        "Hidden Enemies: AI operatives start face-down (hidden). A player operative entering a zone with hidden enemies must roll AWR — on 1+ success, reveal all hidden enemies in that zone. On 0 successes, the hidden enemies get a free activation (ambush) before being revealed.",
+        "Ambush Activation: Revealed enemies via failed AWR check immediately activate (one each) before normal play resumes.",
+        "Sweep: A zone is considered cleared when all enemies in it are Out.",
+        "Close Quarters: All ranges reduced — weapon range bands halved (round up). The table is tight."
+      ],
+      "vpConditions": [
+        "Clear a zone = 2 VP",
+        "All zones cleared = bonus 4 VP",
+        "Reveal enemies without triggering ambush = 1 VP per zone",
+        "Player operative goes Out = -1 VP"
+      ],
+      "deploymentType": "sweep_6zone"
+    }
+  ],
+
+  "aiProfiles": [
+    {
+      "id": "street_wolves",
+      "name": "Street Wolves",
+      "description": "A large street gang that overwhelms with numbers. Cheap bodies, aggressive tactics, led by a veteran enforcer.",
+      "style": "Horde / Aggressive",
+      "budget": 10,
+      "operatives": [
+        { "name": "Pack Alpha", "tier": "leader", "stats": { "CMB": "d10", "REF": "d8", "GRT": "d10", "TEC": "d8", "AWR": "d8" }, "weapon": "rifle", "abilities": ["commander", "hardened"], "behavior": "defensive" },
+        { "name": "Enforcer", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },
+        { "name": "Enforcer", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },
+        { "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "gear": ["frag_grenade"], "behavior": "aggressive" },
+        { "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "gear": ["smoke_grenade"], "behavior": "aggressive" },
+        { "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "gear": ["frag_grenade"], "behavior": "aggressive" },
+        { "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "flanker" },
+        { "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },
+        { "name": "Runner", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "aggressive" }
+      ]
+    },
+    {
+      "id": "obsidian_corp",
+      "name": "Obsidian Corp Security",
+      "description": "Professional corporate security team. Disciplined, well-equipped, holds ground and picks targets methodically.",
+      "style": "Balanced / Defensive",
+      "budget": 10,
+      "operatives": [
+        { "name": "Shift Commander", "tier": "leader", "stats": { "CMB": "d10", "REF": "d8", "GRT": "d8", "TEC": "d8", "AWR": "d10" }, "weapon": "rifle", "abilities": ["marksman", "tactician"], "gear": ["armor_vest"], "behavior": "defensive" },
+        { "name": "Overwatch", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d8" }, "weapon": "sniper_rifle", "abilities": ["spotter"], "behavior": "cautious" },
+        { "name": "Point Man", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "gear": ["frag_grenade"], "behavior": "aggressive" },
+        { "name": "Trooper", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },
+        { "name": "Patrol", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },
+        { "name": "Patrol", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "gear": ["first_aid_kit"], "behavior": "cautious" },
+        { "name": "Patrol", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "behavior": "defensive" }
+      ]
+    },
+    {
+      "id": "ghost_protocol",
+      "name": "Ghost Protocol",
+      "description": "Elite black ops team. Few in number but highly skilled. Strikes from unexpected angles and disappears.",
+      "style": "Elite / Stealth",
+      "budget": 10,
+      "operatives": [
+        { "name": "Phantom Lead", "tier": "leader", "stats": { "CMB": "d10", "REF": "d8", "GRT": "d8", "TEC": "d8", "AWR": "d10" }, "weapon": "rifle", "abilities": ["stealthy", "breacher"], "behavior": "flanker" },
+        { "name": "Wraith", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["ghost"], "behavior": "flanker" },
+        { "name": "Shade", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["hacker"], "gear": ["hacking_deck"], "behavior": "cautious" },
+        { "name": "Striker", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "behavior": "aggressive" },
+        { "name": "Striker", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "flanker" }
+      ]
+    },
+    {
+      "id": "iron_jackals",
+      "name": "Iron Jackals",
+      "description": "Brutal close-combat gang that rushes the enemy and overwhelms them in melee. Led by a terrifying pit fighter.",
+      "style": "Melee / Rush",
+      "budget": 10,
+      "operatives": [
+        { "name": "Pit Boss", "tier": "leader", "stats": { "CMB": "d10", "REF": "d8", "GRT": "d10", "TEC": "d8", "AWR": "d8" }, "weapon": "tactical_knife", "abilities": ["cqb_expert", "rapid_assault"], "gear": ["combat_stims"], "behavior": "aggressive" },
+        { "name": "Gunner", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "lmg", "abilities": ["heavy_weapons"], "behavior": "defensive" },
+        { "name": "Charger", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "gear": ["frag_grenade"], "behavior": "aggressive" },
+        { "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },
+        { "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" },
+        { "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "smg", "abilities": [], "behavior": "aggressive" },
+        { "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "pistol", "abilities": [], "behavior": "flanker" },
+        { "name": "Mutt", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "blade", "abilities": [], "behavior": "aggressive" }
+      ]
+    },
+    {
+      "id": "neon_shadows",
+      "name": "Neon Shadows",
+      "description": "Tech-savvy infiltration team. Prefers to hack, sneak, and outmaneuver rather than engage in straight firefights.",
+      "style": "Tech / Infiltration",
+      "budget": 10,
+      "operatives": [
+        { "name": "Netrunner Prime", "tier": "leader", "stats": { "CMB": "d8", "REF": "d8", "GRT": "d8", "TEC": "d10", "AWR": "d10" }, "weapon": "pistol", "abilities": ["hacker", "ghost"], "gear": ["hacking_deck"], "behavior": "cautious" },
+        { "name": "Signal", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["networked"], "gear": ["comms_relay"], "behavior": "flanker" },
+        { "name": "Cipher", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["stealthy"], "behavior": "flanker" },
+        { "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "cautious" },
+        { "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" }
+      ]
+    },
+    {
+      "id": "razorback_militia",
+      "name": "Razorback Militia",
+      "description": "Dug-in territorial militia. Fortifies positions and punishes anyone who comes too close. Patient and disciplined.",
+      "style": "Defensive / Hold",
+      "budget": 10,
+      "operatives": [
+        { "name": "Warden", "tier": "leader", "stats": { "CMB": "d10", "REF": "d8", "GRT": "d10", "TEC": "d8", "AWR": "d8" }, "weapon": "rifle", "abilities": ["commander", "marksman"], "gear": ["armor_vest"], "behavior": "defensive" },
+        { "name": "Heavy", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d8", "TEC": "d6", "AWR": "d6" }, "weapon": "lmg", "abilities": ["heavy_weapons"], "behavior": "defensive" },
+        { "name": "Sentry", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },
+        { "name": "Sentry", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" },
+        { "name": "Lookout", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "gear": ["smoke_grenade"], "behavior": "cautious" },
+        { "name": "Lookout", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "shotgun", "abilities": [], "gear": ["smoke_grenade"], "behavior": "cautious" },
+        { "name": "Lookout", "tier": "recruit", "stats": { "CMB": "d6", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" }
+      ]
+    }
+  ]
+}
