@@ -264,11 +264,10 @@ Gear is split into **free gear** (available to every operative) and **premium ge
 
 | Gear | Type | Cost | Effect | Pro | Con |
 |------|------|------|--------|-----|-----|
-| **Armor Vest** | one-use | 1 slot | Once per game, treat a failed health check as passed. Health die still degrades one step. | Survives one hit that would drop you | One-use, health still degrades, doesn't help at d6 floor much |
+| **Armor Vest** | passive | 1 slot | Passive: the first hit each game that would trigger a health check is ignored entirely (no roll, no degradation). Does not apply to subsequent hits. | Fully absorbs one hit — no roll, no degradation | One-use protection, useless after first hit absorbed |
 | **Tactical Drone** | reusable | 1 slot | Use Gear action: reveal all hidden/stealthy enemies within 12". Auto-success, no roll needed. After each use, roll d6 — on a 1 the drone is destroyed. | Guaranteed intel, counters stealth | Can be destroyed on use, uses your action |
 | **Comms Relay** | passive | 1 slot | Friendly ability auras (Commander, Networked, Spotter) extend to 12" instead of 6" while this operative is active. | Doubles the effective range of support abilities | No direct combat benefit, useless if no aura abilities in warband |
 | **Combat Stims** | one-use | 1 slot | At start of your activation, boost one stat die by +1 step (e.g., d6 to d8) for this activation only. Discard after use. | Clutch stat boost when you need it most | One-use, must declare at start of activation before rolling |
-| **Signal Jammer** | passive | 1 slot | Enemy operatives within 6" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked). | Shuts down enemy support abilities in an area | No direct combat benefit, only matters vs enemies with auras |
 | **Hacking Deck** | passive | 1 slot | +1 die on all TEC checks. Required for some advanced scenario interactions. | Makes TEC checks much more reliable | Only useful in scenarios with TEC interactions |
 | **Suppressor** | passive | 1 slot | Shooting does not reveal this operative's position for Stealthy/Ghost checks. Enemies must still pass AWR to target. | Stay hidden while shooting, powerful with Stealthy/Ghost abilities | No combat bonus, useless without stealth abilities or scenarios |
 
@@ -284,7 +283,7 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 - Abilities are **not tiered by level** — any available ability can be taken by Leaders or Specialists
 - Abilities should complement weapons and stats, not replace them
 
-### Ability List (Draft — 17 abilities)
+### Ability List (Draft — 16 abilities)
 
 | Ability | Effect |
 |---------|--------|
@@ -299,7 +298,6 @@ A curated list of ~15–20 abilities. Leaders choose 2, Specialists choose 1. Op
 | **Resilient** | First failed health check each game is treated as a pass (health still degrades) |
 | **Tactician** | Once per round, swap activation order with one friendly operative |
 | **Rapid Assault** | After a successful Fight action, may move 3" (no additional action) |
-| **Pinning Fire** | Shoot action: instead of dealing damage, force target to pass a GRT check or lose their next action (distinct from LMG's Suppressive trait which reduces movement) |
 | **Breacher** | Ignores cover penalty when shooting |
 | **Field Repair** | Use Gear action: roll TEC to restore one health step to a friendly operative in contact |
 | **Ghost** | When this operative is hidden, enemies must pass AWR check at -1 to spot them |
@@ -433,12 +431,17 @@ Each scenario defines:
 
 ### 9.4 Starter Scenarios (to be designed)
 
-1. **Blackout** — Seize and hold data relay points in a blacked-out district
-2. **Extraction** — Locate and extract a VIP from a hostile zone
-3. **Scorched Data** — Race to hack/destroy terminals before the enemy does
-4. **Dead Drop** — Retrieve intel packages scattered across the map, exfil to your deployment zone
-5. **Signal Jam** — Hold the central transmitter for 3 consecutive rounds to win
-6. **Sweep & Clear** — Eliminate all hostiles in a building complex (solo/co-op focused)
+1. **Lockdown** — Seize and hold critical locations (flexible: 1, 3, or 5 objective layouts)
+2. **Scorched Data** — Race to hack/destroy terminals before the enemy does
+3. **Dead Drop** — Retrieve intel packages scattered across the map, exfil to your deployment zone
+4. **Headhunter** — Eliminate high-value enemy targets
+5. **Crash Site** — Recover cargo from a downed drone and deliver it home
+6. **Extraction** — Locate and extract a VIP from a hostile zone (PvE)
+7. **Sweep & Clear** — Eliminate all hostiles in a building complex (PvE)
+8. **Holdout** — Survive waves of enemies until extraction arrives (PvE)
+9. **Data Heist** — Hack corporate servers and exfiltrate (PvE)
+10. **Ambush** — Fight through a trap to the extraction point (PvE)
+11. **Bug Hunt** — Room-by-room sweep of a hostile building (PvE)
 
 ---
 

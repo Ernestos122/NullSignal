@@ -220,11 +220,6 @@
       "effect": "After a successful Fight action, may immediately move up to 3\" (no additional action required)."
     },
     {
-      "id": "pinning_fire",
-      "name": "Pinning Fire",
-      "effect": "Shoot action: instead of dealing damage, force the target to pass a GRT check or lose their next action."
-    },
-    {
       "id": "breacher",
       "name": "Breacher",
       "effect": "Ignores the cover penalty when shooting."
@@ -283,10 +278,10 @@
       "id": "armor_vest",
       "name": "Armor Vest",
       "gearCost": 1,
-      "type": "one-use",
-      "effect": "Once per game, treat a failed health check as passed. Health die still degrades one step.",
-      "pro": "Survives one hit that would drop you",
-      "con": "One-use, health still degrades, doesn't help at d6 floor much"
+      "type": "passive",
+      "effect": "Passive: the first hit each game that would trigger a health check is ignored entirely (no roll, no degradation). Does not apply to subsequent hits.",
+      "pro": "Fully absorbs one hit — no roll, no degradation",
+      "con": "One-use protection, useless after first hit absorbed"
     },
     {
       "id": "tactical_drone",
@@ -314,15 +309,6 @@
       "effect": "At start of your activation, boost one stat die by +1 step (e.g., d6→d8) for this activation only. Discard after use.",
       "pro": "Clutch stat boost when you need it most",
       "con": "One-use, must declare at start of activation before rolling"
-    },
-    {
-      "id": "signal_jammer",
-      "name": "Signal Jammer",
-      "gearCost": 1,
-      "type": "passive",
-      "effect": "Enemy operatives within 6\" cannot benefit from ally abilities (Networked, Commander, Spotter auras are blocked).",
-      "pro": "Shuts down enemy support abilities in an area",
-      "con": "No direct combat benefit, only matters vs enemies with auras"
     },
     {
       "id": "hacking_deck",
@@ -425,23 +411,24 @@
 
   "scenarios": [
     {
-      "id": "blackout",
-      "name": "Blackout",
+      "id": "lockdown",
+      "name": "Lockdown",
       "category": "pvp",
-      "briefing": "Seize and hold data relay points in a blacked-out district. Control the nodes and lock out the opposition.",
+      "briefing": "Seize and hold critical locations. The more you control, the faster you win. Choose your objectives: a single high-value point, a contested center zone, or a network of relay nodes spread across the district.",
       "rounds": 6,
       "tableSize": "3'×3'",
       "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
-      "objectives": "Place 3 Data Relay markers along the center line: one in the exact center, one 8\" left of center, one 8\" right of center.",
+      "objectives": "Before the game, players agree on one objective layout: (A) Single Point — 1 objective in the center. Control for 3 consecutive rounds = immediate win. Worth 2 VP/round. (B) Three Points — 3 objectives along the center line (center, 8\" left, 8\" right). Each worth 1 VP/round. Control all 3 simultaneously = bonus 2 VP. (C) Five Zones — Divide the table into 4 quarters plus a central zone. Quarters worth 1 VP/round, center worth 2 VP/round.",
       "specialRules": [
-        "Blackout Conditions: All shooting beyond 12\" suffers an additional -1 die penalty (stacks with range/cover penalties).",
-        "Relays are controlled by having at least one operative within 3\" and no enemies within 3\"."
+        "Control = more operatives within 3\" than the enemy at end of round.",
+        "For Single Point layout: consecutive control counter resets if control is lost.",
+        "Players agree on layout during setup. If they can't agree, roll d6: 1-2 = Single Point, 3-4 = Three Points, 5-6 = Five Zones."
       ],
       "vpConditions": [
-        "Control a Data Relay at end of round = 1 VP per relay",
-        "Control all 3 relays simultaneously at end of any round = bonus 2 VP",
-        "Eliminate enemy operative = 1 VP",
-        "Eliminate enemy Leader = 2 VP"
+        "Control objective(s) at end of round = VP as defined by layout",
+        "Control all objectives simultaneously (Three Points layout) = bonus 2 VP",
+        "3 consecutive rounds of control (Single Point layout) = Immediate Victory",
+        "Eliminate enemy operative = 1 VP"
       ],
       "deploymentType": "opposite_edges"
     },
@@ -486,50 +473,6 @@
         "Deliver Standard Intel = 2 VP",
         "Deliver Priority Intel = 3 VP",
         "Deliver Decoy = 0 VP",
-        "Eliminate enemy operative = 1 VP"
-      ],
-      "deploymentType": "opposite_edges"
-    },
-    {
-      "id": "signal_jam",
-      "name": "Signal Jam",
-      "category": "pvp",
-      "briefing": "Hold the central transmitter for 3 consecutive rounds to broadcast your signal and deny the enemy theirs.",
-      "rounds": 6,
-      "tableSize": "3'×3'",
-      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
-      "objectives": "Place 1 Transmitter marker in the exact center of the table.",
-      "specialRules": [
-        "Control: The transmitter is controlled by having more operatives within 3\" than the enemy at end of round.",
-        "Broadcast Counter: Track consecutive rounds of control. If one player controls the transmitter for 3 consecutive rounds, they win immediately.",
-        "Losing control resets your broadcast counter to 0.",
-        "Interference Zone: All shooting by operatives within 6\" of the transmitter suffers -1 die (signal interference)."
-      ],
-      "vpConditions": [
-        "Control transmitter for 3 consecutive rounds = Immediate Victory",
-        "Control transmitter at end of round = 1 VP",
-        "Eliminate enemy operative = 1 VP",
-        "If no one achieves broadcast victory, highest VP at end of round 6 wins"
-      ],
-      "deploymentType": "opposite_edges"
-    },
-    {
-      "id": "turf_war",
-      "name": "Turf War",
-      "category": "pvp",
-      "briefing": "The district is up for grabs. Five zones, one winner. Control territory and push the enemy out.",
-      "rounds": 6,
-      "tableSize": "3'×3'",
-      "deployment": "Both players deploy within 6\" of their respective table edges (opposite long edges).",
-      "objectives": "Divide the table into 5 zones: 4 quarters plus a central zone (6\" radius from center). Place a zone marker in the center of each.",
-      "specialRules": [
-        "Zones are controlled by having more operatives inside the zone than the enemy at end of round.",
-        "The central zone is worth double VP.",
-        "An operative can only count for one zone (if overlapping, controlling player chooses)."
-      ],
-      "vpConditions": [
-        "Control outer zone at end of round = 1 VP",
-        "Control central zone at end of round = 2 VP",
         "Eliminate enemy operative = 1 VP"
       ],
       "deploymentType": "opposite_edges"
@@ -793,7 +736,7 @@
       "budget": 10,
       "operatives": [
         { "name": "Netrunner Prime", "tier": "leader", "stats": { "CMB": "d6", "REF": "d8", "GRT": "d6", "TEC": "d8", "AWR": "d8" }, "weapon": "pistol", "abilities": ["hacker", "ghost"], "gear": ["hacking_deck"], "behavior": "cautious" },
-        { "name": "Signal", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["networked"], "gear": ["signal_jammer"], "behavior": "flanker" },
+        { "name": "Signal", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["networked"], "gear": ["comms_relay"], "behavior": "flanker" },
         { "name": "Cipher", "tier": "specialist", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d8", "AWR": "d6" }, "weapon": "smg", "abilities": ["stealthy"], "behavior": "flanker" },
         { "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "cautious" },
         { "name": "Proxy", "tier": "operative", "stats": { "CMB": "d8", "REF": "d6", "GRT": "d6", "TEC": "d6", "AWR": "d6" }, "weapon": "rifle", "abilities": [], "behavior": "defensive" }
