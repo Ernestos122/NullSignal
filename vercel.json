@@ -1,0 +1,7 @@
+{
+  "rewrites": [
+    { "source": "/", "destination": "/NullSignal_Rules.html" },
+    { "source": "/forge", "destination": "/NullSignal_Forge.html" },
+    { "source": "/solo", "destination": "/NullSignal_SoloEngine.html" }
+  ]
+}
