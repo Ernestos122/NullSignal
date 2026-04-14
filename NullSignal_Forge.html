@@ -891,8 +891,11 @@ function AbilitySelect({ op, onUpdate }) {
                 if (weapon && weapon.premium) {
                     const gearTotal = getGearSlotsTotal(op);
                     const weaponCost = weapon.gearSlotCost || 1;
-                    const gearItemCount = (op.gear || []).length;
-                    if (gearTotal < weaponCost + gearItemCount) {
+                    const premiumGearCount = (op.gear || []).filter(gId => {
+                        const g = GEAR_ITEMS.find(gi => gi.id === gId);
+                        return g && g.gearCost > 0;
+                    }).length;
+                    if (gearTotal < weaponCost + premiumGearCount) {
                         // Not enough slots — reset weapon to free, keep gear
                         onUpdate({ ...op, abilities: newAbilities, weapon: 'rifle' });
                         return;

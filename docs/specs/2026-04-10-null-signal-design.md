@@ -91,7 +91,7 @@ Brawls are always simultaneous. Firefights give the defender a choice: Return Fi
 
 **Modifiers:**
 - Cover: shift attacker's CMB die down one additional step (stacks with range penalty)
-- Engaged in melee: -1 die from shooting pool (distracted by close combat)
+- Engaged in melee: An operative in base contact with an enemy cannot Shoot. They must use the Fight action or disengage first.
 
 ### 3.2 Brawls (Melee Combat)
 

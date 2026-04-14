@@ -535,7 +535,7 @@ const CombatSection = () => (
         <SubHeading>Opposed Checks</SubHeading>
         <Para>
             Some situations call for an opposed check: both sides roll 2 dice of the relevant stat. The side
-            with more successes wins. Ties go to the active player (or are re-rolled if specified).
+            with more successes wins. Ties go to the defender/status quo.
         </Para>
     </div>
 );
@@ -827,7 +827,7 @@ const SoloAISection = () => (
         <SubHeading>Target Priority</SubHeading>
         <Para>
             <Bright>1.</Bright> Nearest visible enemy. <Bright>2.</Bright> If tied, lowest current health die.{' '}
-            <Bright>3.</Bright> If still tied, random.
+            <Bright>3.</Bright> If still tied, enemy holding an objective.
         </Para>
 
         <SubHeading>Solo / Co-op Setup</SubHeading>
